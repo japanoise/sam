@@ -90,8 +90,9 @@ readio(File *f, bool *nulls, bool setdate)
 
     wchar_t buf[2] = {0};
     while (true){
-        buf[0] = fgetwc(io);
-        if (buf[0] == WEOF){
+        wint_t err;
+        buf[0] = err = fgetwc(io);
+        if (err == WEOF){
             if (errno == EILSEQ){
                 clearerr(io);
                 fflush(io);

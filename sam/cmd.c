@@ -109,8 +109,9 @@ inputc(void)
             terminp = termoutp = termline;
     } else{
         int olderr = errno;
-        r = fgetwc(stdin);
-        if (r == WEOF && errno == EILSEQ){
+        wint_t err;
+        r = err = fgetwc(stdin);
+        if (err = WEOF && errno == EILSEQ){
             clearerr(stdin);
             fflush(stdin);
             fgetc(stdin);
