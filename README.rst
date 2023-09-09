@@ -4,7 +4,7 @@ Introduction
 sam is a text editor originally written for the Blit_ graphical terminal connected to a machine running `9th Edition Research Unix`_.
 It contained many useful innovations, the most famous of which was its use of `structural regular expressions`_.
 
-sam was the standard text editor for `Plan 9 from Bell Labs`_, and the Plan 9 version was backported to Unix and the X Window Sytem in the 1990s.
+sam was the standard text editor for `Plan 9 from Bell Labs`_, and the Plan 9 version was backported to Unix and the X Window System in the 1990s.
 
 .. _Blit: https://en.wikipedia.org/wiki/Blit_(computer_terminal)
 
@@ -22,8 +22,8 @@ the goal being to get it working before making it beautiful.
 That being said, it's my primary editor, so any major bugs tend to get fixed pretty quickly.
 Still, be careful with it.
 
-The Obiligatory Screenshot
---------------------------
+The Obligatory Screenshot
+-------------------------
 
 .. image:: sam.png
 
@@ -51,7 +51,7 @@ Installation and configuration is fairly simple:
 
 Note that running `make install` will install a `desktop entry file`_, in either "system" or "user" mode.
 This can be specified via the `MODE` make variable (the default is "user").
-To isntall the desktop entry for the all users, use:
+To install the desktop entry for the all users, use:
 
     make MODE=system install
 
@@ -106,7 +106,7 @@ Modern OS Support
 
 Improved 64-bit Support
     The original sam had support for 32-bit architectures and big-endian 64-bit architectures.
-    This version supports 64-bit architectures of any endianess (including, most importantly, x86_64).
+    This version supports 64-bit architectures of any endianness (including, most importantly, x86_64).
 
 Scalable Font Support
     This version of sam is not limited to classic X fonts, but can use modern scalable fonts.
