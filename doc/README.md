@@ -15,3 +15,25 @@
   looking at this on GitHub, you can [read it right here](sam_tut.md).
 
 [acme2k]: https://github.com/japanoise/acme2k
+
+## Miscellaneous Hints & Tips
+
+[From here](https://github.com/deadpixi/sam/issues/63) - thanks github user
+Screwtapello
+
+* sam lets you configure a font for drawing text, and a colour to draw it
+  with. However, due to the way sam draws selected text, you should set the
+  foreground colour to black OR use a font without anti-aliasing. If you don't
+  do at least one of those, selected text will be rainbow gibberish.
+* If you're using a scalable font, you can force sam to draw it without
+  anti-aliasing by adding `:antialias=0` to the end of the font pattern: `font
+  Envy Code R:size=10:antialias=0`
+* If the font you want to use looks terrible without anti-aliasing because it
+  does not include rasterization hints, applying FreeType's autohinter by adding
+  `:autohint=1` may help.
+* If you're using a bitmap-based font, it may include a separate copy limited to
+  Latin1 (ISO8859-1) encoding for legacy applications. Because sam doesn't do
+  glyph scavenging, it's better to use a font with as many glyphs as
+  possible. There's no FontConfig syntax for "give me a font in Unicode", but
+  apparently "give me a font that supports Afrikaans" is enough to nudge it
+  toward a Unicode font: `:lang=af`
