@@ -5,11 +5,13 @@
 #include "flayer.h"
 #include "samterm.h"
 
-uint8_t   *name[MAXFILES];    /* first byte is ' ' or '\'': modified state */
-Text    *text[MAXFILES];    /* pointer to Text associated with file */
-uint16_t  tag[MAXFILES];      /* text[i].tag, even if text[i] not defined */
+uint8_t   **name = NULL;    /* first byte is ' ' or '\'': modified state */
+Text    **text = NULL;    /* pointer to Text associated with file */
+uint16_t  *tag = NULL;      /* text[i].tag, even if text[i] not defined */
 int nname;
 int mw;
+
+int menucap;
 
 char    *genmenu3(int);
 char    *genmenu2(int);
@@ -226,12 +228,31 @@ whichmenu(int tg)
 }
 
 void
+menufree(void)
+{
+    free(name);
+    free(text);
+    free(tag);
+}
+
+void
 menuins(int n, uint8_t *s, Text *t, int m, int tg)
 {
     int i;
 
-    if(nname == MAXFILES)
-        panic("menuins");
+    if (name == NULL) {
+        menucap = 16;
+        name = malloc(sizeof(uint8_t*)*menucap);
+        text = malloc(sizeof(Text*)*menucap);
+        tag = malloc(sizeof(uint16_t)*menucap);
+        atexit(menufree);
+    } else if (nname >= menucap - 2) {
+        menucap <<= 1;
+        name = realloc(name, sizeof(uint8_t*)*menucap);
+        text = realloc(text, sizeof(Text*)*menucap);
+        tag = realloc(tag, sizeof(uint16_t)*menucap);
+    }
+
     for(i=nname; i>n; --i)
         name[i]=name[i-1], text[i]=text[i-1], tag[i]=tag[i-1];
     text[n] = t;

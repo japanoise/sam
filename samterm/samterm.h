@@ -2,7 +2,6 @@
 #define SAMTERM
 
 #define RUNESIZE    sizeof(wchar_t)
-#define MAXFILES    256
 #define NL  5
 
 enum{
@@ -78,9 +77,9 @@ enum Resource
     RMouse      = Emouse
 };
 
-extern Text *text[];
-extern uint8_t    *name[];
-extern uint16_t   tag[];
+extern Text **text;
+extern uint8_t    **name;
+extern uint16_t   *tag;
 extern int  nname;
 extern unsigned int cursor;
 extern Flayer   *which;
