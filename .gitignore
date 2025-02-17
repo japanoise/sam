@@ -4,3 +4,5 @@ config.mk
 sam/sam
 samterm/samterm
 ssam/ssam
+.cache/
+compile_commands.json

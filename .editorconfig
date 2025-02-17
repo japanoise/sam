@@ -1,0 +1,14 @@
+# top level
+root = true
+
+# utf-8, unix line endings, final nls, clean whitespace - the One True Way
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+# maintain existing style
+[*.{c,h}]
+indent_style = space
+tab_width = 4
