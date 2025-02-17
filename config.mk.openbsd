@@ -1,0 +1,31 @@
+# config.mk - makefile configuration for sam
+# copyright 2015 Rob King <jking@deadpixi.com>
+
+# Get OS for specific dependencies
+UNAME != uname
+
+# CC is the C compiler to use
+CC=cc
+CFLAGS?=
+CFLAGS+=-std=c99
+
+# STANDARDS names the C preprocessor defines that need to
+# be present to get a more-or-less standard compilation
+# environment.
+STANDARDS=-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500
+
+# DESTDIR is the root of the installation tree
+DESTDIR?=/usr/local
+
+# BINDIR is the directory where binaries go
+BINDIR?=$(DESTDIR)/bin
+
+# MANDIR is where manual pages go
+MANDIR?=$(DESTDIR)/man
+
+# Add additional include and library directories
+INCLUDES != pkg-config --cflags x11 freetype2
+LDFLAGS != pkg-config --libs x11 freetype2
+
+# Set this to your default remote shell.
+RXPATH=/usr/bin/ssh
