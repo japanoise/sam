@@ -308,12 +308,12 @@ rescue(void)
     }
 
     for (int i = 0; i < file.nused; i++){
-        char buf[FILENAME_MAX + 1] = {0};
+        char buf[PATH_MAX] = {0};
         File *f = file.filepptr[i];
         if (f == cmd || f->nrunes == 0 || f->state != Dirty)
             continue;
 
-        snprintf(buf, FILENAME_MAX, "%s/sam.save", home);
+        samsave(buf);
         if ((io = fopen(buf, "w")) == NULL)
             continue;
 

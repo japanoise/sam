@@ -5,11 +5,17 @@
 .Nm samrc
 .Nd configure samterm
 .Sh SYNOPSIS
-.Pa ~/.samrc
+.Pa "${XDG_CONFIG_HOME}/sam/samrc" ";"
+.Pa ~/.config/sam/samrc
 .Sh DESCRIPTION
 A
 .Nm
-file in the user's home directory can be used to configure the downloaded
+file in
+.Pa ${XDG_CONFIG_HOME}/sam/samrc
+(or
+.Pa ~/.config/sam/samrc
+if
+XDG_CONFIG_HOME is not set) can be used to configure the downloaded
 portion of the
 .Xr sam 1
 editor

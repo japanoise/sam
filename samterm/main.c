@@ -62,8 +62,15 @@ main(int argc, char *argv[])
 
     if (getenv("SAMRC"))
         strncpy(rcpath, getenv("SAMRC"), PATH_MAX);
-    else
-        snprintf(rcpath, PATH_MAX, "%s/.samrc", getenv("HOME") ? getenv("HOME") : ".");
+    else {
+        char *home = getenv("HOME");
+        char *xdg_config_home = getenv("XDG_CONFIG_HOME");
+        if (xdg_config_home) {
+            snprintf(rcpath, PATH_MAX, "%s/sam/samrc", xdg_config_home);
+        } else {
+            snprintf(rcpath, PATH_MAX, "%s/.config/sam/samrc", home ? home : ".");
+        }
+    }
 
     while ((opt = getopt(argc, argv, "ef:n:r:")) != -1){
         switch (opt){
@@ -417,11 +424,11 @@ indent(Flayer *l, long p)
 		} else if(c == ' ') {
 			++is;
 		} else {
-			it = is = 0; 
+			it = is = 0;
 			space = false;
 		}
 	}
-    if(space) 
+    if(space)
         it = is = 0;
 
 	while(it != 0) {
@@ -490,7 +497,7 @@ flushtyping(bool clearesc)
     uint64_t n;
 
     if (clearesc)
-        typeesc = -1;   
+        typeesc = -1;
     if (typestart == typeend){
         modified = false;
         return;
@@ -623,7 +630,7 @@ cmdlineup(Flayer *l, int64_t a, Text *t, const char *arg)
             a--;
             while (a > 0 && raspc(&t->rasp, a - 1) != '\n')
                 a--;
-    
+
             n0 = a;
             a = (n0 + count >= n1) ? n1 - 1 : n0 + count;
             flsetselect(l, a, a);

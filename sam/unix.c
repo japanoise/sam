@@ -1,6 +1,7 @@
 /* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
 #include "sam.h"
 #include <limits.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <signal.h>
@@ -107,9 +108,35 @@ newtmp(void)
 }
 
 void
+statehome(char *buf, char *filename)
+{
+    int dir_result = 0;
+    char *xdg_state_home = getenv("XDG_STATE_HOME");
+
+    if (xdg_state_home) {
+        snprintf(buf, PATH_MAX, "%s/sam", xdg_state_home);
+        mkdir_p(buf, 0755);
+        snprintf(buf, PATH_MAX, "%s/sam/%s", xdg_state_home, filename);
+    } else {
+        char *home = getenv("HOME");
+        snprintf(buf, PATH_MAX, "%s/.local/state/sam", home ? home : "/tmp");
+        mkdir_p(buf, 0755);
+        snprintf(buf, PATH_MAX, "%s/.local/state/sam/%s",
+                 home ? home : "/tmp",
+                 filename);
+    }
+}
+
+void
 samerr(char *buf)
 {
-    snprintf(buf, PATH_MAX, "%s/sam.err", getenv("HOME") ? getenv("HOME") : "/tmp");
+    statehome(buf, "sam.err");
+}
+
+void
+samsave(char *buf)
+{
+    statehome(buf, "sam.save");
 }
 
 int
@@ -152,3 +179,37 @@ dprint(wchar_t *z, ...)
     va_end(args);
 }
 
+int
+mkdir_p(const char* path, mode_t mode)
+{
+    struct stat buf;
+
+    if (stat(path, &buf) == 0) {
+        if (S_ISDIR(buf.st_mode)) {
+            return 0;
+        }
+        panic("mkdir_p: path to directory exists but is not a directory");
+    }
+
+    char tmp[PATH_MAX];
+    char *p = NULL;
+    size_t len;
+
+    snprintf(tmp, sizeof(tmp),"%s", path);
+    len = strlen(tmp);
+
+    if (tmp[len - 1] == '/') {
+        tmp[len - 1] = 0;
+    }
+
+    for (p = tmp + 1; *p; p++) {
+        if (*p == '/') {
+            *p = 0;
+            mkdir(tmp, mode);
+            *p = '/';
+        }
+    }
+
+    mkdir(tmp, mode);
+    return 0;
+}

@@ -1,4 +1,5 @@
 /* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
+#include <fcntl.h>
 #include <u.h>
 #include "errors.h"
 
@@ -241,6 +242,7 @@ void    resetsys(void);
 void    resetxec(void);
 void    rgrow(List*, Posn, Posn);
 void    samerr(char*);
+void    samsave(char*);
 void    settempfile(void);
 void    scram(void);
 int     skipbl(void);
@@ -287,6 +289,7 @@ void    writef(File*);
 Posn    writeio(File*);
 void    flushio(void);
 bool canlocksocket(const char *);
+int     mkdir_p(const char* path, mode_t mode);
 
 extern wchar_t samname[];  /* compiler dependent */
 extern wchar_t *left[];

@@ -564,7 +564,8 @@ and
 for all
 .Pc
 is placed in
-.Pa "${HOME}/sam.err"
+.Pa "sam.err"
+.Pq "placed in your state directory, see below"
 and the first few lines are printed.
 .Ss Loops and conditionals
 .Bl -tag -width Ds
@@ -855,14 +856,14 @@ below
 .Pc
 or by writing a
 .Pa samrc
-file in your home directory
+file
 .Po
 see
 .Xr samrc 5
 .Pc "."
 The terminal's keybindings,
 mouse chords,
-tab handling, 
+tab handling,
 colors,
 and fonts may be set at runtime using these methods.
 .Ss Abnormal termination
@@ -873,7 +874,7 @@ terminates other than by a
 command
 .Pq "by hangup, deleting its window, etc." ","
 modified files are saved in an executable file,
-.Pq "${HOME}/sam.save" "."
+.Pq "${XDG_STATE_HOME}/sam/sam.save; ${HOME}/.local/state/sam.save if XDG_STATE_HOME is not set" "."
 This program, when executed, asks whether to write each file back to an external file.
 The answer
 .Sy y
@@ -1062,7 +1063,7 @@ provides the name of the
 file to read at startup.
 By default,
 this is
-.Pa ${HOME}/.samrc "."
+.Pa ${HOME}/.config/sam/samrc "."
 .It Ev SAMSOCKETPATH
 Names a directory in which
 .Nm
@@ -1100,18 +1101,18 @@ Specifies the full path of the shell to use for executing external commands.
 .El
 .Sh FILES
 .Bl -tag -width Ds
-.It Pa "${HOME}/.samrc"
+.It Pa "${XDG_CONFIG_HOME}/sam/samrc" ";" Pa "${HOME}/.config/sam/samrc"
 Provides runtime configuration of key bindings,
 mouse chords,
 colors,
 fonts,
 and tabs.
-.It Pa "${HOME}/sam.save"
+.It Pa "${XDG_STATE_HOME}/sam/sam.save" ";" Pa "${HOME}/.local/state/sam/sam.save"
 Created if
 .Nm
 terminates abnormally.
 Executing this file will prompt the user to restore the files that were being edited at the time of termination.
-.It Pa "${HOME}/sam.err"
+.It Pa "${XDG_STATE_HOME}/sam/sam.err" ";" Pa "${HOME}/.local/state/sam/sam.err"
 Stores output of shell commands executed by
 .Nm "."
 .El
