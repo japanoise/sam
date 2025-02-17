@@ -12,10 +12,10 @@
 #define XtCGotchar "Gotchar"
 #define XtNgotmouse "gotmouse"
 #define XtCGotmouse "Gotmouse"
-#define XtNp9font   "p9font"
-#define XtCP9font   "P9font"
-#define XtNcomposeMod   "composeMod"
-#define XtCComposeMod   "ComposeMod"
+#define XtNp9font "p9font"
+#define XtCP9font "P9font"
+#define XtNcomposeMod "composeMod"
+#define XtCComposeMod "ComposeMod"
 
 /* External reference to the class record pointer */
 extern WidgetClass gwinWidgetClass;
@@ -25,17 +25,19 @@ typedef struct _GwinRec *GwinWidget;
 
 /* Type definition for gwin resources */
 typedef struct {
-        int buttons;
-        struct {
-            int x;
-            int y;
-        } xy;
-        uint64_t msec;
-    } Gwinmouse;
+	int buttons;
+
+	struct {
+		int x;
+		int y;
+	} xy;
+
+	uint64_t msec;
+} Gwinmouse;
 
 typedef void (*Reshapefunc)(int, int, int, int);
 typedef void (*Charfunc)(int, int, int, int, int, const char *);
-typedef void (*Mousefunc)(Gwinmouse*);
+typedef void (*Mousefunc)(Gwinmouse *);
 
 /* Method declarations */
 extern String GwinSelectionSwap(Widget, String);

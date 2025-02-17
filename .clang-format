@@ -1,0 +1,19 @@
+MaxEmptyLinesToKeep: 1
+LineEnding: LF
+ColumnLimit: 80
+
+# None of the objections to tabs have ever made sense to me.
+IndentWidth: 8
+TabWidth: 8
+UseTab: Always
+
+AlignConsecutiveDeclarations: AcrossEmptyLines
+BreakBeforeBraces: Attach
+SeparateDefinitionBlocks: Always
+SortIncludes: Never
+SpaceBeforeParens: ControlStatementsExceptForEachMacros
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
+SpacesBeforeTrailingComments: 1
+SpacesInParens: Never
+SpacesInSquareBrackets: false
