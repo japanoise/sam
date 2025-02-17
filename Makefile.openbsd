@@ -1,0 +1,66 @@
+#	Copyright (c) 1998 Lucent Technologies - All rights reserved.
+#	Changes Copyright (c) 2014-2015 Rob King
+#
+#	master makefile for sam.  configure sub-makefiles first.
+#
+
+MODE?=user
+
+DESKTOPFILE=deadpixi-sam.desktop
+
+all:    config.mk lXg lframe samdir samtermdir docdir
+
+config.mk:
+	cp config.mk.def config.mk
+
+lXg:
+	cd libXg; $(MAKE)
+
+lframe:
+	cd libframe; $(MAKE)
+
+docdir:
+	cd doc; $(MAKE)
+
+samdir:
+	cd sam; $(MAKE)
+
+samtermdir:
+	cd samterm; $(MAKE)
+
+install:
+ifeq ($(UNAME), OpenBSD)
+	mkdir -p $(DESTDIR)/share/applications/
+	cp $(DESKTOPFILE) $(DESTDIR)/share/applications/
+else
+	@xdg-desktop-menu install --mode $(MODE) $(DESKTOPFILE) || echo "unable to install desktop entry"
+endif
+	cd libXg; $(MAKE) install
+	cd libframe; $(MAKE) install
+	cd sam; $(MAKE) install
+	cd samterm; $(MAKE) install
+	cd doc; $(MAKE) install
+	cd ssam; $(MAKE) install
+
+uninstall:
+ifeq ($(UNAME), OpenBSD)
+	rm $(DESTDIR)/share/applications/$(DESKTOPFILE)
+else
+	@xdg-desktop-menu uninstall --mode $(MODE) $(DESKTOPFILE) || echo "unable to uninstall desktop entry"
+endif
+	cd libXg; $(MAKE) uninstall
+	cd libframe; $(MAKE) uninstall
+	cd sam; $(MAKE) uninstall
+	cd samterm; $(MAKE) uninstall
+	cd doc; $(MAKE) uninstall
+	cd ssam; $(MAKE) uninstall
+
+clean:
+	cd libXg; $(MAKE) clean
+	cd libframe; $(MAKE) clean
+	cd sam; $(MAKE) clean
+	cd samterm; $(MAKE) clean
+	cd ssam; $(MAKE) clean
+
+nuke: clean
+	rm -f config.mk
