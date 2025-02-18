@@ -51,5 +51,8 @@ clean:
 	cd samterm; $(MAKE) clean
 	cd ssam; $(MAKE) clean
 
+format:
+	find ./ -iname "*.[ch]" | xargs clang-format -i
+
 nuke: clean
 	rm -f config.mk
