@@ -8,10 +8,8 @@
  * (Not true in the Plan 9 library, which is why this
  * function exists).
  */
-Rectangle
-bscreenrect(Rectangle *clipr)
-{
-    if(clipr)
-        *clipr = screen.clipr;
-    return screen.r;
+Rectangle bscreenrect(Rectangle *clipr) {
+	if (clipr)
+		*clipr = screen.clipr;
+	return screen.r;
 }
