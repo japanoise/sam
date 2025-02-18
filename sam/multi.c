@@ -11,8 +11,9 @@ File	*newfile(void) {
 
 	   inslist(&file, 0, (int64_t)(f = Fopen()));
 	   f->tag = tag++;
-	   if (downloaded)
+	   if (downloaded) {
 		   outTs(Hnewname, f->tag);
+	   }
 	   /* already sorted; file name is "" */
 	   return f;
 }
@@ -20,19 +21,23 @@ File	*newfile(void) {
 int whichmenu(File *f) {
 	int i;
 
-	for (i = 0; i < file.nused; i++)
-		if (file.filepptr[i] == f)
+	for (i = 0; i < file.nused; i++) {
+		if (file.filepptr[i] == f) {
 			return i;
+		}
+	}
 	return -1;
 }
 
 void delfile(File *f) {
 	int w = whichmenu(f);
 
-	if (w < 0) /* e.g. x/./D */
+	if (w < 0) { /* e.g. x/./D */
 		return;
-	if (downloaded)
+	}
+	if (downloaded) {
 		outTs(Hdelname, f->tag);
+	}
 	dellist(&file, w);
 	Fclose(f);
 }
@@ -44,30 +49,35 @@ void sortname(File *f) {
 	w = whichmenu(f);
 	dupwarned = false;
 	dellist(&file, w);
-	if (f == cmd)
+	if (f == cmd) {
 		i = 0;
-	else
+	} else {
 		for (i = 0; i < file.nused; i++) {
 			cmp = Strcmp(&f->name, &file.filepptr[i]->name);
 			if (cmp == 0 && !dupwarned) {
 				dupwarned = true;
 				warn_S(Wdupname, &f->name);
-			} else if (cmp < 0 && (i > 0 || cmd == 0))
+			} else if (cmp < 0 && (i > 0 || cmd == 0)) {
 				break;
+			}
 		}
+	}
 	inslist(&file, i, (int64_t)f);
-	if (downloaded)
+	if (downloaded) {
 		outTsS(Hmovname, f->tag, &f->name);
+	}
 }
 
 void state(File *f, state_t cleandirty) {
-	if (f == cmd)
+	if (f == cmd) {
 		return;
+	}
 	if (downloaded && whichmenu(f) >= 0) { /* else flist or menu */
-		if (f->state == Dirty && cleandirty != Dirty)
+		if (f->state == Dirty && cleandirty != Dirty) {
 			outTs(Hclean, f->tag);
-		else if (f->state != Dirty && cleandirty == Dirty)
+		} else if (f->state != Dirty && cleandirty == Dirty) {
 			outTs(Hdirty, f->tag);
+		}
 	}
 	f->state = cleandirty;
 }
@@ -80,9 +90,9 @@ File *lookfile(String *s, bool fuzzy) {
 	Strinit(&t);
 
 	for (size_t i = 0; i < s->n; i++) {
-		if (esc)
+		if (esc) {
 			esc = false;
-		else if (s->s[i] == L'\\') {
+		} else if (s->s[i] == L'\\') {
 			esc = true;
 			continue;
 		}
@@ -92,16 +102,19 @@ File *lookfile(String *s, bool fuzzy) {
 	char *sc = Strtoc(&t);
 
 	for (i = 0; i < file.nused; i++) {
-		if (Strcmp(&file.filepptr[i]->name, s) == 0)
+		if (Strcmp(&file.filepptr[i]->name, s) == 0) {
 			return file.filepptr[i];
+		}
 
 		if (fuzzy) {
 			char *ac = Strtoc(&file.filepptr[i]->name);
-			if (strcmp(basename(sc), ac) == 0)
+			if (strcmp(basename(sc), ac) == 0) {
 				return free(sc), free(ac), file.filepptr[i];
+			}
 
-			if (!b && strstr(ac, sc))
+			if (!b && strstr(ac, sc)) {
 				b = file.filepptr[i];
+			}
 			free(ac);
 		}
 	}

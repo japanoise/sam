@@ -14,14 +14,17 @@ void bitblt2(Bitmap *d, Point p, Bitmap *s, Rectangle r, Fcode f, uint64_t fg,
 	uint64_t plane;
 	Bitmap	*btmp;
 
-	if (fg == 0)
+	if (fg == 0) {
 		fg = _fgpixel;
+	}
 
-	if (bg == 0)
+	if (bg == 0) {
 		bg = _bgpixel;
+	}
 
-	if (Dx(r) <= 0 || Dy(r) <= 0)
+	if (Dx(r) <= 0 || Dy(r) <= 0) {
 		return;
+	}
 	sx = r.min.x;
 	sy = r.min.y;
 	if (s->flag & SHIFT) {
@@ -35,19 +38,19 @@ void bitblt2(Bitmap *d, Point p, Bitmap *s, Rectangle r, Fcode f, uint64_t fg,
 		dy -= d->r.min.y;
 	}
 	g = _getcopygc2(f, d, s, &bfunc, fg, bg);
-	if (bfunc == UseCopyArea)
+	if (bfunc == UseCopyArea) {
 		XCopyArea(_dpy, (Drawable)s->id, (Drawable)d->id, g, sx, sy,
 			  Dx(r), Dy(r), dx, dy);
-	else if (bfunc == UseFillRectangle) {
+	} else if (bfunc == UseFillRectangle) {
 		XFillRectangle(_dpy, (Drawable)d->id, g, dx, dy, Dx(r), Dy(r));
 	} else {
 		/* bfunc == UseCopyPlane */
 		plane = _ld2dmask[s->ldepth];
 		plane &= ~(plane >> 1);
-		if (0 /*f == S*/)
+		if (0 /*f == S*/) {
 			XCopyPlane(_dpy, (Drawable)s->id, (Drawable)d->id, g,
 				   sx, sy, Dx(r), Dy(r), dx, dy, plane);
-		else {
+		} else {
 			/*
 			 * CopyPlane can only do func code S,
 			 * so copy src rect into a bitmap with the same depth

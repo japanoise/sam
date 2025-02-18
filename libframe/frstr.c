@@ -14,8 +14,9 @@ uint8_t *_frallocstr(unsigned n) {
 	uint8_t *p;
 
 	p = malloc(ROUNDUP(n));
-	if (p == 0)
+	if (p == 0) {
 		berror("out of memory");
+	}
 	return p;
 }
 
@@ -24,10 +25,12 @@ void _frinsure(Frame *f, int bn, unsigned n) {
 	uint8_t *p;
 
 	b = &f->box[bn];
-	if (b->nrune < 0)
+	if (b->nrune < 0) {
 		berror("_frinsure");
-	if (ROUNDUP(b->nrune) > n) /* > guarantees room for terminal NUL */
+	}
+	if (ROUNDUP(b->nrune) > n) { /* > guarantees room for terminal NUL */
 		return;
+	}
 	p = _frallocstr(n);
 	b = &f->box[bn];
 	memmove(p, b->a.ptr, NBYTE(b) + 1);

@@ -122,8 +122,9 @@ static uint8_t	    darkgreybits[] = {
 };
 
 void freefont(void) {
-	if (font)
+	if (font) {
 		XftFontClose(_dpy, font);
+	}
 }
 
 void xtbinit(Errfunc f, char *class, int *pargc, char **argv,
@@ -134,16 +135,19 @@ void xtbinit(Errfunc f, char *class, int *pargc, char **argv,
 
 	if (!class && argv[0]) {
 		p = strrchr(argv[0], '/');
-		if (p)
+		if (p) {
 			class = XtNewString(p + 1);
-		else
+		} else {
 			class = XtNewString(argv[0]);
-		if (class[0] >= 'a' && class[0] <= 'z')
+		}
+		if (class[0] >= 'a' && class[0] <= 'z') {
 			class[0] += 'A' - 'a';
+		}
 	}
 	onerr = f;
-	if (!fallbacks)
+	if (!fallbacks) {
 		fallbacks = _fallbacks;
+	}
 
 	char name[512] = {0};
 	snprintf(name, sizeof(name) - 1, "samterm on %s", machine);
@@ -189,12 +193,14 @@ void xtbinit(Errfunc f, char *class, int *pargc, char **argv,
 		XColor xc = {0};
 		if (XAllocNamedColor(_dpy,
 				     DefaultColormap(_dpy, DefaultScreen(_dpy)),
-				     bgc, &xc, &xc))
+				     bgc, &xc, &xc)) {
 			_bgpixels[_nbgs++] = xc.pixel;
+		}
 	}
 
-	if (_nbgs == 0)
+	if (_nbgs == 0) {
 		_bgpixels[_nbgs++] = ~_fgcolor.pixel;
+	}
 
 	_bgpixel = _bgpixels[0];
 
@@ -255,8 +261,9 @@ void xtbinit(Errfunc f, char *class, int *pargc, char **argv,
 	screen.id = (int)XtWindow(widg);
 	screen.ldepth = ilog2(DefaultDepth(_dpy, DefaultScreen(_dpy)));
 	screen.flag = SCR;
-	if (_fgpixel != 0)
+	if (_fgpixel != 0) {
 		screen.flag |= BL1;
+	}
 	/* leave screen rect at all zeros until reshaped() sets it */
 	while (!exposed) {
 		XFlush(_dpy);
@@ -308,8 +315,9 @@ static void reshaped(int minx, int miny, int maxx, int maxy) {
 		 * will get out of eread and REALLY do the reshape
 		 */
 		eb = ebadd(&esrc[Smouse], false);
-		if (eb == 0)
+		if (eb == 0) {
 			berror("eballoc can't malloc");
+		}
 		memcpy((void *)eb->buf, (void *)&lastmouse, sizeof lastmouse);
 		esrc[Smouse].count++;
 	}
@@ -320,11 +328,13 @@ static void gotchar(int c, int kind, int target, int x, int y,
 	Ebuf	 *eb;
 	Keystroke k;
 
-	if (!einitcalled || Skeyboard == -1)
+	if (!einitcalled || Skeyboard == -1) {
 		return;
+	}
 	eb = ebadd(&esrc[Skeyboard], false);
-	if (eb == NULL)
+	if (eb == NULL) {
 		berror("eballoc can't malloc");
+	}
 	k.c = c;
 	k.k = kind;
 	k.t = target;
@@ -338,16 +348,18 @@ static void gotmouse(Gwinmouse *gm) {
 	Ebuf *eb;
 	Mouse m;
 
-	if (!einitcalled || Smouse == -1)
+	if (!einitcalled || Smouse == -1) {
 		return;
+	}
 	m.buttons = gm->buttons;
 	m.xy.x = gm->xy.x;
 	m.xy.y = gm->xy.y;
 	m.msec = gm->msec;
 	lastmouse = m;
 	eb = ebadd(&esrc[Smouse], false);
-	if (eb == 0)
+	if (eb == 0) {
 		berror("eballoc can't malloc");
+	}
 	memcpy((void *)eb->buf, (void *)&m, sizeof m);
 	esrc[Smouse].count++;
 }
@@ -357,15 +369,18 @@ static void gotinput(XtPointer cldata, int *pfd, XtInputId *id) {
 	Esrc *es;
 	int   n;
 
-	if (!einitcalled)
+	if (!einitcalled) {
 		return;
+	}
 	es = (Esrc *)cldata;
-	if (es->count >= MAXINPUT)
+	if (es->count >= MAXINPUT) {
 		return;
+	}
 	lasttail = es->tail;
 	eb = ebadd(es, false);
-	if (eb == 0)
+	if (eb == 0) {
 		return;
+	}
 	if (es->size) {
 		if (es->issocket) {
 			struct sockaddr addr;
@@ -373,17 +388,20 @@ static void gotinput(XtPointer cldata, int *pfd, XtInputId *id) {
 			int		fd = accept(*pfd, &addr, &len);
 			n = read(fd, (char *)eb->buf, es->size);
 			close(fd);
-		} else
+		} else {
 			n = read(*pfd, (char *)eb->buf, es->size);
-		if (n < 0)
+		}
+		if (n < 0) {
 			n = 0;
+		}
 		if (n < es->size) {
 			newe = realloc(eb, sizeof(Ebuf) + n);
 			newe->n = n;
-			if (es->head == eb)
+			if (es->head == eb) {
 				es->head = newe;
-			else
+			} else {
 				lasttail->next = newe;
+			}
 			es->tail = newe;
 		}
 	}
@@ -393,9 +411,11 @@ static void gotinput(XtPointer cldata, int *pfd, XtInputId *id) {
 static int ilog2(int n) {
 	int i, v;
 
-	for (i = 0, v = 1; i < 6; i++, v <<= 1)
-		if (n <= v)
+	for (i = 0, v = 1; i < 6; i++, v <<= 1) {
+		if (n <= v) {
 			break;
+		}
+	}
 	return i;
 }
 
@@ -424,8 +444,9 @@ void rdcolmap(Bitmap *b, RGB *map) {
 			berror("rdcolmap bitmap too deep");
 			return;
 		}
-		for (i = 0; i < n; i++)
+		for (i = 0; i < n; i++) {
 			cols[i].pixel = i;
+		}
 		XQueryColors(_dpy, cmap, cols, n);
 		for (i = 0; i < n; i++) {
 			map[i].red = (cols[i].red << 16) | cols[i].red;
@@ -491,8 +512,9 @@ void einit(uint64_t keys) {
 		esrc[Skeyboard].inuse = true;
 		esrc[Skeyboard].size = sizeof(Keystroke);
 		esrc[Skeyboard].count = 0;
-		if (Skeyboard >= nsrc)
+		if (Skeyboard >= nsrc) {
 			nsrc = Skeyboard + 1;
+		}
 	}
 	einitcalled = 1;
 }
@@ -500,14 +522,17 @@ void einit(uint64_t keys) {
 uint64_t estart(uint64_t key, int fd, size_t n, bool issocket) {
 	int i;
 
-	if (fd < 0)
+	if (fd < 0) {
 		berror("bad fd to estart");
-	if (n <= 0 || n > EMAXMSG)
+	}
+	if (n <= 0 || n > EMAXMSG) {
 		n = EMAXMSG;
-	for (i = 0; i < MAXSRC; i++)
+	}
+	for (i = 0; i < MAXSRC; i++) {
 		if ((key & ~(1 << i)) == 0 && !esrc[i].inuse) {
-			if (nsrc <= i)
+			if (nsrc <= i) {
 				nsrc = i + 1;
+			}
 			esrc[i].inuse = true;
 			esrc[i].issocket = issocket;
 			esrc[i].size = n;
@@ -516,6 +541,7 @@ uint64_t estart(uint64_t key, int fd, size_t n, bool issocket) {
 				      gotinput, (XtPointer)&esrc[i]);
 			return 1 << i;
 		}
+	}
 	return 0;
 }
 
@@ -525,29 +551,33 @@ uint64_t eread(uint64_t keys, Event *e) {
 	Ebuf *eb;
 	int   i;
 
-	if (keys == 0)
+	if (keys == 0) {
 		return 0;
+	}
 	/* Give Priority to X events */
-	if (XtAppPending(app) & XtIMXEvent)
+	if (XtAppPending(app) & XtIMXEvent) {
 		XtAppProcessEvent(app, XtIMXEvent);
+	}
 
 	for (;;) {
-		for (i = 0; i < nsrc; i++)
+		for (i = 0; i < nsrc; i++) {
 			if ((keys & (1 << i)) && esrc[i].head) {
-				if (i == Smouse)
+				if (i == Smouse) {
 					e->mouse = emouse();
-				else if (i == Skeyboard)
+				} else if (i == Skeyboard) {
 					e->keystroke = ekbd();
-				else {
+				} else {
 					eb = ebread(&esrc[i]);
 					e->n = eb->n;
-					if (e->n > 0)
+					if (e->n > 0) {
 						memcpy((void *)e->data,
 						       (void *)eb->buf, e->n);
+					}
 					free(eb);
 				}
 				return 1 << i;
 			}
+		}
 		waitevent();
 	}
 }
@@ -556,8 +586,9 @@ Mouse emouse(void) {
 	Mouse m;
 	Ebuf *eb;
 
-	if (!esrc[Smouse].inuse)
+	if (!esrc[Smouse].inuse) {
 		berror("mouse events not selected");
+	}
 	eb = ebread(&esrc[Smouse]);
 	memcpy((void *)&m, (void *)eb->buf, sizeof(Mouse));
 	free(eb);
@@ -568,8 +599,9 @@ Keystroke ekbd(void) {
 	Ebuf	 *eb;
 	Keystroke k;
 
-	if (!esrc[Skeyboard].inuse)
+	if (!esrc[Skeyboard].inuse) {
 		berror("keyboard events not selected");
+	}
 	eb = ebread(&esrc[Skeyboard]);
 	memcpy(&k, eb->buf, sizeof(Keystroke));
 	free(eb);
@@ -580,11 +612,13 @@ void pushkbd(int c) {
 	Ebuf	 *eb;
 	Keystroke k;
 
-	if (!einitcalled || Skeyboard == -1)
+	if (!einitcalled || Skeyboard == -1) {
 		return;
+	}
 	eb = ebadd(&esrc[Skeyboard], true);
-	if (eb == 0)
+	if (eb == 0) {
 		berror("eballoc can't malloc");
+	}
 	k.c = c;
 	k.k = Kraw;
 	memcpy(eb->buf, &k, sizeof(Keystroke));
@@ -596,33 +630,38 @@ int ecanread(uint64_t keys) {
 
 	for (;;) {
 		for (i = 0; i < nsrc; i++) {
-			if ((keys & (1 << i)) && esrc[i].head)
+			if ((keys & (1 << i)) && esrc[i].head) {
 				return 1 << i;
+			}
 		}
-		if (XtAppPending(app))
+		if (XtAppPending(app)) {
 			waitevent();
-		else
+		} else {
 			return 0;
+		}
 	}
 }
 
 int ecanmouse(void) {
-	if (Smouse == -1)
+	if (Smouse == -1) {
 		berror("mouse events not selected");
+	}
 	return ecanread(Emouse);
 }
 
 int ecankbd(void) {
-	if (Skeyboard == -1)
+	if (Skeyboard == -1) {
 		berror("keyboard events not selected");
+	}
 	return ecanread(Ekeyboard);
 }
 
 static Ebuf *ebread(Esrc *s) {
 	Ebuf *eb;
 
-	while (s->head == 0)
+	while (s->head == 0) {
 		waitevent();
+	}
 	eb = s->head;
 	if (s == &esrc[Smouse]) {
 		while (eb->next) {
@@ -636,8 +675,9 @@ static Ebuf *ebread(Esrc *s) {
 	if (s->head == 0) {
 		s->tail = 0;
 		s->count = 0;
-	} else
+	} else {
 		s->count--;
+	}
 	return eb;
 }
 
@@ -645,8 +685,9 @@ static inline void ebappend(Ebuf *b, Esrc *s) {
 	if (s->tail) {
 		s->tail->next = b;
 		s->tail = b;
-	} else
+	} else {
 		s->head = s->tail = b;
+	}
 }
 
 static inline void ebprepend(Ebuf *b, Esrc *s) {
@@ -659,54 +700,61 @@ static Ebuf *ebadd(Esrc *s, bool prepend) {
 	int   m;
 
 	m = sizeof(Ebuf);
-	if (s->size > 1)
+	if (s->size > 1) {
 		m += (s->size - 1); /* overestimate, because of alignment */
+	}
 	eb = (Ebuf *)malloc(m);
 	if (eb) {
 		eb->next = 0;
 		eb->n = s->size;
-		if (prepend)
+		if (prepend) {
 			ebprepend(eb, s);
-		else
+		} else {
 			ebappend(eb, s);
+		}
 	}
 	return eb;
 }
 
 void berror(char *s) {
-	if (onerr)
+	if (onerr) {
 		(*onerr)(s);
-	else {
+	} else {
 		fprintf(stderr, "libg error: %s:\n", s);
 		exit(1);
 	}
 }
 
 void bflush(void) {
-	while (XtAppPending(app) & XtIMXEvent)
+	while (XtAppPending(app) & XtIMXEvent) {
 		waitevent();
+	}
 }
 
 static void waitevent(void) {
 	XFlush(_dpy);
-	if (XtAppPending(app) & XtIMXEvent)
+	if (XtAppPending(app) & XtIMXEvent) {
 		XtAppProcessEvent(app, XtIMXEvent);
-	else
+	} else {
 		XtAppProcessEvent(app, XtIMAll);
+	}
 }
 
 int snarfswap(char *s, int n, char **t) {
 	*t = GwinSelectionSwap(widg, s);
-	if (*t)
+	if (*t) {
 		return strlen(*t);
+	}
 	return 0;
 }
 
 int scrpix(int *w, int *h) {
-	if (w)
+	if (w) {
 		*w = WidthOfScreen(XtScreen(_toplevel));
-	if (h)
+	}
+	if (h) {
 		*h = HeightOfScreen(XtScreen(_toplevel));
+	}
 	return 1;
 }
 
@@ -757,8 +805,9 @@ void raisewindow(void) {
 uint64_t getbg(void) {
 	static int i = 0;
 
-	if (i >= _nbgs)
+	if (i >= _nbgs) {
 		i = 0;
+	}
 
 	return _bgpixels[i++];
 }

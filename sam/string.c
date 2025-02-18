@@ -52,8 +52,9 @@ void Straddc(String *p, wchar_t c) {
 }
 
 void Strinsure(String *p, uint64_t n) {
-	if (n > STRSIZE)
+	if (n > STRSIZE) {
 		error(Etoolong);
+	}
 
 	if (p->size < n) { /* p needs to grow */
 		n += 100;
@@ -86,8 +87,9 @@ char *Strtoc(String *s) {
 	wmemcpy(ws, s->s, s->n);
 	ws[s->n] = 0;
 
-	if (wcstombs(c, ws, l) == (size_t)-1)
+	if (wcstombs(c, ws, l) == (size_t)-1) {
 		panic("encoding 1");
+	}
 
 	return c;
 }
@@ -112,8 +114,9 @@ String *tmpcstr(char *s) {
 	p->n = utflen(s);
 	p->size = p->n + 1;
 	p->s = calloc(p->size, sizeof(wchar_t));
-	if (mbstowcs(p->s, s, p->n) == (size_t)-1)
+	if (mbstowcs(p->s, s, p->n) == (size_t)-1) {
 		panic("encoding 2");
+	}
 
 	return p;
 }

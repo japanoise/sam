@@ -18,32 +18,37 @@ int  cmdexec(File *f, Cmd *cp) {
 	 Addr	*ap;
 	 Address a;
 
-	 if (f && f->state == Unread)
+	 if (f && f->state == Unread) {
 		 load(f);
+	 }
 	 if (f == 0 && (cp->addr == 0 || cp->addr->type != '"') &&
 	     !wcschr(L"bBnqUXY!", (wchar_t)cp->cmdc) &&
-	     cp->cmdc != ('c' | 0x100) && !(cp->cmdc == 'D' && cp->ctext))
+	     cp->cmdc != ('c' | 0x100) && !(cp->cmdc == 'D' && cp->ctext)) {
 		 error(Enofile);
+	 }
 	 i = lookup(cp->cmdc);
 	 if (i >= 0 && cmdtab[i].defaddr != aNo) {
 		 if ((ap = cp->addr) == 0 && cp->cmdc != '\n') {
 			 cp->addr = ap = newaddr();
 			 ap->type = '.';
-			 if (cmdtab[i].defaddr == aAll)
+			 if (cmdtab[i].defaddr == aAll) {
 				 ap->type = '*';
+			 }
 		 } else if (ap && ap->type == '"' && ap->next == 0 &&
 			    cp->cmdc != '\n') {
 			 ap->next = newaddr();
 			 ap->next->type = '.';
-			 if (cmdtab[i].defaddr == aAll)
+			 if (cmdtab[i].defaddr == aAll) {
 				 ap->next->type = '*';
+			 }
 		 }
 		 if (cp->addr) { /* may be false for '\n' (only) */
 			 static Address none = {{0, 0}, 0};
-			 if (f)
+			 if (f) {
 				 addr = address(ap, f->dot, 0);
-			 else /* a " */
+			 } else { /* a " */
 				 addr = address(ap, none, 0);
+			 }
 			 f = addr.f;
 		 }
 	 }
@@ -67,10 +72,11 @@ bool a_cmd(File *f, Cmd *cp) { return append(f, cp, addr.r.p2); }
 
 bool b_cmd(File *f, Cmd *cp) {
 	f = cp->cmdc == 'b' ? tofile(cp->ctext) : getfile(cp->ctext);
-	if (f->state == Unread)
+	if (f->state == Unread) {
 		load(f);
-	else if (nest == 0)
+	} else if (nest == 0) {
 		filename(f);
+	}
 	return true;
 }
 
@@ -92,8 +98,9 @@ bool D_cmd(File *f, Cmd *cp) {
 }
 
 bool e_cmd(File *f, Cmd *cp) {
-	if (getname(f, cp->ctext, cp->cmdc == 'e') == 0)
+	if (getname(f, cp->ctext, cp->cmdc == 'e') == 0) {
 		error(Enoname);
+	}
 	edit(f, cp->cmdc);
 	return true;
 }
@@ -105,8 +112,9 @@ bool f_cmd(File *f, Cmd *cp) {
 }
 
 bool g_cmd(File *f, Cmd *cp) {
-	if (f != addr.f)
+	if (f != addr.f) {
 		panic("g_cmd f!=addr.f");
+	}
 	compile(cp->re);
 	if (execute(f, addr.r.p1, addr.r.p2) ^ (cp->cmdc == 'v')) {
 		f->dot = addr;
@@ -126,18 +134,20 @@ bool m_cmd(File *f, Cmd *cp) {
 	Address addr2;
 
 	addr2 = address(cp->caddr, f->dot, 0);
-	if (cp->cmdc == 'm')
+	if (cp->cmdc == 'm') {
 		move(f, addr2);
-	else
+	} else {
 		copy(f, addr2);
+	}
 	return true;
 }
 
 bool n_cmd(File *f, Cmd *cp) {
 	int i;
 	for (i = 0; i < file.nused; i++) {
-		if (file.filepptr[i] == cmd)
+		if (file.filepptr[i] == cmd) {
 			continue;
+		}
 		f = file.filepptr[i];
 		Strduplstr(&genstr, &f->name);
 		filename(f);
@@ -176,21 +186,24 @@ bool s_cmd(File *f, Cmd *cp) {
 				continue;
 			}
 			p1 = sel.p[0].p2 + 1;
-		} else
+		} else {
 			p1 = sel.p[0].p2;
+		}
 		op = sel.p[0].p2;
-		if (--n > 0)
+		if (--n > 0) {
 			continue;
+		}
 		Strzero(&genstr);
-		for (i = 0; i < cp->ctext->n; i++)
+		for (i = 0; i < cp->ctext->n; i++) {
 			if ((c = cp->ctext->s[i]) == '\\' &&
 			    i < cp->ctext->n - 1) {
 				c = cp->ctext->s[++i];
 				if ('1' <= c && c <= '9') {
 					j = c - '0';
 					if (sel.p[j].p2 - sel.p[j].p1 >
-					    BLOCKSIZE)
+					    BLOCKSIZE) {
 						error(Elongtag);
+					}
 					Fchars(f, genbuf, sel.p[j].p1,
 					       sel.p[j].p2);
 					Strinsert(
@@ -198,19 +211,22 @@ bool s_cmd(File *f, Cmd *cp) {
 					    tmprstr(genbuf, (sel.p[j].p2 -
 							     sel.p[j].p1)),
 					    genstr.n);
-				} else
+				} else {
 					Straddc(&genstr, c);
-			} else if (c != '&')
+				}
+			} else if (c != '&') {
 				Straddc(&genstr, c);
-			else {
-				if (sel.p[0].p2 - sel.p[0].p1 > BLOCKSIZE)
+			} else {
+				if (sel.p[0].p2 - sel.p[0].p1 > BLOCKSIZE) {
 					error(Elongrhs);
+				}
 				Fchars(f, genbuf, sel.p[0].p1, sel.p[0].p2);
 				Strinsert(&genstr,
 					  tmprstr(genbuf, (int)(sel.p[0].p2 -
 								sel.p[0].p1)),
 					  genstr.n);
 			}
+		}
 		if (sel.p[0].p1 != sel.p[0].p2) {
 			Fdelete(f, sel.p[0].p1, sel.p[0].p2);
 			delta -= sel.p[0].p2 - sel.p[0].p1;
@@ -220,11 +236,13 @@ bool s_cmd(File *f, Cmd *cp) {
 			delta += genstr.n;
 		}
 		didsub = true;
-		if (!cp->flag)
+		if (!cp->flag) {
 			break;
+		}
 	}
-	if (!didsub && nest == 0)
+	if (!didsub && nest == 0) {
 		error(Enosub);
+	}
 	f->ndot.r.p1 = addr.r.p1, f->ndot.r.p2 = addr.r.p2 + delta;
 	return true;
 }
@@ -238,19 +256,22 @@ bool u_cmd(File *f, Cmd *cp) {
 }
 
 bool w_cmd(File *f, Cmd *cp) {
-	if (f == cmd)
+	if (f == cmd) {
 		return true;
-	if (getname(f, cp->ctext, false) == 0)
+	}
+	if (getname(f, cp->ctext, false) == 0) {
 		error(Enoname);
+	}
 	writef(f);
 	return true;
 }
 
 bool x_cmd(File *f, Cmd *cp) {
-	if (cp->re)
+	if (cp->re) {
 		looper(f, cp, cp->cmdc == 'x');
-	else
+	} else {
 		linelooper(f, cp);
+	}
 	return true;
 }
 
@@ -288,13 +309,15 @@ bool nl_cmd(File *f, Cmd *cp) {
 		/* First put it on newline boundaries */
 		addr = lineaddr((Posn)0, f->dot, -1);
 		addr.r.p2 = lineaddr((Posn)0, f->dot, 1).r.p2;
-		if (addr.r.p1 == f->dot.r.p1 && addr.r.p2 == f->dot.r.p2)
+		if (addr.r.p1 == f->dot.r.p1 && addr.r.p2 == f->dot.r.p2) {
 			addr = lineaddr((Posn)1, f->dot, 1);
+		}
 		display(f);
-	} else if (downloaded)
+	} else if (downloaded) {
 		moveto(f, addr.r);
-	else
+	} else {
 		display(f);
+	}
 	return true;
 }
 
@@ -304,10 +327,12 @@ bool cd_cmd(File *f, Cmd *cp) {
 }
 
 bool append(File *f, Cmd *cp, Posn p) {
-	if (cp->ctext->n > 0 && cp->ctext->s[cp->ctext->n - 1] == 0)
+	if (cp->ctext->n > 0 && cp->ctext->s[cp->ctext->n - 1] == 0) {
 		--cp->ctext->n;
-	if (cp->ctext->n > 0)
+	}
+	if (cp->ctext->n > 0) {
 		Finsert(f, cp->ctext, p);
+	}
 	f->ndot.r.p1 = p;
 	f->ndot.r.p2 = p + cp->ctext->n;
 	return true;
@@ -321,16 +346,19 @@ bool display(File *f) {
 	p2 = addr.r.p2;
 	while (p1 < p2) {
 		np = p2 - p1;
-		if (np > BLOCKSIZE - 1)
+		if (np > BLOCKSIZE - 1) {
 			np = BLOCKSIZE - 1;
+		}
 		n = Fchars(f, genbuf, p1, p1 + np);
-		if (n <= 0)
+		if (n <= 0) {
 			panic("display");
+		}
 		genbuf[n] = 0;
-		if (downloaded)
+		if (downloaded) {
 			termwrite(genbuf);
-		else
+		} else {
 			fprintf(stdout, "%ls", genbuf);
+		}
 		p1 += n;
 	}
 	f->dot = addr;
@@ -348,8 +376,9 @@ void looper(File *f, Cmd *cp, int xy) {
 	for (p = r.p1; p <= r.p2;) {
 		if (!execute(f, p,
 			     r.p2)) { /* no match, but y should still run */
-			if (xy || op > r.p2)
+			if (xy || op > r.p2) {
 				break;
+			}
 			f->dot.r.p1 = op, f->dot.r.p2 = r.p2;
 			p = r.p2 + 1; /* exit next loop */
 		} else {
@@ -359,12 +388,14 @@ void looper(File *f, Cmd *cp, int xy) {
 					continue;
 				}
 				p = sel.p[0].p2 + 1;
-			} else
+			} else {
 				p = sel.p[0].p2;
-			if (xy)
+			}
+			if (xy) {
 				f->dot.r = sel.p[0];
-			else
+			} else {
 				f->dot.r.p1 = op, f->dot.r.p2 = sel.p[0].p1;
+			}
 		}
 		op = sel.p[0].p2;
 		cmdexec(f, cp->ccmd);
@@ -387,19 +418,23 @@ void linelooper(File *f, Cmd *cp) {
 		/*pjw       if(p!=r.p1 || (linesel = lineaddr((Posn)0, a3,
 		 * 1)).r.p2==p)*/
 		if (p != r.p1 ||
-		    ((linesel = lineaddr((Posn)0, a3, 1).r), linesel.p2 == p))
+		    ((linesel = lineaddr((Posn)0, a3, 1).r), linesel.p2 == p)) {
 			linesel = lineaddr((Posn)1, a3, 1).r;
-		if (linesel.p1 >= r.p2)
+		}
+		if (linesel.p1 >= r.p2) {
 			break;
-		if (linesel.p2 >= r.p2)
+		}
+		if (linesel.p2 >= r.p2) {
 			linesel.p2 = r.p2;
-		if (linesel.p2 > linesel.p1)
+		}
+		if (linesel.p2 > linesel.p1) {
 			if (linesel.p1 >= a3.r.p2 && linesel.p2 > a3.r.p2) {
 				f->dot.r = linesel;
 				cmdexec(f, cp->ccmd);
 				a3.r = linesel;
 				continue;
 			}
+		}
 		break;
 	}
 	--nest;
@@ -409,20 +444,24 @@ void filelooper(Cmd *cp, int XY) {
 	File *f, *cur;
 	int   i;
 
-	if (Glooping++)
+	if (Glooping++) {
 		error(EnestXY);
+	}
 	nest++;
 	settempfile();
 	cur = curfile;
 	for (i = 0; i < tempfile.nused; i++) {
 		f = tempfile.filepptr[i];
-		if (f == cmd)
+		if (f == cmd) {
 			continue;
-		if (cp->re == 0 || filematch(f, cp->re) == XY)
+		}
+		if (cp->re == 0 || filematch(f, cp->re) == XY) {
 			cmdexec(f, cp->ccmd);
+		}
 	}
-	if (cur && whichmenu(cur) >= 0) /* check that cur is still a file */
+	if (cur && whichmenu(cur) >= 0) { /* check that cur is still a file */
 		current(cur);
+	}
 	--Glooping;
 	--nest;
 }

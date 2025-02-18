@@ -107,8 +107,9 @@ static void		Realize(Widget w, XtValueMask *valueMask,
 
 	    XtCreateWindow(w, InputOutput, (Visual *)0, *valueMask, attrs);
 	    XtSetKeyboardFocus(w->core.parent, w);
-	    if ((modmap = XGetModifierMapping(XtDisplay(w))))
+	    if ((modmap = XGetModifierMapping(XtDisplay(w)))) {
 		    keypermod = modmap->max_keypermod;
+	    }
 
 	    Resize(w);
 
@@ -122,26 +123,30 @@ static void		Realize(Widget w, XtValueMask *valueMask,
 }
 
 static void Resize(Widget w) {
-	if (XtIsRealized(w))
+	if (XtIsRealized(w)) {
 		(*(XtClass(w)->core_class.expose))(w, (XEvent *)NULL,
 						   (Region)NULL);
+	}
 }
 
 static void Redraw(Widget w, XEvent *e, Region r) {
 	Reshapefunc f;
 
 	f = ((GwinWidget)w)->gwin.reshaped;
-	if (f)
+	if (f) {
 		(*f)(w->core.x, w->core.y, w->core.x + w->core.width,
 		     w->core.y + w->core.height);
+	}
 }
 
 static void Mappingaction(Widget w, XEvent *e, String *p, Cardinal *np) {
-	if (modmap)
+	if (modmap) {
 		XFreeModifiermap(modmap);
+	}
 	modmap = XGetModifierMapping(e->xany.display);
-	if (modmap)
+	if (modmap) {
 		keypermod = modmap->max_keypermod;
+	}
 }
 
 typedef struct Unikeysym Unikeysym;
@@ -157,8 +162,9 @@ Unikeysym unikeysyms[] = {
 
 uint16_t keysymtoshort(KeySym k) {
 	for (Unikeysym *ks = unikeysyms; ks->keysym != 0; ks++) {
-		if (k == ks->keysym)
+		if (k == ks->keysym) {
 			return ks->value;
+		}
 	}
 
 	return k;
@@ -178,13 +184,15 @@ struct Keymapping {
 static Keymapping *keymappings = NULL;
 
 int installbinding(int m, KeySym s, int k, int c, const char *a) {
-	if (m < 0 || s == NoSymbol || k < 0 || c < 0)
+	if (m < 0 || s == NoSymbol || k < 0 || c < 0) {
 		return -1;
+	}
 
 	a = a ? a : "";
 	Keymapping *km = calloc(1, sizeof(Keymapping) + strlen(a) + 1);
-	if (!km)
+	if (!km) {
 		return -1;
+	}
 
 	km->m = m;
 	km->s = s;
@@ -198,12 +206,14 @@ int installbinding(int m, KeySym s, int k, int c, const char *a) {
 }
 
 int removebinding(int m, KeySym s) {
-	if (m < 0 || s == NoSymbol)
+	if (m < 0 || s == NoSymbol) {
 		return -1;
+	}
 
 	for (Keymapping *km = keymappings; km; km = km->next) {
-		if (km->m == m && km->s == s)
+		if (km->m == m && km->s == s) {
 			km->c = Cdefault;
+		}
 	}
 
 	return 0;
@@ -233,12 +243,14 @@ static void Keyaction(Widget w, XEvent *e, String *p, Cardinal *np) {
 	len = 0;
 
 	/* Translate the keycode into a key symbol. */
-	if (e->xany.type != KeyPress)
+	if (e->xany.type != KeyPress) {
 		return;
+	}
 
 	len = XwcLookupString(xic, &e->xkey, buf, 32, &k, &s);
-	if (IsModifierKey(k))
+	if (IsModifierKey(k)) {
 		return;
+	}
 
 	/* Check to see if it's a specially-handled key first. */
 	for (Keymapping *m = keymappings; m; m = m->next) {
@@ -263,9 +275,10 @@ static void Keyaction(Widget w, XEvent *e, String *p, Cardinal *np) {
 
 				default:
 					f = ((GwinWidget)w)->gwin.gotchar;
-					if (f)
+					if (f) {
 						(*f)(m->c, m->k, Tcurrent, 0, 0,
 						     m->a);
+					}
 					return;
 				}
 			}
@@ -274,8 +287,9 @@ static void Keyaction(Widget w, XEvent *e, String *p, Cardinal *np) {
 
 	c = keysymtoshort(k);
 	f = ((GwinWidget)w)->gwin.gotchar;
-	if (f && c)
+	if (f && c) {
 		(*f)(c ? c : buf[0], kind, Tcurrent, 0, 0, NULL);
+	}
 }
 
 typedef struct Chordmapping Chordmapping;
@@ -292,12 +306,14 @@ struct Chordmapping {
 static Chordmapping *chordmap = NULL;
 
 int		     installchord(int s1, int s2, int c, int t, const char *a) {
-	 if (s1 < 0 || s2 < 0 || c < 0 || (t != Tmouse && t != Tcurrent))
+	 if (s1 < 0 || s2 < 0 || c < 0 || (t != Tmouse && t != Tcurrent)) {
 		 return -1;
+	 }
 
 	 Chordmapping *m = calloc(1, sizeof(Chordmapping));
-	 if (!m)
+	 if (!m) {
 		 return -1;
+	 }
 
 	 m->s1 = s1;
 	 m->s2 = s2;
@@ -311,12 +327,14 @@ int		     installchord(int s1, int s2, int c, int t, const char *a) {
 }
 
 int removechord(int s1, int s2) {
-	if (s1 < 0 || s2 < 0)
+	if (s1 < 0 || s2 < 0) {
 		return -1;
+	}
 
 	for (Chordmapping *m = chordmap; m; m = m->next) {
-		if (m->s1 == s1 && m->s2 == s2)
+		if (m->s1 == s1 && m->s2 == s2) {
 			m->c = Cdefault;
+		}
 	}
 
 	return 0;
@@ -402,30 +420,41 @@ static void Mouseaction(Widget w, XEvent *e, String *p, Cardinal *np) {
 
 	m.buttons = 0;
 
-	if (ps & Button1Mask)
+	if (ps & Button1Mask) {
 		ob |= 1;
-	if (ps & Button2Mask)
+	}
+	if (ps & Button2Mask) {
 		ob |= 2;
-	if (ps & Button3Mask)
+	}
+	if (ps & Button3Mask) {
 		ob |= (s & ShiftMask) ? 2 : 4;
-	if (ps & Button4Mask)
+	}
+	if (ps & Button4Mask) {
 		ob |= 8;
-	if (ps & Button5Mask)
+	}
+	if (ps & Button5Mask) {
 		ob |= 16;
+	}
 
-	if (s & Button1Mask)
+	if (s & Button1Mask) {
 		m.buttons |= 1;
-	if (s & Button2Mask)
+	}
+	if (s & Button2Mask) {
 		m.buttons |= 2;
-	if (s & Button3Mask)
+	}
+	if (s & Button3Mask) {
 		m.buttons |= (s & ShiftMask) ? 2 : 4;
-	if (s & Button4Mask)
+	}
+	if (s & Button4Mask) {
 		m.buttons |= 8;
-	if (s & Button5Mask)
+	}
+	if (s & Button5Mask) {
 		m.buttons |= 16;
+	}
 
-	if (!m.buttons)
+	if (!m.buttons) {
 		chording = false;
+	}
 
 	/* Check to see if it's a chord first. */
 	for (Chordmapping *cm = chordmap; cm; cm = cm->next) {
@@ -439,9 +468,10 @@ static void Mouseaction(Widget w, XEvent *e, String *p, Cardinal *np) {
 
 			default:
 				kf = ((GwinWidget)w)->gwin.gotchar;
-				if (kf)
+				if (kf) {
 					(*kf)(cm->c, Kcommand, cm->t, m.xy.x,
 					      m.xy.y, NULL);
+				}
 
 				m.buttons = 0;
 				chording = true;
@@ -450,12 +480,14 @@ static void Mouseaction(Widget w, XEvent *e, String *p, Cardinal *np) {
 		}
 	}
 
-	if (chording)
+	if (chording) {
 		m.buttons = 0;
+	}
 
 	f = ((GwinWidget)w)->gwin.gotmouse;
-	if (f)
+	if (f) {
 		(*f)(&m);
+	}
 }
 
 static void SelCallback(Widget w, XtPointer cldata, Atom *sel, Atom *seltype,
@@ -466,8 +498,9 @@ static void SelCallback(Widget w, XtPointer cldata, Atom *sel, Atom *seltype,
 
 	gw->gwin.selxfered = true;
 	if (*seltype == 0) {
-		if (gw->gwin.selection == NULL)
+		if (gw->gwin.selection == NULL) {
 			gw->gwin.selection = strdup("");
+		}
 		return;
 	}
 
@@ -476,12 +509,14 @@ static void SelCallback(Widget w, XtPointer cldata, Atom *sel, Atom *seltype,
 		gw->gwin.selection = NULL;
 	}
 
-	if (*seltype != XInternAtom(_dpy, "UTF8_STRING", 0))
+	if (*seltype != XInternAtom(_dpy, "UTF8_STRING", 0)) {
 		return;
+	}
 
 	if (XmbTextListToTextProperty(_dpy, ls, 1, XUTF8StringStyle, &p) !=
-	    Success)
+	    Success) {
 		return;
+	}
 
 	gw->gwin.selection = strdup(p.value);
 	XtFree(val);
@@ -498,8 +533,9 @@ static Boolean SendSel(Widget w, Atom *sel, Atom *target, Atom *rtype,
 	    (*target == XInternAtom(_dpy, "UTF8_STRING", 0))) {
 		ls[0] = gw->gwin.selection ? gw->gwin.selection : "";
 		if (XmbTextListToTextProperty(_dpy, ls, 1, XUTF8StringStyle,
-					      &p) != Success)
+					      &p) != Success) {
 			return false;
+		}
 
 		*rtype = p.encoding;
 		*ans = (XtPointer)XtNewString(p.value);
@@ -522,8 +558,9 @@ static String SelectSwap(Widget w, String s) {
 			    XInternAtom(_dpy, "UTF8_STRING", 0), SelCallback, 0,
 			    XtLastTimestampProcessed(XtDisplay(w)));
 
-	while (gw->gwin.selxfered == false)
+	while (gw->gwin.selxfered == false) {
 		XtAppProcessEvent(XtWidgetToApplicationContext(w), XtIMAll);
+	}
 	ans = gw->gwin.selection;
 	gw->gwin.selection = XtMalloc(strlen(s) + 1);
 	strcpy(gw->gwin.selection, s);

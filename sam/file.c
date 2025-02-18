@@ -36,10 +36,12 @@ void Fmark(File *f, Mod m) {
 	Buffer *t = f->transcript;
 	Posn	p;
 
-	if (f->state == Readerr)
+	if (f->state == Readerr) {
 		return;
-	if (f->state == Unread) /* this is implicit 'e' of a file */
+	}
+	if (f->state == Unread) { /* this is implicit 'e' of a file */
 		return;
+	}
 	p = m == 0 ? -1 : f->markp;
 	f->markp = t->nrunes;
 	puthdr_M(t, p, f->dot.r, f->mark, f->mod, f->state);
@@ -57,8 +59,9 @@ File *Fopen(void) {
 	f = emalloc(sizeof(File));
 	f->buf = Bopen();
 	f->transcript = Bopen();
-	if (++fcount == NDISC)
+	if (++fcount == NDISC) {
 		fcount = 0;
+	}
 	f->nrunes = 0;
 	f->markp = 0;
 	f->mod = 0;
@@ -74,41 +77,50 @@ File *Fopen(void) {
 }
 
 void Fclose(File *f) {
-	if (!f)
+	if (!f) {
 		return;
+	}
 
-	if (f == lastfile)
+	if (f == lastfile) {
 		lastfile = NULL;
+	}
 	Bterm(f->buf);
 	Bterm(f->transcript);
 	Strclose(&f->name);
 	Strclose(&f->cache);
-	if (f->rasp)
+	if (f->rasp) {
 		listfree(f->rasp);
+	}
 	free(f);
 }
 
 void Finsert(File *f, String *str, Posn p1) {
 	Buffer *t = f->transcript;
 
-	if (f->state == Readerr)
+	if (f->state == Readerr) {
 		return;
-	if (str->n == 0)
+	}
+	if (str->n == 0) {
 		return;
-	if (str->n < 0 || str->n > STRSIZE)
+	}
+	if (str->n < 0 || str->n > STRSIZE) {
 		panic("Finsert");
-	if (f->mod < modnum)
+	}
+	if (f->mod < modnum) {
 		Fmark(f, modnum);
-	if (p1 < f->hiposn)
+	}
+	if (p1 < f->hiposn) {
 		error(Esequence);
+	}
 	if (str->n >= BLOCKSIZE) { /* don't bother with the cache */
 		Fflush(f);
 		puthdr_csl(t, 'i', str->n, p1);
 		Binsert(t, str, t->nrunes);
 	} else { /* insert into the cache instead of the transcript */
 		if (f->cp2 == 0 && f->cp1 == 0 &&
-		    f->cache.n == 0) /* empty cache */
+		    f->cache.n == 0) { /* empty cache */
 			f->cp1 = f->cp2 = p1;
+		}
 		if (p1 - f->cp2 > SKIP ||
 		    f->cache.n + str->n > MAXCACHE - SKIP) {
 			Fflush(f);
@@ -125,27 +137,35 @@ void Finsert(File *f, String *str, Posn p1) {
 		}
 		Strinsert(&f->cache, str, f->cache.n);
 	}
-	if (f != cmd)
+	if (f != cmd) {
 		quitok = false;
+	}
 	f->closeok = false;
-	if (f->state == Clean)
+	if (f->state == Clean) {
 		state(f, Dirty);
+	}
 	f->hiposn = p1;
 }
 
 void Fdelete(File *f, Posn p1, Posn p2) {
-	if (f->state == Readerr)
+	if (f->state == Readerr) {
 		return;
-	if (p1 == p2)
+	}
+	if (p1 == p2) {
 		return;
-	if (f->mod < modnum)
+	}
+	if (f->mod < modnum) {
 		Fmark(f, modnum);
-	if (p1 < f->hiposn)
+	}
+	if (p1 < f->hiposn) {
 		error(Esequence);
-	if (p1 - f->cp2 > SKIP)
+	}
+	if (p1 - f->cp2 > SKIP) {
 		Fflush(f);
-	if (f->cp2 == 0 && f->cp1 == 0 && f->cache.n == 0) /* empty cache */
+	}
+	if (f->cp2 == 0 && f->cp1 == 0 && f->cache.n == 0) { /* empty cache */
 		f->cp1 = f->cp2 = p1;
+	}
 	if (f->cp2 != p1) { /* grab the piece in between */
 		if (f->cache.n + (p1 - f->cp2) > MAXCACHE) {
 			Fflush(f);
@@ -160,11 +180,13 @@ void Fdelete(File *f, Posn p1, Posn p2) {
 		}
 	}
 	f->cp2 = p2;
-	if (f != cmd)
+	if (f != cmd) {
 		quitok = false;
+	}
 	f->closeok = false;
-	if (f->state == Clean)
+	if (f->state == Clean) {
 		state(f, Dirty);
+	}
 	f->hiposn = p2;
 }
 
@@ -172,10 +194,12 @@ void Fflush(File *f) {
 	Buffer *t = f->transcript;
 	Posn	p1 = f->cp1, p2 = f->cp2;
 
-	if (f->state == Readerr)
+	if (f->state == Readerr) {
 		return;
-	if (p1 != p2)
+	}
+	if (p1 != p2) {
 		puthdr_cll(t, 'd', p1, p2);
+	}
 	if (f->cache.n) {
 		puthdr_csl(t, 'i', f->cache.n, p2);
 		Binsert(t, &f->cache, t->nrunes);
@@ -187,14 +211,16 @@ void Fflush(File *f) {
 void Fsetname(File *f, String *s) {
 	Buffer *t = f->transcript;
 
-	if (f->state == Readerr)
+	if (f->state == Readerr) {
 		return;
+	}
 	if (f->state == Unread) { /* This is setting initial file name */
 		Strduplstr(&f->name, s);
 		sortname(f);
 	} else {
-		if (f->mod < modnum)
+		if (f->mod < modnum) {
 			Fmark(f, modnum);
+		}
 		puthdr_cs(t, 'f', s->n);
 		Binsert(t, s, t->nrunes);
 	}
@@ -218,14 +244,16 @@ int Fupdate(File *f, int mktrans, int toterm) {
 	union Hdr buf;
 	wchar_t	  tmp[BLOCKSIZE + 1]; /* +1 for NUL in 'f' case */
 
-	if (f->state == Readerr)
+	if (f->state == Readerr) {
 		return false;
+	}
 	lastfile = f;
 	Fflush(f);
-	if (f->marked)
+	if (f->marked) {
 		p0 = f->markp + sizeof(Mark) / RUNESIZE;
-	else
+	} else {
 		p0 = 0;
+	}
 	f->dot = f->ndot;
 	while ((n = Bread(t, (wchar_t *)&buf, sizeof buf / RUNESIZE, p0)) > 0) {
 		switch (buf.cs.c) {
@@ -235,23 +263,27 @@ int Fupdate(File *f, int mktrans, int toterm) {
 			p1 = buf.cll.l;
 			p2 = buf.cll.l1;
 			p0 += sizeof(struct _cll) / RUNESIZE;
-			if (p2 <= f->dot.r.p1)
+			if (p2 <= f->dot.r.p1) {
 				deltadot -= p2 - p1;
-			if (p2 <= f->mark.p1)
+			}
+			if (p2 <= f->mark.p1) {
 				deltamark -= p2 - p1;
+			}
 			p1 += delta, p2 += delta;
 			delta -= p2 - p1;
-			if (!mktrans)
+			if (!mktrans) {
 				for (p = p1; p < p2; p += ni) {
-					if (p2 - p > BLOCKSIZE)
+					if (p2 - p > BLOCKSIZE) {
 						ni = BLOCKSIZE;
-					else
+					} else {
 						ni = p2 - p;
+					}
 					puthdr_csl(u, 'i', ni, p1);
 					Bread(f->buf, tmp, ni, p);
 					Binsert(u, ftempstr(tmp, ni),
 						u->nrunes);
 				}
+			}
 			f->nrunes -= p2 - p1;
 			Bdelete(f->buf, p1, p2);
 			changes = true;
@@ -278,21 +310,25 @@ int Fupdate(File *f, int mktrans, int toterm) {
 			n = buf.csl.s;
 			p1 = buf.csl.l;
 			p0 += sizeof(struct _csl) / RUNESIZE;
-			if (p1 < f->dot.r.p1)
+			if (p1 < f->dot.r.p1) {
 				deltadot += n;
-			if (p1 < f->mark.p1)
+			}
+			if (p1 < f->mark.p1) {
 				deltamark += n;
+			}
 			p1 += delta;
 			delta += n;
-			if (!mktrans)
+			if (!mktrans) {
 				puthdr_cll(u, 'd', p1, p1 + n);
+			}
 			changes = true;
 			f->nrunes += n;
 			while (n > 0) {
-				if (n > BLOCKSIZE)
+				if (n > BLOCKSIZE) {
 					ni = BLOCKSIZE;
-				else
+				} else {
 					ni = n;
+				}
 				Bread(t, tmp, ni, p0);
 				Binsert(f->buf, ftempstr(tmp, ni), p1);
 				n -= ni;
@@ -305,20 +341,26 @@ int Fupdate(File *f, int mktrans, int toterm) {
 	toterminal(f, toterm);
 	f->dot.r.p1 += deltadot;
 	f->dot.r.p2 += deltadot;
-	if (f->dot.r.p1 > f->nrunes)
+	if (f->dot.r.p1 > f->nrunes) {
 		f->dot.r.p1 = f->nrunes;
-	if (f->dot.r.p2 > f->nrunes)
+	}
+	if (f->dot.r.p2 > f->nrunes) {
 		f->dot.r.p2 = f->nrunes;
+	}
 	f->mark.p1 += deltamark;
 	f->mark.p2 += deltamark;
-	if (f->mark.p1 > f->nrunes)
+	if (f->mark.p1 > f->nrunes) {
 		f->mark.p1 = f->nrunes;
-	if (f->mark.p2 > f->nrunes)
+	}
+	if (f->mark.p2 > f->nrunes) {
 		f->mark.p2 = f->nrunes;
-	if (n < 0)
+	}
+	if (n < 0) {
 		panic("Fupdate read");
-	if (f == cmd)
+	}
+	if (f == cmd) {
 		f->mod = 0; /* can't undo command file */
+	}
 	if (p0 >
 	    f->markp + sizeof(Posn) / RUNESIZE) { /* for undo, this throws away
 						     the undo transcript */
@@ -327,10 +369,11 @@ int Fupdate(File *f, int mktrans, int toterm) {
 				t->nrunes);
 			/* copy the undo list back into the transcript */
 			for (p = 0; p < u->nrunes; p += ni) {
-				if (u->nrunes - p > BLOCKSIZE)
+				if (u->nrunes - p > BLOCKSIZE) {
 					ni = BLOCKSIZE;
-				else
+				} else {
 					ni = u->nrunes - p;
+				}
 				Bread(u, tmp, ni, p);
 				Binsert(t, ftempstr(tmp, ni), t->nrunes);
 			}
@@ -343,8 +386,9 @@ int Fupdate(File *f, int mktrans, int toterm) {
 void puthdr_csl(Buffer *b, char c, int16_t s, Posn p) {
 	struct _csl buf;
 
-	if (p < 0)
+	if (p < 0) {
 		panic("puthdr_csP");
+	}
 	buf.c = c;
 	buf.s = s;
 	buf.l = p;
@@ -363,8 +407,9 @@ void puthdr_M(Buffer *b, Posn p, Range dot, Range mk, Mod m, int16_t s1) {
 	Mark	    mark;
 	static bool first = true;
 
-	if (!first && p < 0)
+	if (!first && p < 0) {
 		panic("puthdr_M");
+	}
 	mark.p = p;
 	mark.dot = dot;
 	mark.mark = mk;
@@ -377,8 +422,9 @@ void puthdr_M(Buffer *b, Posn p, Range dot, Range mk, Mod m, int16_t s1) {
 void puthdr_cll(Buffer *b, char c, Posn p1, Posn p2) {
 	struct _cll buf;
 
-	if (p1 < 0 || p2 < 0)
+	if (p1 < 0 || p2 < 0) {
 		panic("puthdr_cll");
+	}
 	buf.c = c;
 	buf.l = p1;
 	buf.l1 = p2;
@@ -390,21 +436,25 @@ int64_t Fchars(File *f, wchar_t *addr, Posn p1, Posn p2) {
 }
 
 int Fgetcset(File *f, Posn p) {
-	if (p < 0 || p > f->nrunes)
+	if (p < 0 || p > f->nrunes) {
 		panic("Fgetcset out of range");
-	if ((f->ngetc = Fchars(f, f->getcbuf, p, p + NGETC)) < 0)
+	}
+	if ((f->ngetc = Fchars(f, f->getcbuf, p, p + NGETC)) < 0) {
 		panic("Fgetcset Bread fail");
+	}
 	f->getcp = p;
 	f->getci = 0;
 	return f->ngetc;
 }
 
 int Fbgetcset(File *f, Posn p) {
-	if (p < 0 || p > f->nrunes)
+	if (p < 0 || p > f->nrunes) {
 		panic("Fbgetcset out of range");
-	if ((f->ngetc =
-		 Fchars(f, f->getcbuf, p < NGETC ? (Posn)0 : p - NGETC, p)) < 0)
+	}
+	if ((f->ngetc = Fchars(f, f->getcbuf, p < NGETC ? (Posn)0 : p - NGETC,
+			       p)) < 0) {
 		panic("Fbgetcset Bread fail");
+	}
 	f->getcp = p;
 	f->getci = f->ngetc;
 	return f->ngetc;

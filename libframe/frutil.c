@@ -9,16 +9,19 @@ int _frcanfit(Frame *f, Point pt, Frbox *b) {
 	wchar_t	 r;
 
 	left = f->r.max.x - pt.x;
-	if (b->nrune < 0)
+	if (b->nrune < 0) {
 		return b->a.b.minwid <= left;
-	if (left >= b->wid)
+	}
+	if (left >= b->wid) {
 		return b->nrune;
+	}
 	for (nr = 0, p = b->a.ptr; *p; p += w, nr++) {
 		r = *p;
 		w = chartorune(&r, (char *)p);
 		left -= charwidth(f->font, r);
-		if (left < 0)
+		if (left < 0) {
 			return nr;
+		}
 	}
 	berror("_frcanfit can't");
 	return 0;
@@ -42,8 +45,9 @@ void _fradvance(Frame *f, Point *p, Frbox *b) {
 	if (b->nrune < 0 && b->a.b.bc == '\n') {
 		p->x = f->left;
 		p->y += f->fheight;
-	} else
+	} else {
 		p->x += b->wid;
+	}
 }
 
 int _frnewwid(Frame *f, Point pt, Frbox *b) {
@@ -51,15 +55,18 @@ int _frnewwid(Frame *f, Point pt, Frbox *b) {
 
 	c = f->r.max.x;
 	x = pt.x;
-	if (b->nrune >= 0)
+	if (b->nrune >= 0) {
 		return b->wid;
+	}
 	if (b->a.b.bc == '\t') {
-		if (x + b->a.b.minwid > c)
+		if (x + b->a.b.minwid > c) {
 			x = pt.x = f->left;
+		}
 		x += f->maxtab;
 		x -= (x - f->left) % f->maxtab;
-		if (x - pt.x < b->a.b.minwid || x > c)
+		if (x - pt.x < b->a.b.minwid || x > c) {
 			x = pt.x + b->a.b.minwid;
+		}
 		b->wid = x - pt.x;
 	}
 	return b->wid;
@@ -88,6 +95,7 @@ void _frclean(Frame *f, Point pt, int n0, int n1) /* look for mergeable boxes */
 		_fradvance(f, &pt, &f->box[nb]);
 	}
 	f->lastlinefull = false;
-	if (pt.y >= f->r.max.y)
+	if (pt.y >= f->r.max.y) {
 		f->lastlinefull = true;
+	}
 }

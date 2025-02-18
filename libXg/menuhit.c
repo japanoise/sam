@@ -23,8 +23,9 @@ static int     fontheight() { return font->ascent + font->descent; }
  * return the rectangle, including its black edge, holding element i.
  */
 static Rectangle menurect(Rectangle r, int i) {
-	if (i < 0)
+	if (i < 0) {
 		return Rect(0, 0, 0, 0);
+	}
 	r.min.y += (fontheight() + Vspacing) * i;
 	r.max.y = r.min.y + fontheight() + Vspacing;
 	return inset(r, Border - Margin);
@@ -35,8 +36,9 @@ static Rectangle menurect(Rectangle r, int i) {
  * return the element number containing p.
  */
 static int menusel(Rectangle r, Point p) {
-	if (!ptinrect(p, r))
+	if (!ptinrect(p, r)) {
 		return -1;
+	}
 	return (p.y - r.min.y) / (fontheight() + Vspacing);
 }
 
@@ -56,11 +58,13 @@ static int menuscan(int but, Mouse *m, Rectangle menur, int lasti) {
 	while (m->buttons & (1 << (but - 1))) {
 		*m = emouse();
 		i = menusel(menur, m->xy);
-		if (i == lasti)
+		if (i == lasti) {
 			continue;
+		}
 		bitblt(&screen, r.min, &screen, r, F & ~D);
-		if (i == -1)
+		if (i == -1) {
 			return i;
+		}
 		r = menurect(menur, i);
 		bitblt(&screen, r.min, &screen, r, F & ~D);
 		lasti = i;
@@ -93,11 +97,13 @@ static void menuscrollpaint(Rectangle scrollr, int off, int nitem,
 	r.max.x = scrollr.max.x;
 	r.min.y = scrollr.min.y + (Dy(scrollr) * off) / nitem;
 	r.max.y = scrollr.min.y + (Dy(scrollr) * (off + nitemdrawn)) / nitem;
-	if (r.max.y < r.min.y + 2)
+	if (r.max.y < r.min.y + 2) {
 		r.max.y = r.min.y + 2;
+	}
 	border(&screen, r, 1, F, _bgpixel);
-	if (darkgrey)
+	if (darkgrey) {
 		texture(&screen, inset(r, 1), darkgrey, S);
+	}
 }
 
 int menuhit(int but, Mouse *m, Menu *menu) {
@@ -118,23 +124,28 @@ int menuhit(int but, Mouse *m, Menu *menu) {
 	     (item = menu->item ? menu->item[nitem] : (*menu->gen)(nitem));
 	     nitem++) {
 		i = strwidth(font, item);
-		if (i > maxwid)
+		if (i > maxwid) {
 			maxwid = i;
+		}
 	}
-	if (menu->lasthit < 0 || menu->lasthit >= nitem)
+	if (menu->lasthit < 0 || menu->lasthit >= nitem) {
 		menu->lasthit = 0;
+	}
 	screenitem = (Dy(screen.r) - 10) / (fontheight() + Vspacing);
 	if (nitem > Maxunscroll || nitem > screenitem) {
 		scrolling = true;
 		nitemdrawn = Nscroll;
-		if (nitemdrawn > screenitem)
+		if (nitemdrawn > screenitem) {
 			nitemdrawn = screenitem;
+		}
 		wid = maxwid + Gap + Scrollwid;
 		off = menu->lasthit - nitemdrawn / 2;
-		if (off < 0)
+		if (off < 0) {
 			off = 0;
-		if (off > nitem - nitemdrawn)
+		}
+		if (off > nitem - nitemdrawn) {
 			off = nitem - nitemdrawn;
+		}
 		lasti = menu->lasthit - off;
 	} else {
 		scrolling = false;
@@ -149,14 +160,18 @@ int menuhit(int but, Mouse *m, Menu *menu) {
 			lasti * (fontheight() + Vspacing) + fontheight() / 2));
 	r = raddp(r, m->xy);
 	pt = Pt(0, 0);
-	if (r.max.x > screen.r.max.x)
+	if (r.max.x > screen.r.max.x) {
 		pt.x = screen.r.max.x - r.max.x;
-	if (r.max.y > screen.r.max.y)
+	}
+	if (r.max.y > screen.r.max.y) {
 		pt.y = screen.r.max.y - r.max.y;
-	if (r.min.x < screen.r.min.x)
+	}
+	if (r.min.x < screen.r.min.x) {
 		pt.x = screen.r.min.x - r.min.x;
-	if (r.min.y < screen.r.min.y)
+	}
+	if (r.min.y < screen.r.min.y) {
 		pt.y = screen.r.min.y - r.min.y;
+	}
 	menur = raddp(r, pt);
 	textr.max.x = menur.max.x - Margin;
 	textr.min.x = textr.max.x - maxwid;
@@ -165,39 +180,46 @@ int menuhit(int but, Mouse *m, Menu *menu) {
 	if (scrolling) {
 		scrollr = inset(menur, Border);
 		scrollr.max.x = scrollr.min.x + Scrollwid;
-	} else
+	} else {
 		scrollr = Rect(0, 0, 0, 0);
+	}
 
 	b = balloc(menur, screen.ldepth);
-	if (b == 0)
+	if (b == 0) {
 		b = &screen;
+	}
 	bitblt(b, menur.min, &screen, menur, S);
 	bitblt(&screen, menur.min, &screen, menur, 0);
 	border(&screen, menur, Blackborder, F, _bgpixel);
 	r = menurect(textr, lasti);
 	cursorset(divpt(add(r.min, r.max), 2));
 	menupaint(menu, textr, off, nitemdrawn);
-	if (scrolling)
+	if (scrolling) {
 		menuscrollpaint(scrollr, off, nitem, nitemdrawn);
+	}
 	r = menurect(textr, lasti);
 	cursorset(divpt(add(r.min, r.max), 2));
 	menupaint(menu, textr, off, nitemdrawn);
-	if (scrolling)
+	if (scrolling) {
 		menuscrollpaint(scrollr, off, nitem, nitemdrawn);
+	}
 	while (m->buttons & (1 << (but - 1))) {
 		lasti = menuscan(but, m, textr, lasti);
-		if (lasti >= 0)
+		if (lasti >= 0) {
 			break;
+		}
 		while (!ptinrect(m->xy, textr) &&
 		       (m->buttons & (1 << (but - 1)))) {
 			if (scrolling && ptinrect(m->xy, scrollr)) {
 				noff = ((m->xy.y - scrollr.min.y) * nitem) /
 				       Dy(scrollr);
 				noff -= nitemdrawn / 2;
-				if (noff < 0)
+				if (noff < 0) {
 					noff = 0;
-				if (noff > nitem - nitemdrawn)
+				}
+				if (noff > nitem - nitemdrawn) {
 					noff = nitem - nitemdrawn;
+				}
 				if (noff != off) {
 					off = noff;
 					menupaint(menu, textr, off, nitemdrawn);
@@ -209,8 +231,9 @@ int menuhit(int but, Mouse *m, Menu *menu) {
 		}
 	}
 	bitblt(&screen, menur.min, b, menur, S);
-	if (b != &screen)
+	if (b != &screen) {
 		bfree(b);
+	}
 	clipr(&screen, sc);
 	if (lasti >= 0) {
 		menu->lasthit = lasti + off;

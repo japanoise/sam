@@ -18,28 +18,34 @@ Again:
 	pt1 = frptofchar(f, p1);
 	frselectf(f, pt0, pt1, F & ~D);
 	do {
-		if (f->modified) /* special hack so 8½ can frselect in parallel
-				  */
+		if (f->modified) { /* special hack so 8½ can frselect in
+				    * parallel
+				    */
 			goto Again;
+		}
 		q = frcharofpt(f, m->xy);
 		if (p1 != q) {
-			if (p0 == p1)
+			if (p0 == p1) {
 				frselectf(f, pt0, pt1, F & ~D);
+			}
 			qt = frptofchar(f, q);
-			if (p1 < q)
+			if (p1 < q) {
 				frselectf(f, pt1, qt, F & ~D);
-			else
+			} else {
 				frselectf(f, qt, pt1, F & ~D);
+			}
 			p1 = q;
 			pt1 = qt;
-			if (p0 == p1)
+			if (p0 == p1) {
 				frselectf(f, pt0, pt1, F & ~D);
+			}
 		}
 		f->modified = 0;
-		if (p0 < p1)
+		if (p0 < p1) {
 			f->p0 = p0, f->p1 = p1;
-		else
+		} else {
 			f->p0 = p1, f->p1 = p0;
+		}
 		frgetmouse();
 	} while ((m->buttons & 7) == 1);
 }
@@ -49,36 +55,43 @@ void frselectf(Frame *f, Point p0, Point p1, Fcode c) {
 	int   n;
 	Point q0, q1;
 
-	if (p0.x == f->left)
+	if (p0.x == f->left) {
 		p0.x = f->r.min.x;
-	if (p1.x == f->left)
+	}
+	if (p1.x == f->left) {
 		p1.x = f->r.min.x;
+	}
 	q0 = p0;
 	q1 = p1;
 	q0.y += f->fheight;
 	q1.y += f->fheight;
 	n = (p1.y - p0.y) / f->fheight;
-	if (f->b == 0)
+	if (f->b == 0) {
 		berror("frselectf b==0");
-	if (p0.y == f->r.max.y)
+	}
+	if (p0.y == f->r.max.y) {
 		return;
+	}
 	if (n == 0) {
 		if (p0.x == p1.x) {
-			if (p0.x == f->r.min.x)
+			if (p0.x == f->r.min.x) {
 				q1.x++;
-			else
+			} else {
 				p0.x--;
+			}
 		}
 		bitblt2(f->b, p0, f->b, Rpt(p0, q1), c, 0, f->bg);
 	} else {
-		if (p0.x >= f->r.max.x)
+		if (p0.x >= f->r.max.x) {
 			p0.x = f->r.max.x - 1;
+		}
 		bitblt2(f->b, p0, f->b, Rect(p0.x, p0.y, f->r.max.x, q0.y), c,
 			0, f->bg);
-		if (n > 1)
+		if (n > 1) {
 			bitblt2(f->b, Pt(f->r.min.x, q0.y), f->b,
 				Rect(f->r.min.x, q0.y, f->r.max.x, p1.y), c, 0,
 				f->bg);
+		}
 		bitblt2(f->b, Pt(f->r.min.x, p1.y), f->b,
 			Rect(f->r.min.x, p1.y, q1.x, q1.y), c, 0, f->bg);
 	}

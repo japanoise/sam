@@ -18,31 +18,37 @@ int	       plan9(File *f, int type, String *s, int nest) {
 	   int	   retcode;
 	   int	   pipe1[2], pipe2[2];
 
-	   if (s->s[0] == 0 && plan9cmd.s[0] == 0)
+	   if (s->s[0] == 0 && plan9cmd.s[0] == 0) {
 		   error(Enocmd);
-	   else if (s->s[0])
+	   } else if (s->s[0]) {
 		   Strduplstr(&plan9cmd, s);
-	   if (downloaded)
+	   }
+	   if (downloaded) {
 		   samerr(errfile);
-	   else
+	   } else {
 		   strcpy(errfile, "/dev/tty");
-	   if (type != '!' && pipe(pipe1) == -1)
+	   }
+	   if (type != '!' && pipe(pipe1) == -1) {
 		   error(Epipe);
-	   if (type == '|')
+	   }
+	   if (type == '|') {
 		   snarf(f, addr.r.p1, addr.r.p2, plan9buf, true);
-	   if (downloaded)
+	   }
+	   if (downloaded) {
 		   remove(errfile);
+	   }
 	   if ((pid = fork()) == 0) {
 		   if (downloaded) { /* also put nasty fd's into errfile */
 			   fd = creat(errfile, 0600L);
-			   if (fd < 0)
+			   if (fd < 0) {
 				   fd = creat("/dev/null", 0600L);
+			   }
 			   dup2(fd, 2);
 			   close(fd);
 			   /* 2 now points at err file */
-			   if (type == '>')
+			   if (type == '>') {
 				   dup2(2, 1);
-			   else if (type == '!') {
+			   } else if (type == '!') {
 				   dup2(2, 1);
 				   fd = open("/dev/null", 0);
 				   dup2(fd, 0);
@@ -50,16 +56,18 @@ int	       plan9(File *f, int type, String *s, int nest) {
 			   }
 		   }
 		   if (type != '!') {
-			   if (type == '<' || type == '|')
+			   if (type == '<' || type == '|') {
 				   dup2(pipe1[1], 1);
-			   else if (type == '>')
+			   } else if (type == '>') {
 				   dup2(pipe1[0], 0);
+			   }
 			   close(pipe1[0]);
 			   close(pipe1[1]);
 		   }
 		   if (type == '|') {
-			   if (pipe(pipe2) == -1)
+			   if (pipe(pipe2) == -1) {
 				   exit(EXIT_FAILURE);
+			   }
 			   if ((pid = fork()) == 0) {
 				   /*
 				    * It's ok if we get SIGPIPE here
@@ -72,8 +80,9 @@ int	       plan9(File *f, int type, String *s, int nest) {
 					   for (l = 0; l < plan9buf->nrunes;
 						l += m) {
 						   m = plan9buf->nrunes - l;
-						   if (m > BLOCKSIZE - 1)
+						   if (m > BLOCKSIZE - 1) {
 							   m = BLOCKSIZE - 1;
+						   }
 						   Bread(plan9buf, genbuf, m, l);
 						   genbuf[m] = 0;
 						   c = Strtoc(
@@ -99,12 +108,14 @@ int	       plan9(File *f, int type, String *s, int nest) {
 		   execl(shpath, sh, "-c", Strtoc(&plan9cmd), NULL);
 		   exit(EXIT_FAILURE);
 	   }
-	   if (pid == -1)
+	   if (pid == -1) {
 		   error(Efork);
+	   }
 	   if (type == '<' || type == '|') {
 		   bool nulls;
-		   if (downloaded && addr.r.p1 != addr.r.p2)
+		   if (downloaded && addr.r.p1 != addr.r.p2) {
 			   outTl(Hsnarflen, addr.r.p2 - addr.r.p1);
+		   }
 		   snarf(f, addr.r.p1, addr.r.p2, snarfbuf, false);
 		   Fdelete(f, addr.r.p1, addr.r.p2);
 		   close(pipe1[1]);
@@ -122,13 +133,17 @@ int	       plan9(File *f, int type, String *s, int nest) {
 		   closeio((Posn)-1);
 	   }
 	   retcode = waitfor(pid);
-	   if (type == '|' || type == '<')
-		   if (retcode != 0)
+	   if (type == '|' || type == '<') {
+		   if (retcode != 0) {
 			   warn(Wbadstatus);
-	   if (downloaded)
+		   }
+	   }
+	   if (downloaded) {
 		   checkerrs();
-	   if (!nest)
+	   }
+	   if (!nest) {
 		   dprint(L"!\n");
+	   }
 	   return retcode;
 }
 
@@ -142,16 +157,20 @@ void checkerrs(void) {
 		if ((f = open((char *)errfile, 0)) != -1) {
 			if ((n = read(f, buf, sizeof buf - 1)) > 0) {
 				for (nl = 0, p = buf; nl < 3 && p < &buf[n];
-				     p++)
-					if (*p == '\n')
+				     p++) {
+					if (*p == '\n') {
 						nl++;
+					}
+				}
 				*p = 0;
 				dprint(L"%s", buf);
-				if (p - buf < l - 1)
+				if (p - buf < l - 1) {
 					dprint(L"(sam: more in %s)\n", errfile);
+				}
 			}
 			close(f);
 		}
-	} else
+	} else {
 		remove((char *)errfile);
+	}
 }

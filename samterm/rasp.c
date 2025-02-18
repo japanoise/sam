@@ -32,8 +32,9 @@ Section *rsinsert(Rasp *r, Section *s) /* insert before s */
 		t->next = s;
 	} else {
 		u = r->sect;
-		if (u == 0)
+		if (u == 0) {
 			panic("rsinsert 1");
+		}
 		do {
 			if (u->next == s) {
 				t->next = s;
@@ -51,31 +52,35 @@ Return:
 void rsdelete(Rasp *r, Section *s) {
 	Section *t;
 
-	if (s == 0)
+	if (s == 0) {
 		panic("rsdelete");
+	}
 	if (r->sect == s) {
 		r->sect = s->next;
 		goto Free;
 	}
-	for (t = r->sect; t; t = t->next)
+	for (t = r->sect; t; t = t->next) {
 		if (t->next == s) {
 			t->next = s->next;
 		Free:
-			if (s->text)
+			if (s->text) {
 				free(s->text);
+			}
 			free(s);
 			return;
 		}
+	}
 	panic("rsdelete 2");
 }
 
 void splitsect(Rasp *r, Section *s, int64_t n0) {
-	if (s == 0)
+	if (s == 0) {
 		panic("splitsect");
+	}
 	rsinsert(r, s->next);
-	if (s->text == 0)
+	if (s->text == 0) {
 		s->next->text = 0;
-	else {
+	} else {
 		s->next->text = alloc(RUNESIZE * (TBLOCKSIZE + 1));
 		Strcpy(s->next->text, s->text + n0);
 		s->text[n0] = 0;
@@ -88,10 +93,12 @@ Section *
 findsect(Rasp *r, Section *s, int64_t p,
 	 int64_t q) /* find sect containing q and put q on a sect boundary */
 {
-	if (s == 0 && p != q)
+	if (s == 0 && p != q) {
 		panic("findsect");
-	for (; s && p + s->nrunes <= q; s = s->next)
+	}
+	for (; s && p + s->nrunes <= q; s = s->next) {
 		p += s->nrunes;
+	}
 	if (p != q) {
 		splitsect(r, s, q - p);
 		s = s->next;
@@ -124,8 +131,9 @@ void rdata(Rasp *r, int64_t p0, int64_t p1, wchar_t *cp) {
 	t = findsect(r, s, p0, p1);
 	for (; s != t; s = ns) {
 		ns = s->next;
-		if (s->text)
+		if (s->text) {
 			panic("rdata");
+		}
 		rsdelete(r, s);
 	}
 	p1 -= p0;
@@ -139,16 +147,18 @@ void rdata(Rasp *r, int64_t p0, int64_t p1, wchar_t *cp) {
 void rclean(Rasp *r) {
 	Section *s;
 
-	for (s = r->sect; s; s = s->next)
+	for (s = r->sect; s; s = s->next) {
 		while (s->next && (s->text != 0) == (s->next->text != 0)) {
 			if (s->text) {
-				if (s->nrunes + s->next->nrunes > TBLOCKSIZE)
+				if (s->nrunes + s->next->nrunes > TBLOCKSIZE) {
 					break;
+				}
 				Strcpy(s->text + s->nrunes, s->next->text);
 			}
 			s->nrunes += s->next->nrunes;
 			rsdelete(r, s->next);
 		}
+	}
 }
 
 void Strcpy(wchar_t *to, wchar_t *from) {
@@ -165,8 +175,9 @@ wchar_t *rload(Rasp *r, uint64_t p0, uint64_t p1, uint64_t *nrp) {
 	nb = 0;
 	Strgrow(&scratch, &nscralloc, p1 - p0 + 1);
 	scratch[0] = 0;
-	for (p = 0, s = r->sect; s && p + s->nrunes <= p0; s = s->next)
+	for (p = 0, s = r->sect; s && p + s->nrunes <= p0; s = s->next) {
 		p += s->nrunes;
+	}
 	while (p < p1 && s) {
 		/*
 		 * Subtle and important.  If we are preparing to handle an
@@ -176,8 +187,9 @@ wchar_t *rload(Rasp *r, uint64_t p0, uint64_t p1, uint64_t *nrp) {
 		 */
 		if (s->text) {
 			n = s->nrunes - (p0 - p);
-			if (n > p1 - p0) /* all in this section */
+			if (n > p1 - p0) { /* all in this section */
 				n = p1 - p0;
+			}
 			memmove(scratch + nb, s->text + (p0 - p), n * RUNESIZE);
 			nb += n;
 			scratch[nb] = 0;
@@ -186,8 +198,9 @@ wchar_t *rload(Rasp *r, uint64_t p0, uint64_t p1, uint64_t *nrp) {
 		p0 = p;
 		s = s->next;
 	}
-	if (nrp)
+	if (nrp) {
 		*nrp = nb;
+	}
 	return scratch;
 }
 
@@ -196,13 +209,15 @@ int rmissing(Rasp *r, uint64_t p0, uint64_t p1) {
 	int64_t	 p;
 	int	 n, nm = 0;
 
-	for (p = 0, s = r->sect; s && p + s->nrunes <= p0; s = s->next)
+	for (p = 0, s = r->sect; s && p + s->nrunes <= p0; s = s->next) {
 		p += s->nrunes;
+	}
 	while (p < p1 && s) {
 		if (s->text == 0) {
 			n = s->nrunes - (p0 - p);
-			if (n > p1 - p0) /* all in this section */
+			if (n > p1 - p0) { /* all in this section */
 				n = p1 - p0;
+			}
 			nm += n;
 		}
 		p += s->nrunes;
@@ -217,12 +232,14 @@ int rcontig(Rasp *r, uint64_t p0, uint64_t p1, bool text) {
 	int64_t	 p, n;
 	int	 np = 0;
 
-	for (p = 0, s = r->sect; s && p + s->nrunes <= p0; s = s->next)
+	for (p = 0, s = r->sect; s && p + s->nrunes <= p0; s = s->next) {
 		p += s->nrunes;
+	}
 	while (p < p1 && s && (text ? (s->text != 0) : (s->text == 0))) {
 		n = s->nrunes - (p0 - p);
-		if (n > p1 - p0) /* all in this section */
+		if (n > p1 - p0) { /* all in this section */
 			n = p1 - p0;
+		}
 		np += n;
 		p += s->nrunes;
 		p0 = p;
@@ -234,8 +251,9 @@ int rcontig(Rasp *r, uint64_t p0, uint64_t p1, bool text) {
 void Strgrow(wchar_t **s, int64_t *n,
 	     int want) /* can always toss the old data when called */
 {
-	if (*n >= want)
+	if (*n >= want) {
 		return;
+	}
 	free(*s);
 	*s = alloc(RUNESIZE * want);
 	*n = want;

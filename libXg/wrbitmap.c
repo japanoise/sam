@@ -18,24 +18,28 @@ void wrbitmap(Bitmap *b, int miny, int maxy, unsigned char *data) {
 	outld = (b->ldepth == 0) ? 0 : screen.ldepth;
 	px = 1 << (3 - outld); /* pixels per byte */
 	/* set l to number of bytes of data per scan line */
-	if (b->r.min.x >= 0)
+	if (b->r.min.x >= 0) {
 		offset = b->r.min.x % px;
-	else
+	} else {
 		offset = px - b->r.min.x % px;
+	}
 	l = (-b->r.min.x + px - 1) / px;
-	if (b->r.max.x >= 0)
+	if (b->r.max.x >= 0) {
 		l += (b->r.max.x + px - 1) / px;
-	else
+	} else {
 		l -= b->r.max.x / px;
+	}
 	l *= h;
 
 	tdata = (char *)malloc(l);
-	if (tdata == (char *)0)
+	if (tdata == (char *)0) {
 		berror("wrbitmap malloc");
-	if (inld == outld)
+	}
+	if (inld == outld) {
 		memcpy((void *)tdata, (void *)data, l);
-	else
+	} else {
 		_ldconvert((char *)data, inld, tdata, outld, w, h);
+	}
 
 	im = XCreateImage(_dpy, 0, 1 << outld, ZPixmap, 0, tdata, w, h, 8, 0);
 

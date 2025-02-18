@@ -21,10 +21,12 @@ void checkqid(File *f) {
 	w = whichmenu(f);
 	for (i = 1; i < file.nused; i++) {
 		g = file.filepptr[i];
-		if (w == i)
+		if (w == i) {
 			continue;
-		if (f->dev == g->dev && f->qid == g->qid)
+		}
+		if (f->dev == g->dev && f->qid == g->qid) {
 			warn_SS(Wdupfile, &f->name, &g->name);
+		}
 	}
 }
 
@@ -40,34 +42,40 @@ void writef(File *f) {
 	samename = Strcmp(&genstr, &f->name) == 0;
 	name = Strtoc(&f->name);
 	i = statfile(name, &dev, &qid, &mtime, 0, 0);
-	if (i == -1)
+	if (i == -1) {
 		newfile++;
-	else if (samename &&
-		 (f->dev != dev || f->qid != qid || f->date < mtime)) {
+	} else if (samename &&
+		   (f->dev != dev || f->qid != qid || f->date < mtime)) {
 		f->dev = dev;
 		f->qid = qid;
 		f->date = mtime;
 		warn_S(Wdate, &genstr);
 		return;
 	}
-	if (genc)
+	if (genc) {
 		free(genc);
+	}
 	genc = Strtoc(&genstr);
-	if ((io = fopen(genc, "w+")) == NULL)
+	if ((io = fopen(genc, "w+")) == NULL) {
 		error_s(Ecreate, genc);
+	}
 	dprint(L"%s: ", genc);
 	if (statfd(fileno(io), 0, 0, 0, &length, &appendonly) > 0 &&
-	    appendonly && length > 0)
+	    appendonly && length > 0) {
 		error(Eappend);
+	}
 	n = writeio(f);
-	if (f->name.s[0] == 0 || samename)
+	if (f->name.s[0] == 0 || samename) {
 		state(f,
 		      addr.r.p1 == 0 && addr.r.p2 == f->nrunes ? Clean : Dirty);
-	if (newfile)
+	}
+	if (newfile) {
 		dprint(L"(new file) ");
+	}
 	if (addr.r.p2 > 0 && Fchars(f, &c, addr.r.p2 - 1, addr.r.p2) &&
-	    c != '\n')
+	    c != '\n') {
 		warn(Wnotnewline);
+	}
 	closeio(n);
 	if (f->name.s[0] == 0 || samename) {
 		if (statfile(name, &dev, &qid, &mtime, 0, 0) > 0) {
@@ -97,12 +105,14 @@ Posn readio(File *f, bool *nulls, bool setdate) {
 					      advance here... */
 				buf[0] = UNICODE_REPLACEMENT_CHAR;
 				errno = 0;
-			} else
+			} else {
 				break;
+			}
 		}
 
-		if (buf[0] == 0)
+		if (buf[0] == 0) {
 			*nulls = true;
+		}
 
 		nt++;
 		Finsert(f, tmprstr(buf, 1), addr.r.p2);
@@ -122,8 +132,9 @@ Posn readio(File *f, bool *nulls, bool setdate) {
 }
 
 void flushio(void) {
-	if (io)
+	if (io) {
 		fflush(io);
+	}
 }
 
 Posn writeio(File *f) {
@@ -132,20 +143,24 @@ Posn writeio(File *f) {
 	char *c;
 
 	while (p < addr.r.p2) {
-		if (addr.r.p2 - p > BLOCKSIZE)
+		if (addr.r.p2 - p > BLOCKSIZE) {
 			n = BLOCKSIZE;
-		else
+		} else {
 			n = addr.r.p2 - p;
-		if (Fchars(f, genbuf, p, p + n) != n)
+		}
+		if (Fchars(f, genbuf, p, p + n) != n) {
 			panic("writef read");
+		}
 		c = Strtoc(tmprstr(genbuf, n));
 		m = strlen(c);
-		if (m < n)
+		if (m < n) {
 			panic("corrupted file");
+		}
 		if (Write(io, c, m) != m) {
 			free(c);
-			if (p > 0)
+			if (p > 0) {
 				p += n;
+			}
 			break;
 		}
 		free(c);
@@ -157,8 +172,9 @@ Posn writeio(File *f) {
 void closeio(Posn p) {
 	fclose(io);
 	io = NULL;
-	if (p >= 0)
+	if (p >= 0) {
 		dprint(L"#%lu\n", p);
+	}
 }
 
 char exname[PATH_MAX + 1];
@@ -177,17 +193,19 @@ void bootterm(char *machine) {
 		dup2(remotefd1, 1);
 		close(remotefd0);
 		close(remotefd1);
-		if (exfd >= 0)
+		if (exfd >= 0) {
 			execlp(samterm, samterm, "-r", machine, "-f", fd, "-n",
 			       exname, NULL);
-		else
+		} else {
 			execlp(samterm, samterm, "-r", machine, NULL);
+		}
 		perror("couldn't exec samterm");
 		exit(EXIT_FAILURE);
 	}
 
-	if (pipe(ph2t) == -1 || pipe(pt2h) == -1)
+	if (pipe(ph2t) == -1 || pipe(pt2h) == -1) {
 		panic("pipe");
+	}
 
 	machine = machine ? machine : "localhost";
 	switch (fork()) {
@@ -198,11 +216,12 @@ void bootterm(char *machine) {
 		close(ph2t[1]);
 		close(pt2h[0]);
 		close(pt2h[1]);
-		if (exfd >= 0)
+		if (exfd >= 0) {
 			execlp(samterm, samterm, "-r", machine, "-f", fd, "-n",
 			       exname, NULL);
-		else
+		} else {
 			execlp(samterm, samterm, "-r", machine, NULL);
+		}
 		perror("couldn't exec samterm");
 		exit(EXIT_FAILURE);
 		break;
@@ -286,11 +305,13 @@ bool canlocksocket(const char *machine) {
 	snprintf(lockpath, PATH_MAX, "%s/.sam.%s.lock", path,
 		 machine ? machine : "localhost");
 	lockfd = open(lockpath, O_CREAT | O_RDWR, 0644);
-	if (lockfd < 0)
+	if (lockfd < 0) {
 		return false;
+	}
 
-	if (lockf(lockfd, F_TLOCK, 0) != 0)
+	if (lockf(lockfd, F_TLOCK, 0) != 0) {
 		return close(lockfd), false;
+	}
 
 	return true;
 }
@@ -332,14 +353,17 @@ void opensocket(const char *machine) {
 }
 
 void startup(char *machine, bool rflag, bool trylock) {
-	if (!rflag && trylock)
+	if (!rflag && trylock) {
 		opensocket(machine);
+	}
 
-	if (machine)
+	if (machine) {
 		connectto(machine);
+	}
 
-	if (!rflag)
+	if (!rflag) {
 		bootterm(machine);
+	}
 
 	downloaded = true;
 	outTs(Hversion, VERSION);

@@ -71,8 +71,9 @@ static Namemapping modmapping[] = {
 
 static int lookupmapping(const char *n, Namemapping *m) {
 	for (Namemapping *k = m; k->name != NULL; k++) {
-		if (strcasecmp(k->name, n) == 0)
+		if (strcasecmp(k->name, n) == 0) {
 			return k->value;
+		}
 	}
 
 	return -1;
@@ -156,9 +157,10 @@ static Defaultbinding defaultbindings[] = {
     {0, 0, Kend, 0, NULL}};
 
 void installdefaultbindings(void) {
-	for (Defaultbinding *b = defaultbindings; b->kind != Kend; b++)
+	for (Defaultbinding *b = defaultbindings; b->kind != Kend; b++) {
 		installbinding(b->modifiers, b->keysym, b->kind, b->command,
 			       b->arg);
+	}
 }
 
 typedef struct Defaultchord Defaultchord;
@@ -182,9 +184,10 @@ static Defaultchord defaultchords[] = {{B1, B1 | B2, Ccut, Tcurrent, NULL},
 				       {0, 0, Kend, 0, NULL}};
 
 void		    installdefaultchords(void) {
-	       for (Defaultchord *c = defaultchords; c->state1 != 0; c++)
+	       for (Defaultchord *c = defaultchords; c->state1 != 0; c++) {
 		       installchord(c->state1, c->state2, c->command, c->target,
 					    c->arg);
+	       }
 }
 
 static int statetomask(const char *n, Namemapping *m) {
@@ -192,8 +195,9 @@ static int statetomask(const char *n, Namemapping *m) {
 	for (int i = 0; n[i] != 0; i++) {
 		char s[2] = {n[i], 0};
 		int  v = lookupmapping(s, m);
-		if (v < 0)
+		if (v < 0) {
 			return -1;
+		}
 		r |= v;
 	}
 
@@ -213,8 +217,9 @@ static KeySym nametokeysym(const char *n) {
 
 static int dirfollowfocus(const char *s1, const char *s2, const char *s3,
 			  const char *s4, const char *s5) {
-	if (strcasecmp(s1, "true") != 0 && strcasecmp(s1, "false") != 0)
+	if (strcasecmp(s1, "true") != 0 && strcasecmp(s1, "false") != 0) {
 		return -1;
+	}
 
 	followfocus = (strcasecmp(s1, "true") == 0);
 	return 0;
@@ -224,14 +229,15 @@ static int dirsnarfselection(const char *s1, const char *s2, const char *s3,
 			     const char *s4, const char *s5) {
 	extern const char *clipatom;
 
-	if (strcasecmp(s1, "primary") == 0)
+	if (strcasecmp(s1, "primary") == 0) {
 		clipatom = "PRIMARY";
-	else if (strcasecmp(s1, "secondary") == 0)
+	} else if (strcasecmp(s1, "secondary") == 0) {
 		clipatom = "SECONDARY";
-	else if (strcasecmp(s1, "clipboard") == 0)
+	} else if (strcasecmp(s1, "clipboard") == 0) {
 		clipatom = "CLIPBOARD";
-	else
+	} else {
 		return -1;
+	}
 
 	return 0;
 }
@@ -250,8 +256,9 @@ static int dirraw(const char *s1, const char *s2, const char *s3,
 
 static int dirrawliteral(const char *s1, const char *s2, const char *s3,
 			 const char *s4, const char *s5) {
-	if (strlen(s3) != 1)
+	if (strlen(s3) != 1) {
 		return -1;
+	}
 	return installbinding(modtomask(s1), nametokeysym(s2), Kraw, s3[0],
 			      NULL);
 }
@@ -274,8 +281,9 @@ static int dirunchord(const char *s1, const char *s2, const char *s3,
 
 static int dirforeground(const char *s1, const char *s2, const char *s3,
 			 const char *s4, const char *s5) {
-	if (strlen(s1) == 0)
+	if (strlen(s1) == 0) {
 		return -1;
+	}
 
 	strncpy(foregroundspec, s1, sizeof(foregroundspec) - 1);
 	return 0;
@@ -283,8 +291,9 @@ static int dirforeground(const char *s1, const char *s2, const char *s3,
 
 static int dirbackground(const char *s1, const char *s2, const char *s3,
 			 const char *s4, const char *s5) {
-	if (strlen(s1) == 0)
+	if (strlen(s1) == 0) {
 		return -1;
+	}
 
 	strncpy(backgroundspec, s1, sizeof(backgroundspec) - 1);
 	return 0;
@@ -292,8 +301,9 @@ static int dirbackground(const char *s1, const char *s2, const char *s3,
 
 static int dirborder(const char *s1, const char *s2, const char *s3,
 		     const char *s4, const char *s5) {
-	if (strlen(s1) == 0)
+	if (strlen(s1) == 0) {
 		return -1;
+	}
 
 	strncpy(borderspec, s1, sizeof(borderspec) - 1);
 	return 0;
@@ -301,8 +311,9 @@ static int dirborder(const char *s1, const char *s2, const char *s3,
 
 static int dirfont(const char *s1, const char *s2, const char *s3,
 		   const char *s4, const char *s5) {
-	if (strlen(s1) == 0)
+	if (strlen(s1) == 0) {
 		return -1;
+	}
 
 	strncpy(fontspec, s1, sizeof(fontspec) - 1);
 	return 0;
@@ -311,8 +322,9 @@ static int dirfont(const char *s1, const char *s2, const char *s3,
 static int dirtabs(const char *s1, const char *s2, const char *s3,
 		   const char *s4, const char *s5) {
 	int i = atoi(s1);
-	if (i <= 0 || i > 12)
+	if (i <= 0 || i > 12) {
 		return -1;
+	}
 
 	tabwidth = i;
 	return 0;
@@ -320,8 +332,9 @@ static int dirtabs(const char *s1, const char *s2, const char *s3,
 
 static int direxpandtabs(const char *s1, const char *s2, const char *s3,
 			 const char *s4, const char *s5) {
-	if (strcasecmp(s1, "true") != 0 && strcasecmp(s1, "false") != 0)
+	if (strcasecmp(s1, "true") != 0 && strcasecmp(s1, "false") != 0) {
 		return -1;
+	}
 
 	expandtabs = (strcasecmp(s1, "true") == 0);
 	return 0;
@@ -329,8 +342,9 @@ static int direxpandtabs(const char *s1, const char *s2, const char *s3,
 
 static int dirautoindent(const char *s1, const char *s2, const char *s3,
 			 const char *s4, const char *s5) {
-	if (strcasecmp(s1, "true") != 0 && strcasecmp(s1, "false") != 0)
+	if (strcasecmp(s1, "true") != 0 && strcasecmp(s1, "false") != 0) {
 		return -1;
+	}
 
 	autoindent = (strcasecmp(s1, "true") == 0);
 	return 0;
@@ -388,8 +402,9 @@ void loadrcfile(FILE *f) {
 		bool found = false;
 
 		ln++;
-		if (r == 0)
+		if (r == 0) {
 			continue;
+		}
 
 		for (Directive *d = directives; d->format && !found; d++) {
 			if (sscanf(l, d->format, s1, s2, s3, s4, s5) ==
@@ -399,12 +414,14 @@ void loadrcfile(FILE *f) {
 			}
 		}
 
-		if (!found)
+		if (!found) {
 			fprintf(stderr, "invalid rc line %zd\n", ln);
+		}
 
-		if (rc != 0)
+		if (rc != 0) {
 			fprintf(stderr,
 				"invalid chord/binding on rc line %zd\n", ln);
+		}
 	}
 
 	free(l);

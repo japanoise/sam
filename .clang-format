@@ -9,6 +9,7 @@ UseTab: Always
 
 AlignConsecutiveDeclarations: AcrossEmptyLines
 BreakBeforeBraces: Attach
+InsertBraces: true
 SeparateDefinitionBlocks: Always
 SortIncludes: Never
 SpaceBeforeParens: ControlStatementsExceptForEachMacros

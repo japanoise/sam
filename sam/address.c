@@ -36,8 +36,9 @@ Address address(Addr *ap, Address a, int sign) {
 
 		case '?':
 			sign = -sign;
-			if (sign == 0)
+			if (sign == 0) {
 				sign = -1;
+			}
 			/* fall through */
 		case '/':
 			nextmatch(f, ap->are, sign >= 0 ? a.r.p2 : a.r.p1,
@@ -48,8 +49,9 @@ Address address(Addr *ap, Address a, int sign) {
 		case '"':
 			a = matchfile(ap->are)->dot;
 			f = a.f;
-			if (f->state == Unread)
+			if (f->state == Unread) {
 				load(f);
+			}
 			break;
 
 		case '*':
@@ -58,33 +60,39 @@ Address address(Addr *ap, Address a, int sign) {
 
 		case ',':
 		case ';':
-			if (ap->left)
+			if (ap->left) {
 				a1 = address(ap->left, a, 0);
-			else
+			} else {
 				a1.f = a.f, a1.r.p1 = a1.r.p2 = 0;
+			}
 			if (ap->type == ';') {
 				f = a1.f;
 				f->dot = a = a1;
 			}
-			if (ap->next)
+			if (ap->next) {
 				a2 = address(ap->next, a, 0);
-			else
+			} else {
 				a2.f = a.f, a2.r.p1 = a2.r.p2 = f->nrunes;
-			if (a1.f != a2.f)
+			}
+			if (a1.f != a2.f) {
 				error(Eorder);
+			}
 			a.f = a1.f, a.r.p1 = a1.r.p1, a.r.p2 = a2.r.p2;
-			if (a.r.p2 < a.r.p1)
+			if (a.r.p2 < a.r.p1) {
 				error(Eorder);
+			}
 			return a;
 
 		case '+':
 		case '-':
 			sign = 1;
-			if (ap->type == '-')
+			if (ap->type == '-') {
 				sign = -1;
+			}
 			if (ap->next == 0 || ap->next->type == '+' ||
-			    ap->next->type == '-')
+			    ap->next->type == '-') {
 				a = lineaddr(1L, a, sign);
+			}
 			break;
 		default:
 			panic("address");
@@ -97,22 +105,28 @@ Address address(Addr *ap, Address a, int sign) {
 void nextmatch(File *f, String *r, Posn p, int sign) {
 	compile(r);
 	if (sign >= 0) {
-		if (!execute(f, p, INFINITY))
+		if (!execute(f, p, INFINITY)) {
 			error(Esearch);
+		}
 		if (sel.p[0].p1 == sel.p[0].p2 && sel.p[0].p1 == p) {
-			if (++p > f->nrunes)
+			if (++p > f->nrunes) {
 				p = 0;
-			if (!execute(f, p, INFINITY))
+			}
+			if (!execute(f, p, INFINITY)) {
 				panic("address");
+			}
 		}
 	} else {
-		if (!bexecute(f, p))
+		if (!bexecute(f, p)) {
 			error(Esearch);
+		}
 		if (sel.p[0].p1 == sel.p[0].p2 && sel.p[0].p2 == p) {
-			if (--p < 0)
+			if (--p < 0) {
 				p = f->nrunes;
-			if (!bexecute(f, p))
+			}
+			if (!bexecute(f, p)) {
 				panic("address");
+			}
 		}
 	}
 }
@@ -124,16 +138,19 @@ File *matchfile(String *r) {
 
 	for (i = 0; i < file.nused; i++) {
 		f = file.filepptr[i];
-		if (f == cmd)
+		if (f == cmd) {
 			continue;
+		}
 		if (filematch(f, r)) {
-			if (match)
+			if (match) {
 				error(Emanyfiles);
+			}
 			match = f;
 		}
 	}
-	if (!match)
+	if (!match) {
 		error(Efsearch);
+	}
 	return match;
 }
 
@@ -149,8 +166,9 @@ int filematch(File *f, String *r) {
 	Strduplstr(&genstr, t);
 	freetmpstr(t);
 	/* A little dirty... */
-	if (menu == 0)
+	if (menu == 0) {
 		(menu = Fopen())->state = Clean;
+	}
 	Bdelete(menu->buf, 0, menu->buf->nrunes);
 	Binsert(menu->buf, &genstr, 0);
 	menu->nrunes = menu->buf->nrunes;
@@ -159,14 +177,16 @@ int filematch(File *f, String *r) {
 }
 
 Address charaddr(Posn l, Address addr, int sign) {
-	if (sign == 0)
+	if (sign == 0) {
 		addr.r.p1 = addr.r.p2 = l;
-	else if (sign < 0)
+	} else if (sign < 0) {
 		addr.r.p2 = addr.r.p1 -= l;
-	else if (sign > 0)
+	} else if (sign > 0) {
 		addr.r.p1 = addr.r.p2 += l;
-	if (addr.r.p1 < 0 || addr.r.p2 > addr.f->nrunes)
+	}
+	if (addr.r.p1 < 0 || addr.r.p2 > addr.f->nrunes) {
 		error(Erange);
+	}
 	return addr;
 }
 
@@ -195,10 +215,11 @@ Address lineaddr(Posn l, Address addr, int sign) {
 			}
 			for (; n < l;) {
 				c = Fgetc(f);
-				if (c == -1)
+				if (c == -1) {
 					error(Erange);
-				else if (c == '\n')
+				} else if (c == '\n') {
 					n++;
+				}
 			}
 			a.r.p1 = f->getcp;
 		}
@@ -208,29 +229,32 @@ Address lineaddr(Posn l, Address addr, int sign) {
 		a.r.p2 = f->getcp;
 	} else {
 		Fbgetcset(f, addr.r.p1);
-		if (l == 0)
+		if (l == 0) {
 			a.r.p2 = addr.r.p1;
-		else {
+		} else {
 			c = 0;
 			for (n = 0; n < l;) { /* always runs once */
 				c = Fbgetc(f);
-				if (c == '\n')
+				if (c == '\n') {
 					n++;
-				else if (c == -1) {
-					if (++n != l)
+				} else if (c == -1) {
+					if (++n != l) {
 						error(Erange);
+					}
 				}
 			}
 			a.r.p2 = f->getcp;
-			if (c == '\n')
+			if (c == '\n') {
 				a.r.p2++; /* lines start after a newline */
+			}
 		}
 		do
 			;
 		while ((c = Fbgetc(f)) != '\n' && c != -1);
 		a.r.p1 = f->getcp;
-		if (c == '\n')
+		if (c == '\n') {
 			a.r.p1++; /* lines start after a newline */
+		}
 	}
 	return a;
 }

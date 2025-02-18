@@ -29,8 +29,9 @@ void flnew(Flayer *l, wchar_t *(*fn)(Flayer *, int64_t, uint64_t *), int u0,
 	if (nllist == nlalloc) {
 		nlalloc += DELTA;
 		llist = realloc(llist, nlalloc * sizeof(Flayer **));
-		if (llist == 0)
+		if (llist == 0) {
 			panic("flnew");
+		}
 	}
 	l->textfn = fn;
 	l->user0 = u0;
@@ -62,12 +63,13 @@ void flinit(Flayer *l, Rectangle r, XftFont *ft, uint64_t bg) {
 }
 
 void flclose(Flayer *l) {
-	if (l->visible == All)
+	if (l->visible == All) {
 		bitblt2(&screen, l->entire.min, &screen, l->entire, 0, _bgpixel,
 			_bgpixel);
-	else if (l->visible == Some) {
-		if (l->f.b == 0)
+	} else if (l->visible == Some) {
+		if (l->f.b == 0) {
 			l->f.b = balloc(l->entire, screen.ldepth);
+		}
 		if (l->f.b) {
 			bitblt2(l->f.b, l->entire.min, l->f.b, l->entire, 0,
 				_bgpixel, _bgpixel);
@@ -76,8 +78,9 @@ void flclose(Flayer *l) {
 	}
 	frclear(&l->f);
 	lldelete(l);
-	if (l->f.b && l->visible != All)
+	if (l->f.b && l->visible != All) {
 		bfree(l->f.b);
+	}
 	l->textfn = 0;
 	newvisibilities(1);
 }
@@ -86,19 +89,23 @@ void flborder(Flayer *l, bool wide) {
 	if (flprepare(l)) {
 		border(l->f.b, l->entire, FLMARGIN, 0, l->bg);
 		border(l->f.b, l->entire, wide ? FLMARGIN : 1, F & ~D, l->bg);
-		if (l->visible == Some)
+		if (l->visible == Some) {
 			flrefresh(l, l->entire, 0);
+		}
 	}
 }
 
 Flayer *flwhich(Point p) {
 	int i;
 
-	if (p.x == 0 && p.y == 0)
+	if (p.x == 0 && p.y == 0) {
 		return nllist ? llist[0] : 0;
-	for (i = 0; i < nllist; i++)
-		if (ptinrect(p, llist[i]->entire))
+	}
+	for (i = 0; i < nllist; i++) {
+		if (ptinrect(p, llist[i]->entire)) {
 			return llist[i];
+		}
+	}
 	return 0;
 }
 
@@ -107,8 +114,9 @@ void flupfront(Flayer *l) {
 
 	lldelete(l);
 	llinsert(l);
-	if (v != All)
+	if (v != All) {
 		newvisibilities(0);
+	}
 }
 
 void newvisibilities(int redraw)
@@ -126,8 +134,9 @@ void newvisibilities(int redraw)
 #define V(a, b) (((a) << 2) | ((b)))
 		switch (V(ov, l->visible)) {
 		case V(Some, None):
-			if (l->f.b)
+			if (l->f.b) {
 				bfree(l->f.b);
+			}
 		case V(All, None):
 		case V(All, Some):
 			l->f.b = 0;
@@ -135,9 +144,10 @@ void newvisibilities(int redraw)
 			break;
 
 		case V(Some, Some):
-			if (l->f.b == 0 && redraw)
+			if (l->f.b == 0 && redraw) {
 			case V(None, Some):
 				flprepare(l);
+			}
 			if (l->f.b && redraw) {
 				flrefresh(l, l->entire, 0);
 				bfree(l->f.b);
@@ -160,15 +170,17 @@ void newvisibilities(int redraw)
 			flprepare(l);
 			break;
 		}
-		if (ov == None && l->visible != None)
+		if (ov == None && l->visible != None) {
 			flnewlyvisible(l);
+		}
 	}
 }
 
 void llinsert(Flayer *l) {
 	int i;
-	for (i = nllist; i > 0; --i)
+	for (i = nllist; i > 0; --i) {
 		llist[i] = llist[i - 1];
+	}
 	llist[0] = l;
 	nllist++;
 }
@@ -176,13 +188,15 @@ void llinsert(Flayer *l) {
 void lldelete(Flayer *l) {
 	int i;
 
-	for (i = 0; i < nllist; i++)
+	for (i = 0; i < nllist; i++) {
 		if (llist[i] == l) {
 			--nllist;
-			for (; i < nllist; i++)
+			for (; i < nllist; i++) {
 				llist[i] = llist[i + 1];
+			}
 			return;
 		}
+	}
 	panic("lldelete");
 }
 
@@ -190,39 +204,45 @@ void flinsert(Flayer *l, wchar_t *sp, wchar_t *ep, int64_t p0) {
 	if (flprepare(l)) {
 		frinsert(&l->f, sp, ep, p0 - l->origin);
 		scrdraw(l, scrtotal(l));
-		if (l->visible == Some)
+		if (l->visible == Some) {
 			flrefresh(l, l->entire, 0);
+		}
 	}
 }
 
 void fldelete(Flayer *l, int64_t p0, int64_t p1) {
 	if (flprepare(l)) {
 		p0 -= l->origin;
-		if (p0 < 0)
+		if (p0 < 0) {
 			p0 = 0;
+		}
 		p1 -= l->origin;
-		if (p1 < 0)
+		if (p1 < 0) {
 			p1 = 0;
+		}
 		frdelete(&l->f, p0, p1);
 		scrdraw(l, scrtotal(l));
-		if (l->visible == Some)
+		if (l->visible == Some) {
 			flrefresh(l, l->entire, 0);
+		}
 	}
 }
 
 bool flselect(Flayer *l) {
-	if (l->visible != All)
+	if (l->visible != All) {
 		flupfront(l);
+	}
 	if (mouse.msec - l->click < Clicktime &&
 	    (l->f.p0 == l->f.p1 && l->f.p0 == frcharofpt(&l->f, mouse.xy))) {
 		l->click = 0;
 		return true;
 	}
 	frselect(&l->f, &mouse);
-	if (l->f.p0 == l->f.p1)
+	if (l->f.p0 == l->f.p1) {
 		l->click = mouse.msec;
-	else
+	} else {
 		l->click = 0;
+	}
 	l->p0 = l->f.p0 + l->origin, l->p1 = l->f.p1 + l->origin;
 	return false;
 }
@@ -237,26 +257,32 @@ void flsetselect(Flayer *l, int64_t p0, int64_t p1) {
 	}
 	l->p0 = p0, l->p1 = p1;
 	flfp0p1(l, &fp0, &fp1);
-	if (fp0 == l->f.p0 && fp1 == l->f.p1)
+	if (fp0 == l->f.p0 && fp1 == l->f.p1) {
 		return;
+	}
 	frselectp(&l->f, F & ~D);
 	l->f.p0 = fp0, l->f.p1 = fp1;
 	frselectp(&l->f, F & ~D);
-	if (l->visible == Some)
+	if (l->visible == Some) {
 		flrefresh(l, l->entire, 0);
+	}
 }
 
 void flfp0p1(Flayer *l, uint64_t *pp0, uint64_t *pp1) {
 	int64_t p0 = l->p0 - l->origin, p1 = l->p1 - l->origin;
 
-	if (p0 < 0)
+	if (p0 < 0) {
 		p0 = 0;
-	if (p1 < 0)
+	}
+	if (p1 < 0) {
 		p1 = 0;
-	if (p0 > l->f.nchars)
+	}
+	if (p0 > l->f.nchars) {
 		p0 = l->f.nchars;
-	if (p1 > l->f.nchars)
+	}
+	if (p1 > l->f.nchars) {
 		p1 = l->f.nchars;
+	}
 	*pp0 = p0;
 	*pp1 = p1;
 }
@@ -284,9 +310,9 @@ void flreshape(Rectangle dr) {
 	for (i = 0; i < nllist; i++) {
 		l = llist[i];
 		f = &l->f;
-		if (move)
+		if (move) {
 			r = raddp(rsubp(l->entire, olDrect.min), dr.min);
-		else {
+		} else {
 			r = raddp(rscale(rsubp(l->entire, olDrect.min),
 					 sub(olDrect.max, olDrect.min),
 					 sub(dr.max, dr.min)),
@@ -296,24 +322,32 @@ void flreshape(Rectangle dr) {
 				frclear(f);
 			}
 			f->b = 0;
-			if (l->visible != None)
+			if (l->visible != None) {
 				frclear(f);
+			}
 		}
-		if (!rectclip(&r, dr))
+		if (!rectclip(&r, dr)) {
 			panic("flreshape");
-		if (r.max.x - r.min.x < 100)
+		}
+		if (r.max.x - r.min.x < 100) {
 			r.min.x = dr.min.x;
-		if (r.max.x - r.min.x < 100)
+		}
+		if (r.max.x - r.min.x < 100) {
 			r.max.x = dr.max.x;
-		if (r.max.y - r.min.y < 2 * FLMARGIN + f->fheight)
+		}
+		if (r.max.y - r.min.y < 2 * FLMARGIN + f->fheight) {
 			r.min.y = dr.min.y;
-		if (r.max.y - r.min.y < 2 * FLMARGIN + f->fheight)
+		}
+		if (r.max.y - r.min.y < 2 * FLMARGIN + f->fheight) {
 			r.max.y = dr.max.y;
-		if (!move)
+		}
+		if (!move) {
 			l->visible = None;
+		}
 		frsetrects(f, inset(flrect(l, r), FLMARGIN), f->b);
-		if (!move && f->b)
+		if (!move && f->b) {
 			scrdraw(l, scrtotal(l));
+		}
 	}
 	newvisibilities(1);
 }
@@ -323,14 +357,16 @@ int flprepare(Flayer *l) {
 	uint64_t n;
 	wchar_t *r;
 
-	if (l->visible == None)
+	if (l->visible == None) {
 		return 0;
+	}
 	f = &l->f;
 	if (f->b == 0) {
-		if (l->visible == All)
+		if (l->visible == All) {
 			f->b = &screen;
-		else if ((f->b = balloc(l->entire, screen.ldepth)) == 0)
+		} else if ((f->b = balloc(l->entire, screen.ldepth)) == 0) {
 			return 0;
+		}
 		bitblt2(f->b, l->entire.min, f->b, l->entire, 0, 0, l->bg);
 		border(f->b, l->entire, l == llist[0] ? FLMARGIN : 1, F & ~D,
 		       l->bg);
@@ -353,10 +389,12 @@ Vis	    visibility(Flayer *l) {
 	justvis = true;
 	flrefresh(l, l->entire, 0);
 	justvis = false;
-	if (!somevis)
+	if (!somevis) {
 		return None;
-	if (!someinvis)
+	}
+	if (!someinvis) {
 		return All;
+	}
 	return Some;
 }
 
@@ -366,12 +404,14 @@ void flrefresh(Flayer *l, Rectangle r, int i) {
 
 Top:
 	if ((t = llist[i++]) == l) {
-		if (!justvis)
+		if (!justvis) {
 			bitblt2(&screen, r.min, l->f.b, r, S, 0, l->bg);
+		}
 		somevis = true;
 	} else {
-		if (!rectXrect(t->entire, r))
+		if (!rectXrect(t->entire, r)) {
 			goto Top; /* avoid stacking unnecessarily */
+		}
 		if (t->entire.min.x > r.min.x) {
 			s = r;
 			s.max.x = t->entire.min.x;

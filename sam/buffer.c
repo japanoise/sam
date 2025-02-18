@@ -16,9 +16,9 @@ struct Gapbuffer {
 };
 
 static void movegap(Gapbuffer *b, pos_t p) {
-	if (p == b->gs)
+	if (p == b->gs) {
 		return;
-	else if (p < b->gs) {
+	} else if (p < b->gs) {
 		size_t d = b->gs - p;
 		b->gs -= d;
 		b->ge -= d;
@@ -35,12 +35,14 @@ static void ensuregap(Gapbuffer *b, size_t l) {
 	size_t ns = b->size + l + BUFFER_MIN;
 	size_t es = b->size - b->ge;
 
-	if (GAPSIZE(b) >= l)
+	if (GAPSIZE(b) >= l) {
 		return;
+	}
 
 	b->buf = realloc(b->buf, ns * RUNESIZE);
-	if (!b->buf)
+	if (!b->buf) {
 		panic("out of memory");
+	}
 
 	wmemmove(b->buf + (ns - es), b->buf + b->ge, es);
 	b->ge = ns - es;
@@ -85,16 +87,19 @@ static void insertbuffer(Gapbuffer *b, pos_t p, const wchar_t *s, size_t l) {
 
 Buffer *Bopen(void) {
 	Buffer *b = calloc(1, sizeof(Buffer));
-	if (!b)
+	if (!b) {
 		panic("out of memory");
+	}
 
 	b->gb = calloc(1, sizeof(Gapbuffer));
-	if (!b->gb)
+	if (!b->gb) {
 		panic("out of memory");
+	}
 
 	b->gb->buf = calloc(1, BUFFER_MIN * RUNESIZE);
-	if (!b->gb->buf)
+	if (!b->gb->buf) {
 		panic("out of memory");
+	}
 
 	b->gb->size = BUFFER_MIN;
 	b->gb->gs = 0;
@@ -113,11 +118,13 @@ void Bterm(Buffer *b) {
 
 /* XXX - modify at call sites to use the internal functions */
 int Bread(Buffer *b, wchar_t *c, int l, Posn p) {
-	if (p + l > b->nrunes)
+	if (p + l > b->nrunes) {
 		l = b->nrunes - p;
+	}
 
-	if (l <= 0)
+	if (l <= 0) {
 		return 0;
+	}
 
 	size_t r = readbuffer(b->gb, p, l, c);
 	return (int)r;

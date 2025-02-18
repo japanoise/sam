@@ -23,12 +23,14 @@ void toterminal(File *f, int toterm) {
 	Posn growpos, grown;
 
 	growpos = 0;
-	if (f->rasp == 0)
+	if (f->rasp == 0) {
 		return;
-	if (f->marked)
+	}
+	if (f->marked) {
 		p0 = f->markp + sizeof(Mark) / RUNESIZE;
-	else
+	} else {
 		p0 = 0;
+	}
 	grown = 0;
 	noflush = true;
 	while (Bread(t, (wchar_t *)&hdr, sizeof(hdr) / RUNESIZE, p0) > 0) {
@@ -46,19 +48,22 @@ void toterminal(File *f, int toterm) {
 			}
 			p1 = hdr.g.cll.l;
 			p2 = hdr.g.cll.l1;
-			if (p2 <= p1)
+			if (p2 <= p1) {
 				panic("toterminal delete 0");
+			}
 			if (f == cmd && p1 < cmdpt) {
-				if (p2 <= cmdpt)
+				if (p2 <= cmdpt) {
 					deltacmd -= (p2 - p1);
-				else
+				} else {
 					deltacmd -= cmdpt - p1;
+				}
 			}
 			p1 += delta;
 			p2 += delta;
 			p0 += sizeof(struct _cll) / RUNESIZE;
-			if (toterm)
+			if (toterm) {
 				outTsll(Hcut, f->tag, p1, p2 - p1);
+			}
 			rcut(f->rasp, p1, p2);
 			delta -= p2 - p1;
 			break;
@@ -76,10 +81,12 @@ void toterminal(File *f, int toterm) {
 			n = hdr.g.csl.s;
 			p1 = hdr.g.csl.l;
 			p0 += sizeof(struct _csl) / RUNESIZE + n;
-			if (n <= 0)
+			if (n <= 0) {
 				panic("toterminal insert 0");
-			if (f == cmd && p1 < cmdpt)
+			}
+			if (f == cmd && p1 < cmdpt) {
 				deltacmd += n;
+			}
 			p1 += delta;
 			if (toterm) {
 				if (n > GROWDATASIZE || !rterm(f->rasp, p1)) {
@@ -89,9 +96,9 @@ void toterminal(File *f, int toterm) {
 							grown);
 						grown = 0;
 					}
-					if (grown)
+					if (grown) {
 						grown += n;
-					else {
+					} else {
 						growpos = p1;
 						grown = n;
 					}
@@ -107,25 +114,29 @@ void toterminal(File *f, int toterm) {
 
 					rgrow(f->rasp, p1, n);
 					r = rdata(f->rasp, p1, n);
-					if (r.p1 != p1 || r.p2 != p1 + n)
+					if (r.p1 != p1 || r.p2 != p1 + n) {
 						panic("rdata in toterminal");
+					}
 					outTsllS(Hgrowdata, f->tag, p1, n,
 						 tmprstr(rp, n));
 				}
 			} else {
 				rgrow(f->rasp, p1, n);
 				r = rdata(f->rasp, p1, n);
-				if (r.p1 != p1 || r.p2 != p1 + n)
+				if (r.p1 != p1 || r.p2 != p1 + n) {
 					panic("rdata in toterminal");
+				}
 			}
 			delta += n;
 			break;
 		}
 	}
-	if (grown)
+	if (grown) {
 		outTsll(Hgrow, f->tag, growpos, grown);
-	if (toterm)
+	}
+	if (toterm) {
 		outTs(Hcheck0, f->tag);
+	}
 	outflush();
 	noflush = false;
 	if (f == cmd) {
@@ -143,12 +154,14 @@ void rcut(List *r, Posn p1, Posn p2) {
 	Posn p, x;
 	int  i;
 
-	if (p1 == p2)
+	if (p1 == p2) {
 		panic("rcut 0");
+	}
 	for (p = 0, i = 0; i < r->nused && p + L(i) <= p1; p += L(i++))
 		;
-	if (i == r->nused)
+	if (i == r->nused) {
 		panic("rcut 1");
+	}
 	if (p < p1) { /* chop this piece */
 		if (p + L(i) < p2) {
 			x = p1 - p;
@@ -157,10 +170,11 @@ void rcut(List *r, Posn p1, Posn p2) {
 			x = L(i) - (p2 - p1);
 			p = p2;
 		}
-		if (T(i))
+		if (T(i)) {
 			P(i) = x | M;
-		else
+		} else {
 			P(i) = x;
+		}
 		i++;
 	}
 	while (i < r->nused && p + L(i) <= p2) {
@@ -168,22 +182,25 @@ void rcut(List *r, Posn p1, Posn p2) {
 		dellist(r, i);
 	}
 	if (p < p2) {
-		if (i == r->nused)
+		if (i == r->nused) {
 			panic("rcut 2");
+		}
 		x = L(i) - (p2 - p);
-		if (T(i))
+		if (T(i)) {
 			P(i) = x | M;
-		else
+		} else {
 			P(i) = x;
+		}
 	}
 	/* can we merge i and i-1 ? */
 	if (i > 0 && i < r->nused && T(i - 1) == T(i)) {
 		x = L(i - 1) + L(i);
 		dellist(r, i--);
-		if (T(i))
+		if (T(i)) {
 			P(i) = x | M;
-		else
+		} else {
 			P(i) = x;
+		}
 	}
 }
 
@@ -191,25 +208,28 @@ void rgrow(List *r, Posn p1, Posn n) {
 	Posn p;
 	int  i;
 
-	if (n == 0)
+	if (n == 0) {
 		panic("rgrow 0");
+	}
 	for (p = 0, i = 0; i < r->nused && p + L(i) <= p1; p += L(i++))
 		;
 	if (i == r->nused) { /* stick on end of file */
-		if (p != p1)
+		if (p != p1) {
 			panic("rgrow 1");
-		if (i > 0 && !T(i - 1))
+		}
+		if (i > 0 && !T(i - 1)) {
 			P(i - 1) += n;
-		else
+		} else {
 			inslist(r, i, n);
-	} else if (!T(i)) /* goes in this empty piece */
+		}
+	} else if (!T(i)) { /* goes in this empty piece */
 		P(i) += n;
-	else if (p == p1 && i > 0 &&
-		 !T(i - 1)) /* special case; simplifies life */
+	} else if (p == p1 && i > 0 &&
+		   !T(i - 1)) { /* special case; simplifies life */
 		P(i - 1) += n;
-	else if (p == p1)
+	} else if (p == p1) {
 		inslist(r, i, n);
-	else { /* must break piece in terminal */
+	} else { /* must break piece in terminal */
 		inslist(r, i + 1, (L(i) - (p1 - p)) | M);
 		inslist(r, i + 1, n);
 		P(i) = (p1 - p) | M;
@@ -222,8 +242,9 @@ int rterm(List *r, Posn p1) {
 
 	for (p = 0, i = 0; i < r->nused && p + L(i) <= p1; p += L(i++))
 		;
-	if (i == r->nused && (i == 0 || !T(i - 1)))
+	if (i == r->nused && (i == 0 || !T(i - 1))) {
 		return 0;
+	}
 	return T(i);
 }
 
@@ -232,12 +253,14 @@ Range rdata(List *r, Posn p1, Posn n) {
 	int   i;
 	Range rg;
 
-	if (n == 0)
+	if (n == 0) {
 		panic("rdata 0");
+	}
 	for (p = 0, i = 0; i < r->nused && p + L(i) <= p1; p += L(i++))
 		;
-	if (i == r->nused)
+	if (i == r->nused) {
 		panic("rdata 1");
+	}
 	if (T(i)) {
 		n -= L(i) - (p1 - p);
 		if (n <= 0) {
@@ -247,10 +270,12 @@ Range rdata(List *r, Posn p1, Posn n) {
 		p += L(i++);
 		p1 = p;
 	}
-	if (T(i) || i == r->nused)
+	if (T(i) || i == r->nused) {
 		panic("rdata 2");
-	if (p + L(i) < p1 + n)
+	}
+	if (p + L(i) < p1 + n) {
 		n = L(i) - (p1 - p);
+	}
 	rg.p1 = p1;
 	rg.p2 = p1 + n;
 	if (p != p1) {

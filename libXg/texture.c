@@ -16,8 +16,9 @@ void texture(Bitmap *d, Rectangle r, Bitmap *s, Fcode f) {
 	g = _getcopygc(f, d, s, &bfunc);
 	if (d->flag & SHIFT) {
 		XSetTSOrigin(_dpy, g, -d->r.min.x, -d->r.min.y);
-	} else
+	} else {
 		XSetTSOrigin(_dpy, g, 0, 0);
+	}
 	w = Dx(r);
 	h = Dy(r);
 	if (bfunc == UseFillRectangle) {
@@ -29,8 +30,9 @@ void texture(Bitmap *d, Rectangle r, Bitmap *s, Fcode f) {
 		XFillRectangle(_dpy, (Drawable)d->id, g, x, y, w, h);
 		XSetFillStyle(_dpy, g, FillSolid);
 	} else {
-		if (s->ldepth != 0)
+		if (s->ldepth != 0) {
 			berror("unsupported texture");
+		}
 		XSetStipple(_dpy, g, (Drawable)s->id);
 		XSetFillStyle(_dpy, g, FillOpaqueStippled);
 		XFillRectangle(_dpy, (Drawable)d->id, g, x, y, w, h);

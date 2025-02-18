@@ -133,8 +133,9 @@ void regerror_c(Err e, int c) {
 }
 
 Inst *newinst(int64_t t) {
-	if (progp >= &program[NPROG])
+	if (progp >= &program[NPROG]) {
 		regerror(Etoolong);
+	}
 	progp->type = t;
 	progp->left = 0;
 	progp->right = 0;
@@ -153,18 +154,20 @@ Inst *realcompile(wchar_t *s) {
 	/* Start with a low priority operator to prime parser */
 	pushator(START - 1);
 	while ((token = lex()) != END) {
-		if ((token & ISATOR) == OPERATOR)
+		if ((token & ISATOR) == OPERATOR) {
 			operator(token);
-		else
+		} else {
 			operand(token);
+		}
 	}
 	/* Close with a low priority operator */
 	evaluntil(START);
 	/* Force END */
 	operand(END);
 	evaluntil(START);
-	if (nbra)
+	if (nbra) {
 		regerror(Eleftpar);
+	}
 	--andp; /* points to first and only operand */
 	return andp->first;
 }
@@ -173,10 +176,12 @@ void compile(String *s) {
 	int   i;
 	Inst *oprogp;
 
-	if (Strcmp(s, &lastregexp) == 0)
+	if (Strcmp(s, &lastregexp) == 0) {
 		return;
-	for (i = 0; i < nclass; i++)
+	}
+	for (i = 0; i < nclass; i++) {
 		free(class[i]);
+	}
 	nclass = 0;
 	progp = program;
 	backwards = false;
@@ -191,33 +196,40 @@ void compile(String *s) {
 
 void operand(int64_t t) {
 	Inst *i;
-	if (lastwasand)
+	if (lastwasand) {
 		operator(CAT); /* catenate is implicit */
+	}
 	i = newinst(t);
 	if (t == CCLASS) {
-		if (negateclass)
+		if (negateclass) {
 			i->type = NCCLASS; /* UGH */
-		i->rclass = nclass - 1;	   /* UGH */
+		}
+		i->rclass = nclass - 1; /* UGH */
 	}
 	pushand(i, i);
 	lastwasand = true;
 }
 
 void operator(int64_t t) {
-	if (t == RBRA && --nbra < 0)
+	if (t == RBRA && --nbra < 0) {
 		regerror(Erightpar);
+	}
 	if (t == LBRA) {
 		cursubid++; /* silently ignored */
 		nbra++;
-		if (lastwasand)
+		if (lastwasand) {
 			operator(CAT);
-	} else
+		}
+	} else {
 		evaluntil(t);
-	if (t != RBRA)
+	}
+	if (t != RBRA) {
 		pushator(t);
+	}
 	lastwasand = false;
-	if (t == STAR || t == QUEST || t == PLUS || t == RBRA)
+	if (t == STAR || t == QUEST || t == PLUS || t == RBRA) {
 		lastwasand = true; /* these look like operands */
+	}
 }
 
 void cant(char *s) {
@@ -228,36 +240,41 @@ void cant(char *s) {
 }
 
 void pushand(Inst *f, Inst *l) {
-	if (andp >= &andstack[NSTACK])
+	if (andp >= &andstack[NSTACK]) {
 		cant("operand stack overflow");
+	}
 	andp->first = f;
 	andp->last = l;
 	andp++;
 }
 
 void pushator(int64_t t) {
-	if (atorp >= &atorstack[NSTACK])
+	if (atorp >= &atorstack[NSTACK]) {
 		cant("operator stack overflow");
+	}
 	*atorp++ = t;
-	if (cursubid >= NSUBEXP)
+	if (cursubid >= NSUBEXP) {
 		*subidp++ = -1;
-	else
+	} else {
 		*subidp++ = cursubid;
+	}
 }
 
 Node *popand(int op) {
 	if (andp <= &andstack[0]) {
-		if (op)
+		if (op) {
 			regerror_c(Emissop, op);
-		else
+		} else {
 			regerror(Ebadregexp);
+		}
 	}
 	return --andp;
 }
 
 int64_t popator(void) {
-	if (atorp <= &atorstack[0])
+	if (atorp <= &atorstack[0]) {
 		cant("operator stack underflow");
+	}
 	--subidp;
 	return *--atorp;
 }
@@ -295,8 +312,9 @@ void evaluntil(int64_t pri) {
 		case CAT:
 			op2 = popand(0);
 			op1 = popand(0);
-			if (backwards && op2->first->type != END)
+			if (backwards && op2->first->type != END) {
 				t = op1, op1 = op2, op2 = t;
+			}
 			op1->last->next = op2->first;
 			pushand(op1->first, op2->last);
 			break;
@@ -332,8 +350,9 @@ void optimize(Inst *start) {
 
 	for (inst = start; inst->type != END; inst++) {
 		target = inst->next;
-		while (target->type == NOP)
+		while (target->type == NOP) {
 			target = target->next;
+		}
 		inst->next = target;
 	}
 }
@@ -344,11 +363,13 @@ void dumpstack(void) {
 	int  *ip;
 
 	dprint(L"operators\n");
-	for (ip = atorstack; ip < atorp; ip++)
+	for (ip = atorstack; ip < atorp; ip++) {
 		dprint(L"0%o\n", *ip);
+	}
 	dprint(L"operands\n");
-	for (stk = andstack; stk < andp; stk++)
+	for (stk = andstack; stk < andp; stk++) {
 		dprint(L"0%o\t0%o\n", stk->first->type, stk->last->type);
+	}
 }
 
 void dump(void) {
@@ -372,9 +393,11 @@ int64_t lex(void) {
 
 	switch (c) {
 	case '\\':
-		if (*exprp)
-			if ((c = *exprp++) == 'n')
+		if (*exprp) {
+			if ((c = *exprp++) == 'n') {
 				c = '\n';
+			}
+		}
 		break;
 	case 0:
 		c = END;
@@ -416,8 +439,9 @@ int64_t lex(void) {
 }
 
 int64_t nextrec(void) {
-	if (exprp[0] == 0 || (exprp[0] == '\\' && exprp[1] == 0))
+	if (exprp[0] == 0 || (exprp[0] == '\\' && exprp[1] == 0)) {
 		regerror(Ebadclass);
+	}
 	if (exprp[0] == '\\') {
 		exprp++;
 		if (*exprp == 'n') {
@@ -441,8 +465,9 @@ void bldcclass(void) {
 		classp[n++] = '\n'; /* don't match newline in negate case */
 		negateclass = true;
 		exprp++;
-	} else
+	} else {
 		negateclass = false;
+	}
 	while ((c1 = nextrec()) != ']') {
 		if (c1 == '-') {
 		Error:
@@ -455,14 +480,16 @@ void bldcclass(void) {
 		}
 		if (*exprp == '-') {
 			exprp++; /* eat '-' */
-			if ((c2 = nextrec()) == ']')
+			if ((c2 = nextrec()) == ']') {
 				goto Error;
+			}
 			classp[n + 0] = 0xFFFFFFFF;
 			classp[n + 1] = c1;
 			classp[n + 2] = c2;
 			n += 3;
-		} else
+		} else {
 			classp[n++] = c1;
+		}
 	}
 	classp[n] = 0;
 	if (nclass == Nclass) {
@@ -478,11 +505,13 @@ bool classmatch(int classno, wchar_t c, bool negate) {
 	p = class[classno];
 	while (*p) {
 		if (*p == 0xFFFFFFFF) {
-			if (p[1] <= c && c <= p[2])
+			if (p[1] <= c && c <= p[2]) {
 				return !negate;
+			}
 			p += 3;
-		} else if (*p++ == c)
+		} else if (*p++ == c) {
 			return !negate;
+		}
 	}
 	return negate;
 }
@@ -497,9 +526,10 @@ void addinst(Ilist *l, Inst *inst, Rangeset *sep) {
 
 	for (p = l; p->inst; p++) {
 		if (p->inst == inst) {
-			if ((sep)->p[0].p1 < p->se.p[0].p1)
+			if ((sep)->p[0].p1 < p->se.p[0].p1) {
 				p->se = *sep; /* this would be bug */
-			return;		      /* It's already there */
+			}
+			return; /* It's already there */
 		}
 	}
 	p->inst = inst;
@@ -530,8 +560,9 @@ int execute(File *f, Posn startp, Posn eof) {
 			case 2:
 				break;
 			case 1: /* expired; wrap to beginning */
-				if (sel.p[0].p1 >= 0 || eof != INFINITY)
+				if (sel.p[0].p1 >= 0 || eof != INFINITY) {
 					goto Return;
+				}
 				list[0][0].inst = list[1][0].inst = 0;
 				Fgetcset(f, (Posn)0);
 				p = 0;
@@ -540,11 +571,13 @@ int execute(File *f, Posn startp, Posn eof) {
 				goto Return;
 			}
 		} else if (((wrapped && p >= startp) || sel.p[0].p1 > 0) &&
-			   nnl == 0)
+			   nnl == 0) {
 			break;
+		}
 		/* fast check for first char */
-		if (startchar && nnl == 0 && c != startchar)
+		if (startchar && nnl == 0 && c != startchar) {
 			continue;
+		}
 		tl = list[flag];
 		nl = list[flag ^= 1];
 		nl->inst = 0;
@@ -553,9 +586,10 @@ int execute(File *f, Posn startp, Posn eof) {
 		if (sel.p[0].p1 < 0 &&
 		    (!wrapped || p < startp || startp == eof)) {
 			/* Add first instruction to this list */
-			if (++ntl >= NLIST)
+			if (++ntl >= NLIST) {
 			Overflow:
 				error(Eoverflow);
+			}
 			sempty.p[0].p1 = p;
 			addinst(tl, startinst, &sempty);
 		}
@@ -566,24 +600,28 @@ int execute(File *f, Posn startp, Posn eof) {
 			default: /* regular character */
 				if (inst->type == c) {
 				Addinst:
-					if (++nnl >= NLIST)
+					if (++nnl >= NLIST) {
 						goto Overflow;
+					}
 					addinst(nl, inst->next, &tlp->se);
 				}
 				break;
 			case LBRA:
-				if (inst->subid >= 0)
+				if (inst->subid >= 0) {
 					tlp->se.p[inst->subid].p1 = p;
+				}
 				inst = inst->next;
 				goto Switchstmt;
 			case RBRA:
-				if (inst->subid >= 0)
+				if (inst->subid >= 0) {
 					tlp->se.p[inst->subid].p2 = p;
+				}
 				inst = inst->next;
 				goto Switchstmt;
 			case ANY:
-				if (c != '\n')
+				if (c != '\n') {
 					goto Addinst;
+				}
 				break;
 			case BOL:
 				if (p == 0) {
@@ -592,31 +630,37 @@ int execute(File *f, Posn startp, Posn eof) {
 					goto Switchstmt;
 				}
 				if (f->getci > 1) {
-					if (f->getcbuf[f->getci - 2] == '\n')
+					if (f->getcbuf[f->getci - 2] == '\n') {
 						goto Step;
+					}
 				} else {
 					wchar_t c;
 					if (Fchars(f, &c, p - 1, p) == 1 &&
-					    c == '\n')
+					    c == '\n') {
 						goto Step;
+					}
 				}
 				break;
 			case EOL:
-				if (c == '\n')
+				if (c == '\n') {
 					goto Step;
+				}
 				break;
 			case CCLASS:
-				if (c >= 0 && classmatch(inst->rclass, c, 0))
+				if (c >= 0 && classmatch(inst->rclass, c, 0)) {
 					goto Addinst;
+				}
 				break;
 			case NCCLASS:
-				if (c >= 0 && classmatch(inst->rclass, c, 1))
+				if (c >= 0 && classmatch(inst->rclass, c, 1)) {
 					goto Addinst;
+				}
 				break;
 			case OR:
 				/* evaluate right choice later */
-				if (++ntl >= NLIST)
+				if (++ntl >= NLIST) {
 					goto Overflow;
+				}
 				addinst(tlp, inst->right, &tlp->se);
 				/* efficiency: advance and re-evaluate */
 				inst = inst->left;
@@ -636,9 +680,11 @@ void newmatch(Rangeset *sp) {
 	int i;
 
 	if (sel.p[0].p1 < 0 || sp->p[0].p1 < sel.p[0].p1 ||
-	    (sp->p[0].p1 == sel.p[0].p1 && sp->p[0].p2 > sel.p[0].p2))
-		for (i = 0; i < NSUBEXP; i++)
+	    (sp->p[0].p1 == sel.p[0].p1 && sp->p[0].p2 > sel.p[0].p2)) {
+		for (i = 0; i < NSUBEXP; i++) {
 			sel.p[i] = sp->p[i];
+		}
+	}
 }
 
 int bexecute(File *f, Posn startp) {
@@ -663,9 +709,10 @@ int bexecute(File *f, Posn startp) {
 			case 2:
 				break;
 			case 1: /* expired; wrap to end */
-				if (sel.p[0].p1 >= 0)
+				if (sel.p[0].p1 >= 0) {
 				case 3:
 					goto Return;
+				}
 				list[0][0].inst = list[1][0].inst = 0;
 				Fgetcset(f, f->nrunes);
 				p = f->nrunes;
@@ -674,11 +721,13 @@ int bexecute(File *f, Posn startp) {
 				goto Return;
 			}
 		} else if (((wrapped && p <= startp) || sel.p[0].p1 > 0) &&
-			   nnl == 0)
+			   nnl == 0) {
 			break;
+		}
 		/* fast check for first char */
-		if (startchar && nnl == 0 && c != startchar)
+		if (startchar && nnl == 0 && c != startchar) {
 			continue;
+		}
 		tl = list[flag];
 		nl = list[flag ^= 1];
 		nl->inst = 0;
@@ -686,9 +735,10 @@ int bexecute(File *f, Posn startp) {
 		nnl = 0;
 		if (sel.p[0].p1 < 0 && (!wrapped || p > startp)) {
 			/* Add first instruction to this list */
-			if (++ntl >= NLIST)
+			if (++ntl >= NLIST) {
 			Overflow:
 				error(Eoverflow);
+			}
 			/* the minus is so the optimizations in addinst work */
 			sempty.p[0].p1 = -p;
 			addinst(tl, bstartinst, &sempty);
@@ -700,24 +750,28 @@ int bexecute(File *f, Posn startp) {
 			default: /* regular character */
 				if (inst->type == c) {
 				Addinst:
-					if (++nnl >= NLIST)
+					if (++nnl >= NLIST) {
 						goto Overflow;
+					}
 					addinst(nl, inst->next, &tlp->se);
 				}
 				break;
 			case LBRA:
-				if (inst->subid >= 0)
+				if (inst->subid >= 0) {
 					tlp->se.p[inst->subid].p1 = p;
+				}
 				inst = inst->next;
 				goto Switchstmt;
 			case RBRA:
-				if (inst->subid >= 0)
+				if (inst->subid >= 0) {
 					tlp->se.p[inst->subid].p2 = p;
+				}
 				inst = inst->next;
 				goto Switchstmt;
 			case ANY:
-				if (c != '\n')
+				if (c != '\n') {
 					goto Addinst;
+				}
 				break;
 			case BOL:
 				if (c == '\n' || p == 0) {
@@ -728,27 +782,32 @@ int bexecute(File *f, Posn startp) {
 				break;
 			case EOL:
 				if (f->getci < f->ngetc - 1) {
-					if (f->getcbuf[f->getci + 1] == '\n')
+					if (f->getcbuf[f->getci + 1] == '\n') {
 						goto Step;
+					}
 				} else if (p < f->nrunes - 1) {
 					wchar_t c;
 					if (Fchars(f, &c, p, p + 1) == 1 &&
-					    c == '\n')
+					    c == '\n') {
 						goto Step;
+					}
 				}
 				break;
 			case CCLASS:
-				if (c >= 0 && classmatch(inst->rclass, c, 0))
+				if (c >= 0 && classmatch(inst->rclass, c, 0)) {
 					goto Addinst;
+				}
 				break;
 			case NCCLASS:
-				if (c >= 0 && classmatch(inst->rclass, c, 1))
+				if (c >= 0 && classmatch(inst->rclass, c, 1)) {
 					goto Addinst;
+				}
 				break;
 			case OR:
 				/* evaluate right choice later */
-				if (++ntl >= NLIST)
+				if (++ntl >= NLIST) {
 					goto Overflow;
+				}
 				addinst(tlp, inst->right, &tlp->se);
 				/* efficiency: advance and re-evaluate */
 				inst = inst->left;
@@ -769,9 +828,10 @@ Return:
 void bnewmatch(Rangeset *sp) {
 	int i;
 	if (sel.p[0].p1 < 0 || sp->p[0].p1 > sel.p[0].p2 ||
-	    (sp->p[0].p1 == sel.p[0].p2 && sp->p[0].p2 < sel.p[0].p1))
+	    (sp->p[0].p1 == sel.p[0].p2 && sp->p[0].p2 < sel.p[0].p1)) {
 		for (i = 0; i < NSUBEXP; i++) { /* note the reversal; p1<=p2 */
 			sel.p[i].p1 = sp->p[i].p2;
 			sel.p[i].p2 = sp->p[i].p1;
 		}
+	}
 }

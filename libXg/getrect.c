@@ -11,8 +11,9 @@ static void grabcursor(void) {
 			    ButtonPressMask | ButtonReleaseMask |
 				ButtonMotionMask | StructureNotifyMask,
 			    GrabModeAsync, GrabModeAsync, None, None,
-			    CurrentTime) != GrabSuccess)
+			    CurrentTime) != GrabSuccess) {
 		sleep(2);
+	}
 
 	/* Grab the keyboard too */
 	XSetInputFocus(_dpy, screen.id, RevertToParent, CurrentTime);
@@ -25,13 +26,15 @@ Rectangle   getrect(int but, Mouse *m) {
 
 	  but = 1 << (but - 1);
 	  cursorswitch(SweepCursor);
-	  while (m->buttons)
+	  while (m->buttons) {
 		  *m = emouse();
+	  }
 	  grabcursor();
 	  while (!(m->buttons & but)) {
 		  *m = emouse();
-		  if (m->buttons & (7 ^ but))
+		  if (m->buttons & (7 ^ but)) {
 			  goto Return;
+		  }
 	  }
 	  r.min = m->xy;
 	  r.max = m->xy;
@@ -48,8 +51,9 @@ Return:
 	if (m->buttons & (7 ^ but)) {
 		rc.min.x = rc.max.x = 0;
 		rc.min.y = rc.max.y = 0;
-		while (m->buttons)
+		while (m->buttons) {
 			*m = emouse();
+		}
 	}
 	ungrabcursor();
 	return rc;

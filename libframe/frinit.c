@@ -13,8 +13,9 @@ void	    frinit(Frame *f, Rectangle r, XftFont *ft, Bitmap *b, uint64_t bg) {
 		       expandtabs = true;
 	       }
 
-	       if (tabs > 0 && tabs <= 12)
+	       if (tabs > 0 && tabs <= 12) {
 		       tabwidth = tabs;
+	       }
 
 	       f->font = ft;
 	       /* ft->height is NOT CORRECT; we must use ascent + descent to
@@ -43,9 +44,11 @@ void frsetrects(Frame *f, Rectangle r, Bitmap *b) {
 }
 
 void frclear(Frame *f) {
-	if (f->nbox)
+	if (f->nbox) {
 		_frdelbox(f, 0, f->nbox - 1);
-	if (f->box)
+	}
+	if (f->box) {
 		free(f->box);
+	}
 	f->box = 0;
 }

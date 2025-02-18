@@ -10,19 +10,23 @@ int frdelete(Frame *f, uint64_t p0, uint64_t p1) {
 	Rectangle r;
 	int	  nn0;
 
-	if (p0 >= f->nchars || p0 == p1 || f->b == 0)
+	if (p0 >= f->nchars || p0 == p1 || f->b == 0) {
 		return 0;
-	if (p1 > f->nchars)
+	}
+	if (p1 > f->nchars) {
 		p1 = f->nchars;
+	}
 	n0 = _frfindbox(f, 0, (uint64_t)0, p0);
 	n1 = _frfindbox(f, n0, p0, p1);
 	pt0 = _frptofcharnb(f, p0, n0);
 	pt1 = frptofchar(f, p1);
-	if (f->p0 != p0 || f->p1 != p1) /* likely they ARE equal */
-		frselectp(f, F & ~D);	/* can do better some day */
+	if (f->p0 != p0 || f->p1 != p1) { /* likely they ARE equal */
+		frselectp(f, F & ~D);	  /* can do better some day */
+	}
 	frselectf(f, pt0, pt1, 0);
-	if (n0 == f->nbox)
+	if (n0 == f->nbox) {
 		berror("off end in frdelete");
+	}
 	nn0 = n0;
 	ppt0 = pt0;
 	_frfreebox(f, n0, n1 - 1);
@@ -41,8 +45,9 @@ int frdelete(Frame *f, uint64_t p0, uint64_t p1) {
 		_frcklinewrap(f, &pt1, b);
 		if (b->nrune > 0) {
 			n = _frcanfit(f, pt0, b);
-			if (n == 0)
+			if (n == 0) {
 				berror("_frcanfit==0");
+			}
 			if (n != b->nrune) {
 				_frsplitbox(f, n1, n);
 				b = &f->box[n1];
@@ -52,8 +57,9 @@ int frdelete(Frame *f, uint64_t p0, uint64_t p1) {
 			r.max.x += b->wid;
 			r.max.y += f->fheight;
 			bitblt2(f->b, pt0, f->b, r, S, 0, f->bg);
-			if (pt0.y == pt1.y)
+			if (pt0.y == pt1.y) {
 				r.min.x = r.max.x - (pt1.x - pt0.x);
+			}
 			bitblt2(f->b, r.min, f->b, r, 0, 0, f->bg);
 		}
 		_fradvance(f, &pt1, b);
@@ -65,8 +71,9 @@ int frdelete(Frame *f, uint64_t p0, uint64_t p1) {
 		Point pt2;
 
 		pt2 = _frptofcharptb(f, 32767, pt1, n1);
-		if (pt2.y > f->r.max.y)
+		if (pt2.y > f->r.max.y) {
 			berror("frptofchar in frdelete");
+		}
 		if (n1 < f->nbox) {
 			int q0, q1, q2;
 
@@ -81,8 +88,9 @@ int frdelete(Frame *f, uint64_t p0, uint64_t p1) {
 				f->bg);
 			frselectf(f, Pt(pt2.x, pt2.y - (pt1.y - pt0.y)), pt2,
 				  0);
-		} else
+		} else {
 			frselectf(f, pt0, pt2, 0);
+		}
 	}
 	_frclosebox(f, n0, n1 - 1);
 	if (nn0 > 0 && f->box[nn0 - 1].nrune >= 0 &&
@@ -91,14 +99,16 @@ int frdelete(Frame *f, uint64_t p0, uint64_t p1) {
 		ppt0.x -= f->box[nn0].wid;
 	}
 	_frclean(f, ppt0, nn0, n0 < f->nbox - 1 ? n0 + 1 : n0);
-	if (f->p1 > p1)
+	if (f->p1 > p1) {
 		f->p1 -= p1 - p0;
-	else if (f->p1 > p0)
+	} else if (f->p1 > p0) {
 		f->p1 = p0;
-	if (f->p0 > p1)
+	}
+	if (f->p0 > p1) {
 		f->p0 -= p1 - p0;
-	else if (f->p0 > p0)
+	} else if (f->p0 > p0) {
 		f->p0 = p0;
+	}
 	frselectp(f, F & ~D);
 	f->nchars -= p1 - p0;
 	pt0 = frptofchar(f, f->nchars);

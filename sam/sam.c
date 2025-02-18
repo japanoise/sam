@@ -57,8 +57,9 @@ int sammain(int argc, char *argv[]);
 int bmain(int argc, char *argv[]);
 
 int main(int argc, char *argv[]) {
-	if (strcmp(basename(argv[0]), "B") == 0)
+	if (strcmp(basename(argv[0]), "B") == 0) {
 		return bmain(argc, argv);
+	}
 	return sammain(argc, argv);
 }
 
@@ -72,23 +73,28 @@ const char *getbsocketname(const char *machine) {
 	    getenv("SAMSOCKETPATH") ? getenv("SAMSOCKETPATH") : getenv("HOME");
 	static char name[FILENAME_MAX + 1] = {0};
 
-	if (getenv("SAMSOCKETNAME"))
+	if (getenv("SAMSOCKETNAME")) {
 		return getenv("SAMSOCKETNAME");
+	}
 
-	if (name[0])
+	if (name[0]) {
 		return name;
+	}
 
 	snprintf(name, FILENAME_MAX, "%s/.sam.%s", path, machine);
-	if (access(name, R_OK) == 0)
+	if (access(name, R_OK) == 0) {
 		return name;
+	}
 
 	snprintf(name, FILENAME_MAX, "%s/.sam.remote.%s", path, user);
-	if (access(name, R_OK) == 0)
+	if (access(name, R_OK) == 0) {
 		return name;
+	}
 
 	snprintf(name, FILENAME_MAX, "/tmp/sam.remote.%s", user);
-	if (access(name, R_OK) == 0)
+	if (access(name, R_OK) == 0) {
 		return name;
+	}
 
 	return NULL;
 }
@@ -115,8 +121,9 @@ int bmain(int argc, char *argv[]) {
 
 	if (getbsocketname(machine) == NULL) {
 		fputs("could not determine controlling socket name\n", stderr);
-		if (!machineset)
+		if (!machineset) {
 			machine = NULL;
+		}
 		return sammain(argc, argv);
 	}
 
@@ -127,23 +134,25 @@ int bmain(int argc, char *argv[]) {
 	un.sun_family = AF_UNIX;
 	strncpy(un.sun_path, getbsocketname(machine), sizeof(un.sun_path) - 1);
 	if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0 ||
-	    connect(fd, (struct sockaddr *)&un, sizeof(un)) < 0)
+	    connect(fd, (struct sockaddr *)&un, sizeof(un)) < 0) {
 		return perror("could not open socket"), EXIT_FAILURE;
+	}
 
 	strncat(cmd, "B ", B_CMD_MAX);
 	for (int i = 0; i < argc; i++) {
 		char path[FILENAME_MAX + 1];
-		if (realpath(argv[i], path) == NULL)
+		if (realpath(argv[i], path) == NULL) {
 			perror(argv[i]);
-		else {
+		} else {
 			strncat(cmd, " ", B_CMD_MAX);
 			strncat(cmd, path, B_CMD_MAX);
 		}
 	}
 	strncat(cmd, "\n", B_CMD_MAX);
 
-	if (write(fd, cmd, strlen(cmd)) <= 0)
+	if (write(fd, cmd, strlen(cmd)) <= 0) {
 		return perror("could not send command"), EXIT_FAILURE;
+	}
 
 	close(fd);
 	return EXIT_SUCCESS;
@@ -203,8 +212,9 @@ int sammain(int argc, char *argv[]) {
 		}
 	}
 
-	if (trylock && !canlocksocket(machine) && !dflag)
+	if (trylock && !canlocksocket(machine) && !dflag) {
 		return bmain(argc, argv);
+	}
 
 	argv += optind;
 	argc -= optind;
@@ -221,8 +231,9 @@ int sammain(int argc, char *argv[]) {
 	home = getenv("HOME") ? getenv("HOME") : "/";
 	shpath = getenv("SHELL") ? getenv("SHELL") : shpath;
 	sh = basename(shpath);
-	if (!dflag)
+	if (!dflag) {
 		startup(machine, rmsocketname != NULL, trylock);
+	}
 	Fstart();
 
 	signal(SIGINT, SIG_IGN);
@@ -230,7 +241,7 @@ int sammain(int argc, char *argv[]) {
 	signal(SIGPIPE, SIG_IGN);
 
 	if (argc > 0) {
-		for (i = 0; i < argc; i++)
+		for (i = 0; i < argc; i++) {
 			if (!setjmp(mainloop)) {
 				t = tmpcstr(argv[i]);
 				Straddc(t, '\0');
@@ -238,11 +249,14 @@ int sammain(int argc, char *argv[]) {
 				freetmpstr(t);
 				Fsetname(newfile(), &genstr);
 			}
-	} else if (!downloaded)
+		}
+	} else if (!downloaded) {
 		newfile()->state = Clean;
+	}
 	modnum++;
-	if (file.nused)
+	if (file.nused) {
 		current(file.filepptr[0]);
+	}
 
 	atexit(scram);
 	setjmp(mainloop);
@@ -255,14 +269,17 @@ int sammain(int argc, char *argv[]) {
 
 void scram(void) {
 	freecmd();
-	for (int i = 0; i < file.nused; i++)
+	for (int i = 0; i < file.nused; i++) {
 		Fclose(file.filepptr[i]);
+	}
 
-	if (!downloaded)
+	if (!downloaded) {
 		Fclose(cmd);
+	}
 
-	if (genc)
+	if (genc) {
 		free(genc);
+	}
 
 	Strclose(&cmdstr);
 	Strclose(&lastpat);
@@ -272,11 +289,13 @@ void scram(void) {
 	Strclose(&wd);
 	Strclose(&plan9cmd);
 
-	if (file.listptr)
+	if (file.listptr) {
 		free(file.listptr);
+	}
 
-	if (tempfile.listptr)
+	if (tempfile.listptr) {
 		free(tempfile.listptr);
+	}
 
 	freecmdlists();
 	freebufs();
@@ -289,8 +308,9 @@ void usage(void) {
 }
 
 void rescue(void) {
-	if (rescuing++)
+	if (rescuing++) {
 		return;
+	}
 
 	if (io) {
 		fclose(io);
@@ -300,12 +320,14 @@ void rescue(void) {
 	for (int i = 0; i < file.nused; i++) {
 		char  buf[PATH_MAX] = {0};
 		File *f = file.filepptr[i];
-		if (f == cmd || f->nrunes == 0 || f->state != Dirty)
+		if (f == cmd || f->nrunes == 0 || f->state != Dirty) {
 			continue;
+		}
 
 		samsave(buf);
-		if ((io = fopen(buf, "w")) == NULL)
+		if ((io = fopen(buf, "w")) == NULL) {
 			continue;
+		}
 
 		fprintf(io, "samsave() {\n"
 			    "    echo \"${1}?\"\n"
@@ -319,8 +341,9 @@ void rescue(void) {
 			char *c = Strtoc(&f->name);
 			snprintf(buf, FILENAME_MAX, "%s", c);
 			free(c);
-		} else
+		} else {
 			snprintf(buf, FILENAME_MAX, "nameless.%d", i);
+		}
 
 		fprintf(io, "samsave %s <<'---%s'\n", buf, buf);
 		addr.r.p1 = 0, addr.r.p2 = f->nrunes;
@@ -337,19 +360,22 @@ void panic(char *s) {
 		wasd = downloaded;
 		downloaded = 0;
 		dprint(L"sam: panic: %s\n", s);
-		if (wasd)
+		if (wasd) {
 			fprintf(stderr, "sam: panic: %s\n", s);
+		}
 		rescue();
 		abort();
 	}
 }
 
 void hiccough(char *s) {
-	if (rescuing)
+	if (rescuing) {
 		exit(EXIT_FAILURE);
+	}
 
-	if (s)
+	if (s) {
 		dprint(L"%s\n", s);
+	}
 
 	resetcmd();
 	resetxec();
@@ -360,16 +386,18 @@ void hiccough(char *s) {
 		io = NULL;
 	}
 
-	if (undobuf->nrunes)
+	if (undobuf->nrunes) {
 		Bdelete(undobuf, (Posn)0, undobuf->nrunes);
+	}
 
 	update();
 
 	if (curfile) {
-		if (curfile->state == Unread)
+		if (curfile->state == Unread) {
 			curfile->state = Clean;
-		else if (downloaded)
+		} else if (downloaded) {
 			outTs(Hcurrent, curfile->tag);
+		}
 	}
 
 	longjmp(mainloop, 1);
@@ -381,18 +409,21 @@ void trytoclose(File *f) {
 	char *t;
 	char  buf[256];
 
-	if (f == cmd) /* possible? */
+	if (f == cmd) { /* possible? */
 		return;
-	if (f->deleted)
+	}
+	if (f->deleted) {
 		return;
+	}
 	if (f->state == Dirty && !f->closeok) {
 		f->closeok = true;
 		if (f->name.s[0]) {
 			t = Strtoc(&f->name);
 			strncpy(buf, t, sizeof buf - 1);
 			free(t);
-		} else
+		} else {
 			strcpy(buf, "nameless file");
+		}
 		error_s(Emodified, buf);
 	}
 	f->deleted = true;
@@ -423,8 +454,9 @@ void load(File *f) {
 		saveaddr = addr;
 		edit(f, 'I');
 		addr = saveaddr;
-	} else
+	} else {
 		f->state = Clean;
+	}
 	Fupdate(f, true, true);
 }
 
@@ -437,11 +469,13 @@ void cmdupdate(void) {
 }
 
 void delete(File *f) {
-	if (downloaded && f->rasp)
+	if (downloaded && f->rasp) {
 		outTs(Hclose, f->tag);
+	}
 	delfile(f);
-	if (f == curfile)
+	if (f == curfile) {
 		current(0);
+	}
 }
 
 void update(void) {
@@ -451,19 +485,23 @@ void update(void) {
 	settempfile();
 	for (anymod = i = 0; i < tempfile.nused; i++) {
 		f = tempfile.filepptr[i];
-		if (f == cmd) /* cmd gets done in main() */
+		if (f == cmd) { /* cmd gets done in main() */
 			continue;
+		}
 		if (f->deleted) {
 			delete (f);
 			continue;
 		}
-		if (f->mod == modnum && Fupdate(f, false, downloaded))
+		if (f->mod == modnum && Fupdate(f, false, downloaded)) {
 			anymod++;
-		if (f->rasp)
+		}
+		if (f->rasp) {
 			telldot(f);
+		}
 	}
-	if (anymod)
+	if (anymod) {
 		modnum++;
+	}
 }
 
 File *current(File *f) { return curfile = f; }
@@ -473,35 +511,42 @@ void  edit(File *f, int cmd) {
 	 Posn p;
 	 bool nulls;
 
-	 if (cmd == 'r')
+	 if (cmd == 'r') {
 		 Fdelete(f, addr.r.p1, addr.r.p2);
+	 }
 	 if (cmd == 'e' || cmd == 'I') {
 		 Fdelete(f, (Posn)0, f->nrunes);
 		 addr.r.p2 = f->nrunes;
 	 } else if (f->nrunes != 0 ||
-		    (f->name.s[0] && Strcmp(&genstr, &f->name) != 0))
+		    (f->name.s[0] && Strcmp(&genstr, &f->name) != 0)) {
 		 empty = false;
+	 }
 	 if ((io = fopen(genc, "r")) == NULL) {
-		 if (curfile && curfile->state == Unread)
+		 if (curfile && curfile->state == Unread) {
 			 curfile->state = Clean;
+		 }
 		 error_s(Eopen, genc);
 	 }
 	 p = readio(f, &nulls, empty);
-	 if (nulls)
+	 if (nulls) {
 		 warn(Wnulls);
+	 }
 	 closeio((cmd == 'e' || cmd == 'I') ? -1 : p);
-	 if (cmd == 'r')
+	 if (cmd == 'r') {
 		 f->ndot.r.p1 = addr.r.p2, f->ndot.r.p2 = addr.r.p2 + p;
-	 else
+	 } else {
 		 f->ndot.r.p1 = f->ndot.r.p2 = 0;
+	 }
 	 f->closeok = empty;
-	 if (quitok)
+	 if (quitok) {
 		 quitok = empty;
-	 else
+	 } else {
 		 quitok = false;
+	 }
 	 state(f, empty ? Clean : Dirty);
-	 if (cmd == 'e')
+	 if (cmd == 'e') {
 		 filename(f);
+	 }
 }
 
 int getname(File *f, String *s, bool save) {
@@ -513,14 +558,16 @@ int getname(File *f, String *s, bool save) {
 		genc = 0;
 	}
 	if (s == 0 || (c = s->s[0]) == 0) { /* no name provided */
-		if (f)
+		if (f) {
 			Strduplstr(&genstr, &f->name);
-		else
+		} else {
 			Straddc(&genstr, '\0');
+		}
 		goto Return;
 	}
-	if (c != L' ' && c != L'\t')
+	if (c != L' ' && c != L'\t') {
 		error(Eblank);
+	}
 
 	for (i = 0; (c = s->s[i]) == L' ' || c == L'\t'; i++)
 		;
@@ -528,14 +575,16 @@ int getname(File *f, String *s, bool save) {
 	while (s->s[i] > L' ' && i < s->n) {
 		if (s->s[i] == L'\\') {
 			i++;
-			if (i >= s->n)
+			if (i >= s->n) {
 				break;
+			}
 		}
 		Straddc(&genstr, s->s[i++]);
 	}
 
-	if (s->s[i])
+	if (s->s[i]) {
 		error(Enewline);
+	}
 	Straddc(&genstr, '\0');
 	if (f && (save || f->name.s[0] == 0)) {
 		Fsetname(f, &genstr);
@@ -552,8 +601,9 @@ Return:
 }
 
 void filename(File *f) {
-	if (genc)
+	if (genc) {
 		free(genc);
+	}
 	genc = Strtoc(&f->name);
 	dprint(L"%c%c%c %s\n", " '"[f->state == Dirty], "-+"[f->rasp != 0],
 	       " ."[f == curfile], genc);
@@ -574,25 +624,29 @@ void undostep(File *f) {
 	f->mark = mark.mark;
 	f->mod = mark.m;
 	f->closeok = mark.s1 != Dirty;
-	if (mark.s1 == Dirty)
+	if (mark.s1 == Dirty) {
 		quitok = false;
-	if (f->state == Clean && mark.s1 == Clean && changes)
+	}
+	if (f->state == Clean && mark.s1 == Clean && changes) {
 		state(f, Dirty);
-	else
+	} else {
 		state(f, mark.s1);
+	}
 }
 
 int undo(void) {
 	File *f;
 	int   i;
 	Mod   max;
-	if ((max = curfile->mod) == 0)
+	if ((max = curfile->mod) == 0) {
 		return 0;
+	}
 	settempfile();
 	for (i = 0; i < tempfile.nused; i++) {
 		f = tempfile.filepptr[i];
-		if (f != cmd && f->mod == max)
+		if (f != cmd && f->mod == max) {
 			undostep(f);
+		}
 	}
 	return 1;
 }
@@ -600,14 +654,16 @@ int undo(void) {
 int readcmd(String *s) {
 	int retcode;
 
-	if (flist == 0)
+	if (flist == 0) {
 		(flist = Fopen())->state = Clean;
+	}
 	addr.r.p1 = 0, addr.r.p2 = flist->nrunes;
 	retcode = plan9(flist, '<', s, false);
 	Fupdate(flist, false, false);
 	flist->mod = 0;
-	if (flist->nrunes > BLOCKSIZE)
+	if (flist->nrunes > BLOCKSIZE) {
 		error(Etoolong);
+	}
 	Strzero(&genstr);
 	Strinsure(&genstr, flist->nrunes);
 	Fchars(flist, genbuf, (Posn)0, flist->nrunes);
@@ -642,8 +698,9 @@ void cd(String *str) {
 		--wd.n;
 		wd.s[wd.n - 1] = '/';
 	}
-	if (chdir(getname((File *)0, str, false) ? genc : home))
+	if (chdir(getname((File *)0, str, false) ? genc : home)) {
 		syserror("chdir");
+	}
 	settempfile();
 	for (i = 0; i < tempfile.nused; i++) {
 		f = tempfile.filepptr[i];
@@ -666,17 +723,20 @@ int loadflist(String *s) {
 			readcmd(s);
 		} else {
 			Strzero(&genstr);
-			while ((c = s->s[i++]) && c != '\n')
+			while ((c = s->s[i++]) && c != '\n') {
 				Straddc(&genstr, c);
+			}
 			Straddc(&genstr, '\0');
 		}
 	} else {
-		if (c != '\n')
+		if (c != '\n') {
 			error(Eblank);
+		}
 		Strdupl(&genstr, empty);
 	}
-	if (genc)
+	if (genc) {
 		free(genc);
+	}
 	genc = Strtoc(&genstr);
 	return genstr.s[0];
 }
@@ -691,24 +751,27 @@ File *readflist(bool readall, bool delete) {
 	     i++) { /* ++ skips blank */
 		bool esc = false;
 		Strinit(&t);
-		while (i < genstr.n &&
-		       ((c = genstr.s[i]) == L' ' || c == L'\t' || c == L'\n'))
+		while (i < genstr.n && ((c = genstr.s[i]) == L' ' ||
+					c == L'\t' || c == L'\n')) {
 			i++;
+		}
 
-		if (i >= genstr.n)
+		if (i >= genstr.n) {
 			break;
+		}
 
 		while (i < genstr.n) {
 			c = genstr.s[i];
-			if (esc)
+			if (esc) {
 				esc = false;
-			else if (c == L'\\') {
+			} else if (c == L'\\') {
 				esc = true;
 				i++;
 				continue;
 			} else if (c == L' ' || c == L'\t' || c == L'\n' ||
-				   c == 0)
+				   c == 0) {
 				break;
+			}
 			Straddc(&t, c);
 			i++;
 		}
@@ -716,40 +779,49 @@ File *readflist(bool readall, bool delete) {
 		Straddc(&t, 0);
 		f = lookfile(&t, false);
 		if (delete) {
-			if (f == NULL)
+			if (f == NULL) {
 				warn_S(Wfile, &t);
-			else
+			} else {
 				trytoclose(f);
-		} else if (f == NULL && readall)
+			}
+		} else if (f == NULL && readall) {
 			Fsetname(f = newfile(), &t);
+		}
 
-		if (i == 0 || i >= genstr.n || t.n == 0)
+		if (i == 0 || i >= genstr.n || t.n == 0) {
 			break;
+		}
 
 		Strclose(&t);
 	}
-	if (t.s)
+	if (t.s) {
 		Strclose(&t);
+	}
 	return f;
 }
 
 File *tofile(String *s) {
 	File *f = NULL;
 
-	if (s->s[0] != L' ')
+	if (s->s[0] != L' ') {
 		error(Eblank);
+	}
 
-	if (loadflist(s) == 0)
+	if (loadflist(s) == 0) {
 		f = lookfile(&genstr, false);
+	}
 
-	if (f == NULL)
+	if (f == NULL) {
 		f = lookfile(&genstr, true);
+	}
 
-	if (f == NULL)
+	if (f == NULL) {
 		f = readflist(false, false);
+	}
 
-	if (f == NULL)
+	if (f == NULL) {
 		error_s(Emenu, genc);
+	}
 
 	return current(f);
 }
@@ -757,24 +829,28 @@ File *tofile(String *s) {
 File *getfile(String *s) {
 	File *f;
 
-	if (loadflist(s) == 0)
+	if (loadflist(s) == 0) {
 		Fsetname(f = newfile(), &genstr);
-	else if ((f = readflist(true, false)) == NULL)
+	} else if ((f = readflist(true, false)) == NULL) {
 		error(Eblank);
+	}
 	return current(f);
 }
 
 void closefiles(File *f, String *s) {
 	if (s->s[0] == 0) {
-		if (f == 0)
+		if (f == 0) {
 			error(Enofile);
+		}
 		trytoclose(f);
 		return;
 	}
-	if (s->s[0] != L' ')
+	if (s->s[0] != L' ') {
 		error(Eblank);
-	if (loadflist(s) == 0)
+	}
+	if (loadflist(s) == 0) {
 		error(Enewline);
+	}
 	readflist(false, true);
 }
 
@@ -783,8 +859,9 @@ void copy(File *f, Address addr2) {
 	int  ni;
 	for (p = addr.r.p1; p < addr.r.p2; p += ni) {
 		ni = addr.r.p2 - p;
-		if (ni > BLOCKSIZE)
+		if (ni > BLOCKSIZE) {
 			ni = BLOCKSIZE;
+		}
 		Fchars(f, genbuf, p, p + ni);
 		Finsert(addr2.f, tmprstr(genbuf, ni), addr2.r.p2);
 	}
@@ -799,17 +876,20 @@ void move(File *f, Address addr2) {
 	} else if (addr.r.p1 >= addr2.r.p2) {
 		copy(f, addr2);
 		Fdelete(f, addr.r.p1, addr.r.p2);
-	} else
+	} else {
 		error(Eoverlap);
+	}
 }
 
 Posn nlcount(File *f, Posn p0, Posn p1) {
 	Posn nl = 0;
 
 	Fgetcset(f, p0);
-	while (p0++ < p1)
-		if (Fgetc(f) == '\n')
+	while (p0++ < p1) {
+		if (Fgetc(f) == '\n') {
 			nl++;
+		}
+	}
 	return nl;
 }
 
@@ -821,16 +901,19 @@ void printposn(File *f, int charsonly) {
 		l2 = l1 + nlcount(f, addr.r.p1, addr.r.p2);
 		/* check if addr ends with '\n' */
 		if (addr.r.p2 > 0 && addr.r.p2 > addr.r.p1 &&
-		    (Fgetcset(f, addr.r.p2 - 1), Fgetc(f) == '\n'))
+		    (Fgetcset(f, addr.r.p2 - 1), Fgetc(f) == '\n')) {
 			--l2;
+		}
 		dprint(L"%lu", l1);
-		if (l2 != l1)
+		if (l2 != l1) {
 			dprint(L",%lu", l2);
+		}
 		dprint(L"; ");
 	}
 	dprint(L"#%lu", addr.r.p1);
-	if (addr.r.p2 != addr.r.p1)
+	if (addr.r.p2 != addr.r.p1) {
 		dprint(L",#%lu", addr.r.p2);
+	}
 	dprint(L"\n");
 }
 

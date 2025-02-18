@@ -29,12 +29,14 @@ void	       print_ss(char *s, String *a, String *b) {
 	  wchar_t *rp;
 
 	  ap = emalloc(a->n + 1);
-	  for (cp = ap, rp = a->s; *rp; rp++)
+	  for (cp = ap, rp = a->s; *rp; rp++) {
 		  cp += runetochar(cp, *rp);
+	  }
 	  *cp = 0;
 	  bp = emalloc(b->n + 1);
-	  for (cp = bp, rp = b->s; *rp; rp++)
+	  for (cp = bp, rp = b->s; *rp; rp++) {
 		  cp += runetochar(cp, *rp);
+	  }
 	  *cp = 0;
 	  dprint(L"?warning: %s `%.*s' and `%.*s'\n", s, a->n, ap, b->n, bp);
 	  free(ap);
@@ -46,8 +48,9 @@ void print_s(char *s, String *a) {
 	wchar_t *rp;
 
 	ap = emalloc(a->n + 1);
-	for (cp = ap, rp = a->s; *rp; rp++)
+	for (cp = ap, rp = a->s; *rp; rp++) {
 		cp += runetochar(cp, *rp);
+	}
 	*cp = 0;
 	dprint(L"?warning: %s `%.*s'\n", s, a->n, ap);
 	free(ap);
@@ -57,18 +60,24 @@ int statfile(char *name, uint64_t *dev, uint64_t *id, int64_t *time,
 	     int64_t *length, int64_t *appendonly) {
 	struct stat dirb;
 
-	if (stat(name, &dirb) == -1)
+	if (stat(name, &dirb) == -1) {
 		return -1;
-	if (dev)
+	}
+	if (dev) {
 		*dev = dirb.st_dev;
-	if (id)
+	}
+	if (id) {
 		*id = dirb.st_ino;
-	if (time)
+	}
+	if (time) {
 		*time = dirb.st_mtime;
-	if (length)
+	}
+	if (length) {
 		*length = dirb.st_size;
-	if (appendonly)
+	}
+	if (appendonly) {
 		*appendonly = 0;
+	}
 	return 1;
 }
 
@@ -76,25 +85,32 @@ int statfd(int fd, uint64_t *dev, uint64_t *id, int64_t *time, int64_t *length,
 	   int64_t *appendonly) {
 	struct stat dirb;
 
-	if (fstat(fd, &dirb) == -1)
+	if (fstat(fd, &dirb) == -1) {
 		return -1;
-	if (dev)
+	}
+	if (dev) {
 		*dev = dirb.st_dev;
-	if (id)
+	}
+	if (id) {
 		*id = dirb.st_ino;
-	if (time)
+	}
+	if (time) {
 		*time = dirb.st_mtime;
-	if (length)
+	}
+	if (length) {
 		*length = dirb.st_size;
-	if (appendonly)
+	}
+	if (appendonly) {
 		*appendonly = 0;
+	}
 	return 1;
 }
 
 int newtmp(void) {
 	FILE *f = tmpfile();
-	if (f)
+	if (f) {
 		return fileno(f);
+	}
 	panic("could not create tempfile!");
 	return -1;
 }
@@ -133,15 +149,17 @@ int  waitfor(int pid) {
 
 void *emalloc(uint64_t n) {
 	void *p = calloc(1, n < sizeof(int) ? sizeof(int) : n);
-	if (!p)
+	if (!p) {
 		panic("malloc failed");
+	}
 	return p;
 }
 
 void *erealloc(void *p, uint64_t n) {
 	p = realloc(p, n);
-	if (!p)
+	if (!p) {
 		panic("realloc fails");
+	}
 	return p;
 }
 

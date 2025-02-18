@@ -4,13 +4,15 @@
 #include "libgint.h"
 
 int clipr(Bitmap *d, Rectangle r) {
-	if (rectclip(&r, d->r) == 0)
+	if (rectclip(&r, d->r) == 0) {
 		return 0;
+	}
 	d->clipr = r;
 	if (r.min.x != d->r.min.x || r.min.y != d->r.min.y ||
-	    r.max.x != d->r.max.x || r.max.y != d->r.max.y)
+	    r.max.x != d->r.max.x || r.max.y != d->r.max.y) {
 		d->flag |= CLIP;
-	else
+	} else {
 		d->flag &= ~CLIP;
+	}
 	return 1;
 }

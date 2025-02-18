@@ -26,8 +26,9 @@ static Point bxscan(Frame *f, wchar_t *sp, wchar_t *ep, Point *ppt) {
 	for (nb = 0; sp < ep && nl <= f->maxlines; nb++, frame.nbox++) {
 		if (nb == frame.nalloc) {
 			_frgrowbox(&frame, delta);
-			if (delta < 10000)
+			if (delta < 10000) {
 				delta *= 2;
+			}
 		}
 		b = &frame.box[nb];
 		c = *sp;
@@ -37,8 +38,9 @@ static Point bxscan(Frame *f, wchar_t *sp, wchar_t *ep, Point *ppt) {
 			b->a.b.minwid =
 			    (c == '\n') ? 0 : charwidth(frame.font, ' ');
 			b->nrune = -1;
-			if (c == '\n')
+			if (c == '\n') {
 				nl++;
+			}
 			frame.nchars++;
 			sp++;
 		} else {
@@ -47,11 +49,13 @@ static Point bxscan(Frame *f, wchar_t *sp, wchar_t *ep, Point *ppt) {
 			w = 0;
 			while (sp < ep) {
 				c = *sp;
-				if (c == '\t' || c == '\n')
+				if (c == '\t' || c == '\n') {
 					break;
+				}
 				rw = runetochar(s, *sp);
-				if (s + rw >= tmp + TMPSIZE)
+				if (s + rw >= tmp + TMPSIZE) {
 					break;
+				}
 				w += charwidth(frame.font, c);
 				sp++;
 				s += rw;
@@ -75,18 +79,21 @@ static void chopframe(Frame *f, Point pt, uint64_t p, int bn) {
 	Frbox *b;
 
 	for (b = &f->box[bn];; b++) {
-		if (b >= &f->box[f->nbox])
+		if (b >= &f->box[f->nbox]) {
 			berror("endofframe");
+		}
 		_frcklinewrap(f, &pt, b);
-		if (pt.y >= f->r.max.y)
+		if (pt.y >= f->r.max.y) {
 			break;
+		}
 		p += NRUNE(b);
 		_fradvance(f, &pt, b);
 	}
 	f->nchars = p;
 	f->nlines = f->maxlines;
-	if (b < &f->box[f->nbox]) /* BUG */
+	if (b < &f->box[f->nbox]) { /* BUG */
 		_frdelbox(f, (int)(b - f->box), f->nbox - 1);
+	}
 }
 
 void frinsert(Frame *f, wchar_t *sp, wchar_t *ep, uint64_t p0) {
@@ -102,8 +109,9 @@ void frinsert(Frame *f, wchar_t *sp, wchar_t *ep, uint64_t p0) {
 	static int nalloc = 0;
 	int	   npts;
 
-	if (p0 > f->nchars || sp == ep || f->b == 0)
+	if (p0 > f->nchars || sp == ep || f->b == 0) {
 		return;
+	}
 	n0 = _frfindbox(f, 0, 0, p0);
 	nn0 = n0;
 	pt0 = _frptofcharnb(f, p0, n0);
@@ -120,10 +128,11 @@ void frinsert(Frame *f, wchar_t *sp, wchar_t *ep, uint64_t p0) {
 	 * insertion is complete. pt0 is current location of insertion position
 	 * (p0); pt1 is terminal point (without line wrap) of insertion.
 	 */
-	if (p0 == f->p0 && p0 == f->p1) /* quite likely */
+	if (p0 == f->p0 && p0 == f->p1) { /* quite likely */
 		frselectf(f, pt0, pt0, F & ~D);
-	else
+	} else {
 		frselectp(f, F & ~D);
+	}
 	/*
 	 * Find point where old and new x's line up
 	 * Invariants:
@@ -138,8 +147,9 @@ void frinsert(Frame *f, wchar_t *sp, wchar_t *ep, uint64_t p0) {
 		_frcklinewrap0(f, &pt1, b);
 		if (b->nrune > 0) {
 			n = _frcanfit(f, pt1, b);
-			if (n == 0)
+			if (n == 0) {
 				berror("_frcanfit==0");
+			}
 			if (n != b->nrune) {
 				_frsplitbox(f, n0, n);
 				b = &f->box[n0];
@@ -153,36 +163,40 @@ void frinsert(Frame *f, wchar_t *sp, wchar_t *ep, uint64_t p0) {
 		pts[npts].pt0 = pt0;
 		pts[npts].pt1 = pt1;
 		/* has a text box overflowed off the frame? */
-		if (pt1.y == f->r.max.y)
+		if (pt1.y == f->r.max.y) {
 			break;
+		}
 		_fradvance(f, &pt0, b);
 		pt1.x += _frnewwid(f, pt1, b);
 	}
-	if (pt1.y > f->r.max.y)
+	if (pt1.y > f->r.max.y) {
 		berror("frinsert pt1 too far");
+	}
 	if (pt1.y == f->r.max.y && n0 < f->nbox) {
 		f->nchars -= _frstrlen(f, n0);
 		_frdelbox(f, n0, f->nbox - 1);
 	}
-	if (n0 == f->nbox)
+	if (n0 == f->nbox) {
 		f->nlines =
 		    (pt1.y - f->r.min.y) / f->fheight + (pt1.x > f->left);
-	else if (pt1.y != pt0.y) {
+	} else if (pt1.y != pt0.y) {
 		int q0, q1;
 
 		y = f->r.max.y;
 		q0 = pt0.y + f->fheight;
 		q1 = pt1.y + f->fheight;
 		f->nlines += (q1 - q0) / f->fheight;
-		if (f->nlines > f->maxlines)
+		if (f->nlines > f->maxlines) {
 			chopframe(f, ppt1, p0, nn0);
+		}
 		if (pt1.y < y) {
 			r = f->r;
 			r.min.y = q0;
 			r.max.y = y - (q1 - q0);
-			if (q1 < y)
+			if (q1 < y) {
 				bitblt2(f->b, Pt(f->r.min.x, q1), f->b, r, S, 0,
 					f->bg);
+			}
 			r.min = pt0;
 			r.max.y = q0;
 			bitblt2(f->b, pt1, f->b, r, S, 0, f->bg);
@@ -217,8 +231,9 @@ void frinsert(Frame *f, wchar_t *sp, wchar_t *ep, uint64_t p0) {
 			r.max = pt;
 			r.max.x += b->wid;
 			r.max.y += f->fheight;
-			if (r.max.x >= f->r.max.x)
+			if (r.max.x >= f->r.max.x) {
 				r.max.x = f->r.max.x;
+			}
 			bitblt2(f->b, r.min, f->b, r, 0, 0, f->bg);
 			y = (pt.x == f->left) ? pt.y : 0;
 		}
@@ -226,8 +241,9 @@ void frinsert(Frame *f, wchar_t *sp, wchar_t *ep, uint64_t p0) {
 	frselectf(f, ppt0, ppt1, 0);
 	_frredraw(&frame, ppt0);
 	_fraddbox(f, nn0, frame.nbox);
-	for (n = 0; n < frame.nbox; n++)
+	for (n = 0; n < frame.nbox; n++) {
 		f->box[nn0 + n] = frame.box[n];
+	}
 	if (nn0 > 0 && f->box[nn0 - 1].nrune >= 0 &&
 	    ppt0.x - f->box[nn0 - 1].wid >= (int)f->left) {
 		--nn0;
@@ -236,13 +252,17 @@ void frinsert(Frame *f, wchar_t *sp, wchar_t *ep, uint64_t p0) {
 	n0 += frame.nbox;
 	_frclean(f, ppt0, nn0, n0 < f->nbox - 1 ? n0 + 1 : n0);
 	f->nchars += frame.nchars;
-	if (f->p0 >= p0)
+	if (f->p0 >= p0) {
 		f->p0 += frame.nchars;
-	if (f->p0 > f->nchars)
+	}
+	if (f->p0 > f->nchars) {
 		f->p0 = f->nchars;
-	if (f->p1 >= p0)
+	}
+	if (f->p1 >= p0) {
 		f->p1 += frame.nchars;
-	if (f->p1 > f->nchars)
+	}
+	if (f->p1 > f->nchars) {
 		f->p1 = f->nchars;
+	}
 	frselectp(f, F & ~D);
 }

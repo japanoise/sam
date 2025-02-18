@@ -93,11 +93,13 @@ void termwrite(wchar_t *p) {
 	size_t l = wcslen(p);
 
 	if (downloaded) {
-		if (cmd)
+		if (cmd) {
 			Finsert(cmd, tmprstr(p, l), cmdpt);
-		else
+		} else {
 			Strinsert(&cmdstr, tmprstr(p, l), cmdstr.n);
+		}
 		cmdptadv += wcslen(p);
-	} else
+	} else {
 		fprintf(stderr, "%ls", p);
+	}
 }

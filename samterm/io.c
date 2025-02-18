@@ -23,8 +23,9 @@ void	  initio(void) {
 
 	     einit(Emouse | Ekeyboard);
 	     estart(Ehost, 0, 0, false);
-	     if (exfd >= 0)
+	     if (exfd >= 0) {
 		     estart(Eextern, exfd, 8192, true);
+	     }
 }
 
 void frgetmouse(void) { mouse = emouse(); }
@@ -40,8 +41,9 @@ int  button(int but) {
 
 void externload(Event *e) {
 	externbase = malloc(e->n);
-	if (externbase == 0)
+	if (externbase == 0) {
 		return;
+	}
 	memmove(externbase, e->data, e->n);
 	externp = externbase;
 	externstop = externbase + e->n;
@@ -52,8 +54,9 @@ int waitforio(void) {
 	uint64_t     type;
 	static Event e;
 
-	if (got & ~block)
+	if (got & ~block) {
 		return got & ~block;
+	}
 	type = eread(~(got | block), &e);
 	switch (type) {
 	case Ehost:
@@ -78,11 +81,13 @@ int waitforio(void) {
 int rcvchar(void) {
 	int c;
 
-	if (!(got & Ehost))
+	if (!(got & Ehost)) {
 		return -1;
+	}
 	c = *hostp++;
-	if (hostp == hoststop)
+	if (hostp == hoststop) {
 		got &= ~Ehost;
+	}
 	return c;
 }
 
@@ -113,8 +118,9 @@ loop:
 			got &= ~Eextern;
 			free(externbase);
 		}
-		if (r == 0)
+		if (r == 0) {
 			goto loop;
+		}
 		return r;
 	}
 	return -1;
@@ -127,8 +133,9 @@ Keystroke kbdchar(void) {
 	static Event e;
 
 	k.c = externchar();
-	if (k.c > 0)
+	if (k.c > 0) {
 		return k;
+	}
 	if (got & Ekeyboard) {
 		k = keystroke;
 		memset(&keystroke, 0, sizeof(keystroke));
@@ -139,8 +146,9 @@ Keystroke kbdchar(void) {
 		eread(Eextern, &e);
 		externload(&e);
 		k.c = externchar();
-		if (k.c > 0)
+		if (k.c > 0) {
 			return k;
+		}
 	}
 	if (!ecankbd()) {
 		k.c = -1;

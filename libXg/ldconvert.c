@@ -19,7 +19,7 @@ void _ldconvert(char *in, int inld, char *out, int outld, int w, int h) {
 
 	if (ind > outd) {
 		mask = 256 - (256 >> outd);
-		for (hh = 0; hh < h; hh++, in += inl, out += outl)
+		for (hh = 0; hh < h; hh++, in += inl, out += outl) {
 			for (p = in, q = out, ww = 0; ww < w; ww++) {
 				for (j = j1; j > 0;) {
 					a = *p++;
@@ -31,10 +31,11 @@ void _ldconvert(char *in, int inld, char *out, int outld, int w, int h) {
 				}
 				*q++ = (b >> 8);
 			}
+		}
 	} else {
 		j2 = 1 << (outld - inld);
 		mask = 256 - (256 >> ind);
-		for (hh = 0; hh < h; hh++, in += inl, out += outl)
+		for (hh = 0; hh < h; hh++, in += inl, out += outl) {
 			for (p = in, q = out, ww = 0; ww < w; ww++) {
 				a = *p++;
 				for (i = i1; i > 0;) {
@@ -43,10 +44,12 @@ void _ldconvert(char *in, int inld, char *out, int outld, int w, int h) {
 						a <<= ind;
 						b <<= outd;
 					}
-					for (j = j2; j > 0; j--)
+					for (j = j2; j > 0; j--) {
 						b |= (b << ind);
+					}
 					*q++ = (b >> 8);
 				}
 			}
+		}
 	}
 }

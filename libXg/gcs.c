@@ -166,12 +166,14 @@ GC _getgc(Bitmap *b, uint64_t gcvm, XGCValues *pgcv) {
 	g = (b->ldepth == 0) ? gc0 : gcn;
 	if (!g) {
 		g = XCreateGC(_dpy, (Drawable)b->id, gcvm, pgcv);
-		if (b->ldepth == 0)
+		if (b->ldepth == 0) {
 			gc0 = g;
-		else
+		} else {
 			gcn = g;
-	} else
+		}
+	} else {
 		XChangeGC(_dpy, g, gcvm, pgcv);
+	}
 	if (b->flag & CLIP) {
 		xr.x = b->clipr.min.x;
 		xr.y = b->clipr.min.y;
@@ -233,30 +235,34 @@ GC _getfillgc2(Fcode f, Bitmap *b, uint64_t val, uint64_t fg, uint64_t bg) {
 			spix = fg ^ bg;
 			break;
 		case S:
-			if (val == ~0)
+			if (val == ~0) {
 				spix = fg;
-			else
+			} else {
 				spix = v;
+			}
 			break;
 		case notS:
-			if (val == ~0)
+			if (val == ~0) {
 				spix = bg;
-			else
+			} else {
 				spix = v;
+			}
 			break;
 		case DxorS:
 			xf = GXxor;
-			if (val == ~0)
+			if (val == ~0) {
 				spix = fg ^ bg;
-			else
+			} else {
 				spix = v;
+			}
 			break;
 		case DxnorS:
 			xf = GXxor;
-			if (val == 0)
+			if (val == 0) {
 				spix = fg ^ bg;
-			else
+			} else {
 				spix = v;
+			}
 			break;
 		default:
 			/* hard to do anything other than v==0 or v==~0 case */

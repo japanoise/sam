@@ -8,8 +8,9 @@ void _frredraw(Frame *f, Point pt) {
 	int    nb;
 	for (nb = 0, b = f->box; nb < f->nbox; nb++, b++) {
 		_frcklinewrap(f, &pt, b);
-		if (b->nrune >= 0)
+		if (b->nrune >= 0) {
 			string(f->b, pt, f->font, (char *)b->a.ptr, S ^ D);
+		}
 		pt.x += b->wid;
 	}
 }
@@ -26,18 +27,20 @@ Point _frdraw(Frame *f, Point pt) {
 		}
 		if (b->nrune > 0) {
 			n = _frcanfit(f, pt, b);
-			if (n == 0)
+			if (n == 0) {
 				berror("draw: _frcanfit==0");
+			}
 			if (n != b->nrune) {
 				_frsplitbox(f, nb, n);
 				b = &f->box[nb];
 			}
 			pt.x += b->wid;
 		} else {
-			if (b->a.b.bc == '\n')
+			if (b->a.b.bc == '\n') {
 				pt.x = f->left, pt.y += f->fheight;
-			else
+			} else {
 				pt.x += _frnewwid(f, pt, b);
+			}
 		}
 	}
 	return pt;
@@ -46,7 +49,8 @@ Point _frdraw(Frame *f, Point pt) {
 int _frstrlen(Frame *f, int nb) {
 	int n;
 
-	for (n = 0; nb < f->nbox; nb++)
+	for (n = 0; nb < f->nbox; nb++) {
 		n += NRUNE(&f->box[nb]);
+	}
 	return n;
 }

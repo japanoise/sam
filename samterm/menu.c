@@ -51,8 +51,9 @@ void menu2hit(void) {
 	int   m;
 
 	m = menuhit(2, &mouse, t == &cmd ? &menu2c : &menu2);
-	if (lock || t->lock)
+	if (lock || t->lock) {
 		return;
+	}
 
 	switch (m) {
 	case Cut:
@@ -80,10 +81,11 @@ void menu2hit(void) {
 
 	case Search:
 		outcmd();
-		if (t == &cmd)
+		if (t == &cmd) {
 			outTsll(Tsend, 0 /*ignored*/, which->p0, which->p1);
-		else
+		} else {
 			outT0(Tsearch);
+		}
 		setlock();
 		break;
 	}
@@ -101,8 +103,9 @@ void menu3hit(void) {
 		break;
 
 	case New:
-		if (!lock)
+		if (!lock) {
 			sweeptext(1, 0);
+		}
 		break;
 
 	case Zerox:
@@ -111,10 +114,11 @@ void menu3hit(void) {
 			cursorswitch(BullseyeCursor);
 			buttons(Down);
 			if ((mouse.buttons & 4) && (l = flwhich(mouse.xy)) &&
-			    getr(&r))
+			    getr(&r)) {
 				duplicate(l, r, l->f.font, m == Reshape);
-			else
+			} else {
 				cursorswitch(cursor);
+			}
 			buttons(Up);
 		}
 		break;
@@ -126,9 +130,9 @@ void menu3hit(void) {
 			if ((mouse.buttons & 4) && (l = flwhich(mouse.xy)) &&
 			    !lock) {
 				t = (Text *)l->user1;
-				if (t->nwin > 1)
+				if (t->nwin > 1) {
 					closeup(l);
-				else if (t != &cmd) {
+				} else if (t != &cmd) {
 					outTs(Tclose, t->tag);
 					setlock();
 				}
@@ -145,8 +149,9 @@ void menu3hit(void) {
 			if ((mouse.buttons & 4) && (l = flwhich(mouse.xy))) {
 				outTs(Twrite, ((Text *)l->user1)->tag);
 				setlock();
-			} else
+			} else {
 				cursorswitch(cursor);
+			}
 			buttons(Up);
 		}
 		break;
@@ -154,18 +159,23 @@ void menu3hit(void) {
 	default:
 		if ((t = text[m - NMENU3])) {
 			i = t->front;
-			if (t->nwin == 0 || t->l[i].textfn == 0)
+			if (t->nwin == 0 || t->l[i].textfn == 0) {
 				return; /* not ready yet; try again later */
-			if (t->nwin > 1 && which == &t->l[i])
-				do
-					if (++i == NL)
+			}
+			if (t->nwin > 1 && which == &t->l[i]) {
+				do {
+					if (++i == NL) {
 						i = 0;
-				while (i != t->front && t->l[i].textfn == 0);
+					}
+				} while (i != t->front && t->l[i].textfn == 0);
+			}
 			current(&t->l[i]);
-			if (followfocus)
+			if (followfocus) {
 				flupfront(&t->l[i]);
-		} else if (!lock)
+			}
+		} else if (!lock) {
 			sweeptext(0, tag[m - NMENU3]);
+		}
 		break;
 	}
 }
@@ -181,9 +191,9 @@ Text *sweeptext(int new, int tag) {
 		flinit(&t->l[0], r, font, getbg()); /*bnl*/
 		t->nwin = 1;
 		rinit(&t->rasp);
-		if (new)
+		if (new) {
 			startnewfile(Tstartnewfile, t);
-		else {
+		} else {
 			rinit(&t->rasp);
 			t->tag = tag;
 			startfile(t);
@@ -196,9 +206,11 @@ Text *sweeptext(int new, int tag) {
 int whichmenu(int tg) {
 	int i;
 
-	for (i = 0; i < nname; i++)
-		if (tag[i] == tg)
+	for (i = 0; i < nname; i++) {
+		if (tag[i] == tg) {
 			return i;
+		}
+	}
 	return -1;
 }
 
@@ -224,9 +236,10 @@ void menuins(int n, uint8_t *s, Text *t, int m, int tg) {
 		tag = realloc(tag, sizeof(uint16_t) * menucap);
 	}
 
-	for (i = nname; i > n; --i)
+	for (i = nname; i > n; --i) {
 		name[i] = name[i - 1], text[i] = text[i - 1],
 		tag[i] = tag[i - 1];
+	}
 	text[n] = t;
 	tag[n] = tg;
 	name[n] = alloc(strlen((char *)s) + 2);
@@ -239,13 +252,15 @@ void menuins(int n, uint8_t *s, Text *t, int m, int tg) {
 void menudel(int n) {
 	int i;
 
-	if (nname == 0 || n >= nname || text[n])
+	if (nname == 0 || n >= nname || text[n]) {
 		panic("menudel");
+	}
 	free(name[n]);
 	--nname;
-	for (i = n; i < nname; i++)
+	for (i = n; i < nname; i++) {
 		name[i] = name[i + 1], text[i] = text[i + 1],
 		tag[i] = tag[i + 1];
+	}
 }
 
 void setpat(char *s) {
@@ -276,25 +291,30 @@ char	      *paren(char *s) {
 char *genmenu2(int n) {
 	Text *t = (Text *)which->user1;
 	char *p;
-	if (n >= NMENU2 + (menu2str[Search] != 0))
+	if (n >= NMENU2 + (menu2str[Search] != 0)) {
 		return 0;
+	}
 	p = menu2str[n];
-	if ((!lock && !t->lock) || n == Search || n == Look)
+	if ((!lock && !t->lock) || n == Search || n == Look) {
 		return p;
+	}
 	return paren(p);
 }
 
 char *genmenu2c(int n) {
 	Text *t = (Text *)which->user1;
 	char *p;
-	if (n >= NMENU2C)
+	if (n >= NMENU2C) {
 		return 0;
-	if (n == Send)
+	}
+	if (n == Send) {
 		p = "send";
-	else
+	} else {
 		p = menu2str[n];
-	if (!lock && !t->lock)
+	}
+	if (!lock && !t->lock) {
 		return p;
+	}
 	return paren(p);
 }
 
@@ -304,42 +324,49 @@ char *genmenu3(int n) {
 	wchar_t r;
 	char   *p;
 
-	if (n >= NMENU3 + nname)
+	if (n >= NMENU3 + nname) {
 		return 0;
+	}
 	if (n < NMENU3) {
 		p = menu3str[n];
-		if (lock)
+		if (lock) {
 			p = paren(p);
+		}
 		return p;
 	}
 	n -= NMENU3;
-	if (n == 0) /* unless we've been fooled, this is cmd */
+	if (n == 0) { /* unless we've been fooled, this is cmd */
 		return (char *)&name[n][1];
+	}
 	if (mw == -1) {
 		mw = 7; /* strlen("~~sam~~"); */
 		for (i = 1; i < nname; i++) {
 			w = utflen((char *)name[i] + 1) +
 			    4; /* include "'+. " */
-			if (w > mw)
+			if (w > mw) {
 				mw = w;
+			}
 		}
 	}
-	if (mw > NBUF)
+	if (mw > NBUF) {
 		mw = NBUF;
+	}
 	t = text[n];
 	buf[0] = name[n][0];
 	buf[1] = '-';
 	buf[2] = ' ';
 	buf[3] = ' ';
 	if (t) {
-		if (t->nwin == 1)
+		if (t->nwin == 1) {
 			buf[1] = '+';
-		else if (t->nwin > 1)
+		} else if (t->nwin > 1) {
 			buf[1] = '*';
+		}
 		if (work && t == (Text *)work->user1) {
 			buf[2] = '.';
-			if (modified)
+			if (modified) {
 				buf[0] = '\'';
+			}
 		}
 	}
 	l = utflen((char *)name[n] + 1);
@@ -360,8 +387,9 @@ char *genmenu3(int n) {
 			i++;
 		}
 		strcat((char *)buf, (char *)name[n] + k);
-	} else
+	} else {
 		strcpy((char *)buf + 4, (char *)name[n] + 1);
+	}
 	i = utflen((char *)buf);
 	k = strlen((char *)buf);
 	while (i < mw && k < sizeof buf - 1) {

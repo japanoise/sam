@@ -9,7 +9,7 @@ static wchar_t wordx[] = L" \t\n";
 
 struct cmdtab  cmdtab[] = {
     /*  cmdc    text    regexp  addr defcmd defaddr count   token    keepslash
-	fn */
+	 fn */
     {'\n', 0, 0, 0, 0, aDot, 0, 0, 0, nl_cmd},
     {'a', 1, 0, 0, 0, aDot, 0, 0, 0, a_cmd},
     {'b', 0, 0, 0, 0, aNo, 0, linex, 1, b_cmd},
@@ -64,17 +64,21 @@ List	 stringlist;
 bool	 eof;
 
 void	 freecmdlists(void) {
-	    if (cmdlist.listptr)
+	    if (cmdlist.listptr) {
 		    free(cmdlist.listptr);
+	    }
 
-	    if (addrlist.listptr)
+	    if (addrlist.listptr) {
 		    free(addrlist.listptr);
+	    }
 
-	    if (relist.listptr)
+	    if (relist.listptr) {
 		    free(relist.listptr);
+	    }
 
-	    if (stringlist.listptr)
+	    if (stringlist.listptr) {
 		    free(stringlist.listptr);
+	    }
 }
 
 void resetcmd(void) {
@@ -91,18 +95,21 @@ Again:
 	if (downloaded) {
 		while (termoutp == terminp) {
 			cmdupdate();
-			if (patset)
+			if (patset) {
 				tellpat();
+			}
 			while (termlocked > 0) {
 				outT0(Hunlock);
 				termlocked--;
 			}
-			if (rcv() == 0)
+			if (rcv() == 0) {
 				return -1;
+			}
 		}
 		r = *termoutp++;
-		if (termoutp == terminp)
+		if (termoutp == terminp) {
 			terminp = termoutp = termline;
+		}
 	} else {
 		int    olderr = errno;
 		wint_t err;
@@ -130,18 +137,21 @@ int inputline(void) {
 	linep = line;
 	i = 0;
 	do {
-		if ((c = inputc()) <= 0)
+		if ((c = inputc()) <= 0) {
 			return -1;
-		if (i == (sizeof line) / RUNESIZE - 1)
+		}
+		if (i == (sizeof line) / RUNESIZE - 1) {
 			error(Etoolong);
+		}
 	} while ((line[i++] = c) != '\n');
 	line[i] = 0;
 	return 1;
 }
 
 int getch(void) {
-	if (eof)
+	if (eof) {
 		return -1;
+	}
 	if (*linep == 0 && inputline() < 0) {
 		eof = true;
 		return -1;
@@ -150,35 +160,40 @@ int getch(void) {
 }
 
 int nextc(void) {
-	if (*linep == 0)
+	if (*linep == 0) {
 		return -1;
+	}
 	return *linep;
 }
 
 void ungetch(void) {
-	if (--linep < line)
+	if (--linep < line) {
 		panic("ungetch");
+	}
 }
 
 Posn getnum(void) {
 	Posn n = 0;
 	int  c;
 
-	if ((c = nextc()) < '0' || '9' < c) /* no number defaults to 1 */
+	if ((c = nextc()) < '0' || '9' < c) { /* no number defaults to 1 */
 		return 1;
-	while ('0' <= (c = getch()) && c <= '9')
+	}
+	while ('0' <= (c = getch()) && c <= '9') {
 		n = n * 10 + (c - '0');
+	}
 	ungetch();
 	return n;
 }
 
 int skipbl(void) {
 	int c;
-	do
+	do {
 		c = getch();
-	while (c == ' ' || c == '\t');
-	if (c >= 0)
+	} while (c == ' ' || c == '\t');
+	if (c >= 0) {
 		ungetch();
+	}
 	return c;
 }
 
@@ -202,8 +217,9 @@ void cmdloop(void) {
 	int   loaded;
 
 	for (;;) {
-		if (!downloaded && curfile && curfile->state == Unread)
+		if (!downloaded && curfile && curfile->state == Unread) {
 			load(curfile);
+		}
 		if ((cmdp = parsecmd(0)) == NULL) {
 			if (downloaded) {
 				rescue();
@@ -222,12 +238,14 @@ void cmdloop(void) {
 		update();
 		if (downloaded && curfile &&
 		    (ocurfile != curfile ||
-		     (!loaded && curfile->state != Unread)))
+		     (!loaded && curfile->state != Unread))) {
 			outTs(Hcurrent, curfile->tag);
+		}
 		/* don't allow type ahead on files that aren't bound */
 
-		if (downloaded && curfile && curfile->rasp == 0)
+		if (downloaded && curfile && curfile->rasp == 0) {
 			terminp = termoutp;
+		}
 	}
 }
 
@@ -268,11 +286,13 @@ String *newstring(void) {
 void freecmd(void) {
 	int i;
 
-	while (cmdlist.nused > 0)
+	while (cmdlist.nused > 0) {
 		free(cmdlist.uint8_tpptr[--cmdlist.nused]);
+	}
 
-	while (addrlist.nused > 0)
+	while (addrlist.nused > 0) {
 		free(addrlist.uint8_tpptr[--addrlist.nused]);
+	}
 
 	while (relist.nused > 0) {
 		i = --relist.nused;
@@ -290,22 +310,26 @@ void freecmd(void) {
 int lookup(int c) {
 	int i;
 
-	for (i = 0; cmdtab[i].cmdc; i++)
-		if (cmdtab[i].cmdc == c)
+	for (i = 0; cmdtab[i].cmdc; i++) {
+		if (cmdtab[i].cmdc == c) {
 			return i;
+		}
+	}
 	return -1;
 }
 
 void okdelim(int c) {
 	if (c == '\\' || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') ||
-	    ('0' <= c && c <= '9'))
+	    ('0' <= c && c <= '9')) {
 		error_c(Edelim, c);
+	}
 }
 
 void atnl(void) {
 	skipbl();
-	if (getch() != '\n')
+	if (getch() != '\n') {
 		error(Enewline);
+	}
 }
 
 void getrhs(String *s, int delim, int cmd) {
@@ -313,16 +337,19 @@ void getrhs(String *s, int delim, int cmd) {
 
 	while ((c = getch()) > 0 && c != delim && c != '\n') {
 		if (c == '\\') {
-			if ((c = getch()) <= 0)
+			if ((c = getch()) <= 0) {
 				error(Ebadrhs);
+			}
 			if (c == '\n') {
 				ungetch();
 				c = '\\';
-			} else if (c == 'n')
+			} else if (c == 'n') {
 				c = '\n';
-			else if (c != delim &&
-				 (cmd == 's' || c != '\\')) /* s does its own */
+			} else if (c != delim &&
+				   (cmd == 's' ||
+				    c != '\\')) { /* s does its own */
 				Straddc(s, '\\');
+			}
 		}
 		Straddc(s, c);
 	}
@@ -334,8 +361,9 @@ String *collecttoken(wchar_t *end, bool keepslash) {
 	int	c;
 	bool	esc = false;
 
-	while ((c = nextc()) == ' ' || c == '\t')
+	while ((c = nextc()) == ' ' || c == '\t') {
 		Straddc(s, getch()); /* blanks significant for getname() */
+	}
 
 	while ((c = getch()) > 0) {
 		if (esc) {
@@ -343,17 +371,20 @@ String *collecttoken(wchar_t *end, bool keepslash) {
 			esc = false;
 		} else if (c == L'\\') {
 			esc = true;
-			if (keepslash)
+			if (keepslash) {
 				Straddc(s, c);
-		} else if (wcschr(end, (wchar_t)c) != NULL)
+			}
+		} else if (wcschr(end, (wchar_t)c) != NULL) {
 			break;
-		else
+		} else {
 			Straddc(s, c);
+		}
 	}
 
 	Straddc(s, 0);
-	if (c != '\n')
+	if (c != '\n') {
 		atnl();
+	}
 	return s;
 }
 
@@ -366,18 +397,21 @@ String *collecttext(void) {
 		i = 0;
 		do {
 			begline = i;
-			while ((c = getch()) > 0 && c != '\n')
+			while ((c = getch()) > 0 && c != '\n') {
 				i++, Straddc(s, c);
+			}
 			i++, Straddc(s, '\n');
-			if (c < 0)
+			if (c < 0) {
 				goto Return;
+			}
 		} while (s->s[begline] != '.' || s->s[begline + 1] != '\n');
 		Strdelete(s, s->n - 2, s->n);
 	} else {
 		okdelim(delim = getch());
 		getrhs(s, delim, 'a');
-		if (nextc() == delim)
+		if (nextc() == delim) {
 			getch();
+		}
 		atnl();
 	}
 Return:
@@ -395,10 +429,12 @@ Cmd *parsecmd(int nest) {
 	cmd.re = 0;
 	cmd.flag = cmd.num = 0;
 	cmd.addr = compoundaddr();
-	if (skipbl() == -1)
+	if (skipbl() == -1) {
 		return 0;
-	if ((c = getch()) == -1)
+	}
+	if ((c = getch()) == -1) {
 		return 0;
+	}
 	cmd.cmdc = c;
 	if (cmd.cmdc == 'c' && nextc() == 'd') { /* sleazy two-character case */
 		getch();			 /* the 'd' */
@@ -406,21 +442,25 @@ Cmd *parsecmd(int nest) {
 	}
 	i = lookup(cmd.cmdc);
 	if (i >= 0) {
-		if (cmd.cmdc == '\n')
+		if (cmd.cmdc == '\n') {
 			goto Return; /* let nl_cmd work it all out */
+		}
 		ct = &cmdtab[i];
-		if (ct->defaddr == aNo && cmd.addr)
+		if (ct->defaddr == aNo && cmd.addr) {
 			error(Enoaddr);
-		if (ct->count)
+		}
+		if (ct->count) {
 			cmd.num = getnum();
+		}
 		if (ct->regexp) {
 			/* x without pattern -> .*\n, indicated by cmd.re==0 */
 			/* X without pattern is all files */
 			if ((ct->cmdc != 'x' && ct->cmdc != 'X') ||
 			    ((c = nextc()) != ' ' && c != '\t' && c != '\n')) {
 				skipbl();
-				if ((c = getch()) == '\n' || c < 0)
+				if ((c = getch()) == '\n' || c < 0) {
 					error(Enopattern);
+				}
 				okdelim(c);
 				cmd.re = getregexp(c);
 				if (ct->cmdc == 's') {
@@ -428,49 +468,57 @@ Cmd *parsecmd(int nest) {
 					getrhs(cmd.ctext, c, 's');
 					if (nextc() == c) {
 						getch();
-						if (nextc() == 'g')
+						if (nextc() == 'g') {
 							cmd.flag = getch();
+						}
 					}
 				}
 			}
 		}
-		if (ct->addr && (cmd.caddr = simpleaddr()) == 0)
+		if (ct->addr && (cmd.caddr = simpleaddr()) == 0) {
 			error(Eaddress);
+		}
 		if (ct->defcmd) {
 			if (skipbl() == '\n') {
 				getch();
 				cmd.ccmd = newcmd();
 				cmd.ccmd->cmdc = ct->defcmd;
-			} else if ((cmd.ccmd = parsecmd(nest)) == 0)
+			} else if ((cmd.ccmd = parsecmd(nest)) == 0) {
 				panic("defcmd");
+			}
 		} else if (ct->text) {
 			cmd.ctext = collecttext();
 		} else if (ct->token) {
 			cmd.ctext = collecttoken(ct->token, ct->keepslash);
-		} else
+		} else {
 			atnl();
-	} else
+		}
+	} else {
 		switch (cmd.cmdc) {
 		case '{':
 			cp = 0;
 			do {
-				if (skipbl() == '\n')
+				if (skipbl() == '\n') {
 					getch();
+				}
 				ncp = parsecmd(nest + 1);
-				if (cp)
+				if (cp) {
 					cp->next = ncp;
-				else
+				} else {
 					cmd.ccmd = ncp;
+				}
 			} while ((cp = ncp));
 			break;
 		case '}':
 			atnl();
-			if (nest == 0)
+			if (nest == 0) {
 				error(Enolbrace);
+			}
 			return 0;
 		default:
 			error_c(Eunk, cmd.cmdc);
 		}
+	}
 Return:
 	cp = newcmd();
 	*cp = cmd;
@@ -482,25 +530,29 @@ getregexp(int delim) {
 	String *r = newre();
 	int	c;
 
-	for (Strzero(&genstr);; Straddc(&genstr, c))
+	for (Strzero(&genstr);; Straddc(&genstr, c)) {
 		if ((c = getch()) == '\\') {
-			if (nextc() == delim)
+			if (nextc() == delim) {
 				c = getch();
-			else if (nextc() == '\\') {
+			} else if (nextc() == '\\') {
 				Straddc(&genstr, c);
 				c = getch();
 			}
-		} else if (c == delim || c == '\n')
+		} else if (c == delim || c == '\n') {
 			break;
-	if (c != delim && c)
+		}
+	}
+	if (c != delim && c) {
 		ungetch();
+	}
 	if (genstr.n > 0) {
 		patset = true;
 		Strduplstr(&lastpat, &genstr);
 		Straddc(&lastpat, '\0');
 	}
-	if (lastpat.n <= 1)
+	if (lastpat.n <= 1) {
 		error(Epattern);
+	}
 	Strduplstr(r, &lastpat);
 	return r;
 }
@@ -544,19 +596,21 @@ Addr *simpleaddr(void) {
 	default:
 		return 0;
 	}
-	if ((addr.next = simpleaddr()))
+	if ((addr.next = simpleaddr())) {
 		switch (addr.next->type) {
 		case '.':
 		case '$':
 		case '\'':
-			if (addr.type != '"')
+			if (addr.type != '"') {
 			case '"':
 				error(Eaddress);
+			}
 			break;
 		case 'l':
 		case '#':
-			if (addr.type == '"')
+			if (addr.type == '"') {
 				break;
+			}
 			/* fall through */
 		case '/':
 		case '?':
@@ -574,6 +628,7 @@ Addr *simpleaddr(void) {
 		default:
 			panic("simpleaddr");
 		}
+	}
 	ap = newaddr();
 	*ap = addr;
 	return ap;
@@ -584,12 +639,15 @@ Addr *compoundaddr(void) {
 	Addr *ap, *next;
 
 	addr.left = simpleaddr();
-	if ((addr.type = skipbl()) != ',' && addr.type != ';')
+	if ((addr.type = skipbl()) != ',' && addr.type != ';') {
 		return addr.left;
+	}
 	getch();
 	next = addr.next = compoundaddr();
-	if (next && (next->type == ',' || next->type == ';') && next->left == 0)
+	if (next && (next->type == ',' || next->type == ';') &&
+	    next->left == 0) {
 		error(Eaddress);
+	}
 	ap = newaddr();
 	*ap = addr;
 	return ap;

@@ -28,10 +28,12 @@ void syserror(char *a) {
 
 int Read(FILE *f, void *a, int n) {
 	if (fread(a, 1, n, f) != n) {
-		if (lastfile)
+		if (lastfile) {
 			lastfile->state = Readerr;
-		if (downloaded)
+		}
+		if (downloaded) {
 			fprintf(stderr, "read error: %s\n", strerror(errno));
+		}
 		rescue();
 		exit(EXIT_FAILURE);
 	}
@@ -40,8 +42,9 @@ int Read(FILE *f, void *a, int n) {
 
 int Write(FILE *f, void *a, int n) {
 	size_t m = fwrite(a, 1, n, f);
-	if (m != n)
+	if (m != n) {
 		syserror("write");
+	}
 	fflush(f);
 	return m;
 }

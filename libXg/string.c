@@ -17,11 +17,12 @@ Point string(Bitmap *b, Point p, XftFont *ft, char *s, Fcode f) {
 	}
 	y += ft->ascent;
 
-	if (!b->fd)
+	if (!b->fd) {
 		b->fd =
 		    XftDrawCreate(_dpy, (Drawable)(b->id),
 				  DefaultVisual(_dpy, DefaultScreen(_dpy)),
 				  DefaultColormap(_dpy, DefaultScreen(_dpy)));
+	}
 	XftDrawStringUtf8(b->fd, &fontcolor, ft, x, y, (FcChar8 *)s, length);
 
 	x += strwidth(ft, s);
@@ -41,8 +42,9 @@ int64_t strwidth(XftFont *f, char *s) {
 int64_t charwidth(XftFont *f, wchar_t r) {
 	char chars[MB_LEN_MAX + 1] = {0};
 
-	if (runetochar(chars, r) < 0)
+	if (runetochar(chars, r) < 0) {
 		return 0;
+	}
 
 	return strwidth(f, chars);
 }
