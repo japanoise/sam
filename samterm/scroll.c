@@ -91,7 +91,7 @@ void scroll(Flayer *l, int pbut, int but) {
 	int64_t	  tot = scrtotal(l);
 	Rectangle scr, r, s, rt;
 	int	  x, y, my, oy, h;
-	int64_t	  p0; 		/* Goal point */
+	int64_t	  p0; /* Goal point */
 
 	s = inset(l->scroll, 1);
 	x = s.min.x + FLSCROLLWID / 2;
@@ -165,7 +165,8 @@ void scroll(Flayer *l, int pbut, int but) {
 			p0 = l->origin + frcharofpt(&l->f, Pt(s.max.x, my));
 			while (p0 >= tot) {
 				my--;
-				p0 = l->origin + frcharofpt(&l->f, Pt(s.max.x, my));
+				p0 = l->origin +
+				     frcharofpt(&l->f, Pt(s.max.x, my));
 				if (p0 == 0) {
 					break;
 				}
