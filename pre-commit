@@ -1,0 +1,10 @@
+#!/usr/env/bin bash
+
+for file in $(git diff-index --cached --name-only HEAD | grep -iE '\.(c|cpp|cc|h|hpp)$')
+do
+    if [ -f "$file" ]
+    then
+        clang-format -i "$file"
+        git add "$file"
+    fi
+done
