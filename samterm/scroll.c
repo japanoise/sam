@@ -79,12 +79,19 @@ void scrdraw(Flayer *l, int64_t tot) {
 	}
 }
 
+/*
+ * `pbut` appears to == `but` in all existing calls
+ *
+ * 1 = Left
+ * 2 = Middle
+ * 3 = Right
+ */
 void scroll(Flayer *l, int pbut, int but) {
 	int	  in = 0, oin;
 	int64_t	  tot = scrtotal(l);
 	Rectangle scr, r, s, rt;
 	int	  x, y, my, oy, h;
-	int64_t	  p0;
+	int64_t	  p0; 		/* Goal point */
 
 	s = inset(l->scroll, 1);
 	x = s.min.x + FLSCROLLWID / 2;
@@ -92,6 +99,9 @@ void scroll(Flayer *l, int pbut, int but) {
 	r = scr;
 	y = scr.min.y;
 	my = mouse.xy.y;
+
+	/* While the mouse button is down, calculate the scrollbar
+	   position & draw it */
 	do {
 		oin = in;
 		in = abs(x - mouse.xy.x) <= FLSCROLLWID / 2;
@@ -135,22 +145,30 @@ void scroll(Flayer *l, int pbut, int but) {
 			}
 		}
 	} while (button(pbut));
+
 	if (in) {
 		h = s.max.y - s.min.y;
 		scrflip(l, r);
 		p0 = 0;
 		if (but == 1) {
+			/* LMB: scroll up */
 			p0 = (int64_t)(my - s.min.y) / l->f.fheight + 1;
 		} else if (but == 2) {
+			/* MMB: jump */
 			if (tot > 1024L * 1024L) {
 				p0 = ((tot >> 10) * (y - s.min.y) / h) << 10;
 			} else {
 				p0 = tot * (y - s.min.y) / h;
 			}
 		} else if (but == 3) {
+			/* RMB: scroll down */
 			p0 = l->origin + frcharofpt(&l->f, Pt(s.max.x, my));
-			if (p0 > tot) {
-				p0 = tot;
+			while (p0 >= tot) {
+				my--;
+				p0 = l->origin + frcharofpt(&l->f, Pt(s.max.x, my));
+				if (p0 == 0) {
+					break;
+				}
 			}
 		}
 		scrorigin(l, but, p0);
