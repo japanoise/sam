@@ -27,7 +27,7 @@ OBJS=	  arith.o balloc.o bitblt.o   border.o bscreenrect.o\
 	  clipr.o   cursorset.o cursorswitch.o\
 	    gcs.o getrect.o gwin.o ldconvert.o\
 	menuhit.o    \
-	rectclip.o rune.o  string.o texture.o\
+	rectclip.o string.o texture.o\
 	wrbitmap.o   xtbinit.o
 
 all install:	$(LIB)

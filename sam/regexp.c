@@ -14,7 +14,7 @@ struct Inst {
 
 	union {
 		int rsubid;
-		int class; /* index into `wchar_t **class` */
+		int class; /* index into `Rune **class` */
 		struct Inst *rother;
 		struct Inst *rright;
 	} r;
@@ -100,11 +100,11 @@ int	 subidstack[NSTACK];
 int	*subidp;
 bool	 backwards;
 int	 nbra;
-wchar_t *exprp;	  /* pointer to next character in source expression */
+Rune	*exprp;	  /* pointer to next character in source expression */
 #define DCLASS 10 /* allocation increment */
 int nclass;	  /* number active */
 int Nclass;	  /* high water mark */
-wchar_t **class;
+Rune **class;
 bool	negateclass;
 
 void	addinst(Ilist *l, Inst *inst, Rangeset *sep);
@@ -114,7 +114,7 @@ void	pushand(Inst *, Inst *);
 void	pushator(int64_t);
 Node   *popand(int);
 int64_t popator(void);
-void	startlex(wchar_t *);
+void	startlex(Rune *);
 int64_t lex(void);
 void	operator(int64_t);
 void	operand(int64_t);
@@ -142,7 +142,7 @@ Inst *newinst(int64_t t) {
 	return progp++;
 }
 
-Inst *realcompile(wchar_t *s) {
+Inst *realcompile(Rune *s) {
 	int64_t token;
 
 	startlex(s);
@@ -383,7 +383,7 @@ void dump(void) {
 }
 #endif
 
-void startlex(wchar_t *s) {
+void startlex(Rune *s) {
 	exprp = s;
 	nbra = 0;
 }
@@ -454,8 +454,8 @@ int64_t nextrec(void) {
 }
 
 void bldcclass(void) {
-	int64_t	 c1, c2, n, na;
-	wchar_t *classp;
+	int64_t c1, c2, n, na;
+	Rune   *classp;
 
 	classp = emalloc(DCLASS * RUNESIZE);
 	n = 0;
@@ -494,13 +494,13 @@ void bldcclass(void) {
 	classp[n] = 0;
 	if (nclass == Nclass) {
 		Nclass += DCLASS;
-		class = erealloc(class, Nclass * sizeof(wchar_t *));
+		class = erealloc(class, Nclass * sizeof(Rune *));
 	}
 	class[nclass++] = classp;
 }
 
-bool classmatch(int classno, wchar_t c, bool negate) {
-	wchar_t *p;
+bool classmatch(int classno, Rune c, bool negate) {
+	Rune *p;
 
 	p = class[classno];
 	while (*p) {
@@ -634,7 +634,7 @@ int execute(File *f, Posn startp, Posn eof) {
 						goto Step;
 					}
 				} else {
-					wchar_t c;
+					Rune c;
 					if (Fchars(f, &c, p - 1, p) == 1 &&
 					    c == '\n') {
 						goto Step;
@@ -786,7 +786,7 @@ int bexecute(File *f, Posn startp) {
 						goto Step;
 					}
 				} else if (p < f->nrunes - 1) {
-					wchar_t c;
+					Rune c;
 					if (Fchars(f, &c, p, p + 1) == 1 &&
 					    c == '\n') {
 						goto Step;

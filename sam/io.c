@@ -31,7 +31,7 @@ void checkqid(File *f) {
 }
 
 void writef(File *f) {
-	wchar_t	 c;
+	Rune	 c;
 	Posn	 n;
 	char	*name;
 	int	 i, samename, newfile;
@@ -93,7 +93,7 @@ Posn readio(File *f, bool *nulls, bool setdate) {
 	int	 olderr = errno;
 	Posn	 nt = 0;
 
-	wchar_t	 buf[2] = {0};
+	Rune	 buf[2] = {0};
 	while (true) {
 		wint_t err;
 		buf[0] = err = fgetwc(io);

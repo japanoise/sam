@@ -76,8 +76,8 @@ int clickmatch(File *f, int cl, int cr, int dir) {
 	return cl == '\n' && nest == 1;
 }
 
-wchar_t *strrune(wchar_t *s, wchar_t c) {
-	wchar_t c1;
+Rune *strrune(Rune *s, Rune c) {
+	Rune c1;
 
 	if (c == 0) {
 		while (*s++)
@@ -94,8 +94,8 @@ wchar_t *strrune(wchar_t *s, wchar_t c) {
 }
 
 void doubleclick(File *f, Posn p1) {
-	int	 c, i;
-	wchar_t *r, *l;
+	int   c, i;
+	Rune *r, *l;
 
 	if (p1 > f->nrunes) {
 		return;

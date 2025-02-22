@@ -86,8 +86,8 @@ static void dupbox(Frame *f, int bn) {
 }
 
 static uint8_t *runeindex(uint8_t *p, int n) {
-	int	i, w;
-	wchar_t rune;
+	int  i, w;
+	Rune rune;
 
 	for (i = 0; i < n; i++, p += w) {
 		w = chartorune(&rune, (char *)p);

@@ -319,10 +319,10 @@ char *genmenu2c(int n) {
 }
 
 char *genmenu3(int n) {
-	Text   *t;
-	int	c, i, k, l, w;
-	wchar_t r;
-	char   *p;
+	Text *t;
+	int   c, i, k, l, w;
+	Rune  r;
+	char *p;
 
 	if (n >= NMENU3 + nname) {
 		return 0;

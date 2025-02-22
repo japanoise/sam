@@ -153,16 +153,16 @@ File *whichfile(int tag) {
 }
 
 int inmesg(Tmesg type) {
-	wchar_t	 buf[1025];
-	int	 i, m;
-	int16_t	 s;
-	int64_t	 l, l1, l2;
-	File	*f;
-	Posn	 p0, p1;
-	Range	 r;
-	String	*str;
-	char	*c;
-	wchar_t *rp;
+	Rune	buf[1025];
+	int	i, m;
+	int16_t s;
+	int64_t l, l1, l2;
+	File   *f;
+	Posn	p0, p1;
+	Range	r;
+	String *str;
+	char   *c;
+	Rune   *rp;
 
 	if (type > TMAX) {
 		panic("inmesg");
@@ -398,7 +398,7 @@ int inmesg(Tmesg type) {
 		setgenstr(f, p0, p1);
 		for (l = 0; l < genstr.n; l++) {
 			i = genstr.s[l];
-			if (wcschr(L".*+?(|)\\[]^$", (wchar_t)i)) {
+			if (wcschr(L".*+?(|)\\[]^$", (Rune)i)) {
 				Strinsert(&genstr, tmpcstr("\\"), l++);
 			}
 		}
@@ -459,7 +459,7 @@ int inmesg(Tmesg type) {
 			m = 32000;
 			dprint(L"?warning: snarf buffer truncated\n");
 		}
-		rp = malloc(m * sizeof(wchar_t));
+		rp = malloc(m * sizeof(Rune));
 		if (rp) {
 			Bread(snarfbuf, rp, m, 0);
 			c = Strtoc(tmprstr(rp, m));

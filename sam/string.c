@@ -31,7 +31,7 @@ void Strzero(String *p) {
 	p->n = 0;
 }
 
-void Strdupl(String *p, wchar_t *s) /* copies the null */
+void Strdupl(String *p, Rune *s) /* copies the null */
 {
 	p->n = wcslen(s);
 	Strinsure(p, p->n + 1);
@@ -46,7 +46,7 @@ void Strduplstr(String *p,
 	wmemmove(p->s, q->s, q->n);
 }
 
-void Straddc(String *p, wchar_t c) {
+void Straddc(String *p, Rune c) {
 	Strinsure(p, p->n + 1);
 	p->s[p->n++] = c;
 }
@@ -78,9 +78,9 @@ void Strdelete(String *p, Posn p1, Posn p2) {
 int   Strcmp(String *a, String *b) { return wcscmp(a->s, b->s); }
 
 char *Strtoc(String *s) {
-	size_t	l = s->n * MB_LEN_MAX;
-	char   *c = emalloc(l + 1);
-	wchar_t ws[s->n + 1];
+	size_t l = s->n * MB_LEN_MAX;
+	char  *c = emalloc(l + 1);
+	Rune   ws[s->n + 1];
 
 	memset(ws, 0, sizeof(ws));
 	memset(c, 0, l + 1);
@@ -95,9 +95,9 @@ char *Strtoc(String *s) {
 }
 
 /*
- * Build very temporary String from wchar_t*
+ * Build very temporary String from Rune*
  */
-String *tmprstr(wchar_t *r, int n) {
+String *tmprstr(Rune *r, int n) {
 	static String p = {0};
 
 	p.s = r;
@@ -113,7 +113,7 @@ String *tmpcstr(char *s) {
 	String *p = emalloc(sizeof(String));
 	p->n = utflen(s);
 	p->size = p->n + 1;
-	p->s = calloc(p->size, sizeof(wchar_t));
+	p->s = calloc(p->size, sizeof(Rune));
 	if (mbstowcs(p->s, s, p->n) == (size_t)-1) {
 		panic("encoding 2");
 	}

@@ -12,40 +12,40 @@
 #include <stdarg.h>
 #endif
 
-wchar_t	       samname[] = {'~', '~', 's', 'a', 'm', '~', '~', 0};
+Rune	    samname[] = {'~', '~', 's', 'a', 'm', '~', '~', 0};
 
-static wchar_t l1[] = {'{', '[', '(', '<', 0253, 0};
-static wchar_t l2[] = {'\n', 0};
-static wchar_t l3[] = {'\'', '"', '`', 0};
-wchar_t	      *left[] = {l1, l2, l3, 0};
+static Rune l1[] = {'{', '[', '(', '<', 0253, 0};
+static Rune l2[] = {'\n', 0};
+static Rune l3[] = {'\'', '"', '`', 0};
+Rune	   *left[] = {l1, l2, l3, 0};
 
-static wchar_t r1[] = {'}', ']', ')', '>', 0273, 0};
-static wchar_t r2[] = {'\n', 0};
-static wchar_t r3[] = {'\'', '"', '`', 0};
-wchar_t	      *right[] = {r1, r2, r3, 0};
+static Rune r1[] = {'}', ']', ')', '>', 0273, 0};
+static Rune r2[] = {'\n', 0};
+static Rune r3[] = {'\'', '"', '`', 0};
+Rune	   *right[] = {r1, r2, r3, 0};
 
-void	       print_ss(char *s, String *a, String *b) {
-	  char	  *ap, *bp, *cp;
-	  wchar_t *rp;
+void	    print_ss(char *s, String *a, String *b) {
+	       char *ap, *bp, *cp;
+	       Rune *rp;
 
-	  ap = emalloc(a->n + 1);
-	  for (cp = ap, rp = a->s; *rp; rp++) {
-		  cp += runetochar(cp, *rp);
-	  }
-	  *cp = 0;
-	  bp = emalloc(b->n + 1);
-	  for (cp = bp, rp = b->s; *rp; rp++) {
-		  cp += runetochar(cp, *rp);
-	  }
-	  *cp = 0;
-	  dprint(L"?warning: %s `%.*s' and `%.*s'\n", s, a->n, ap, b->n, bp);
-	  free(ap);
-	  free(bp);
+	       ap = emalloc(a->n + 1);
+	       for (cp = ap, rp = a->s; *rp; rp++) {
+		       cp += runetochar(cp, *rp);
+	       }
+	       *cp = 0;
+	       bp = emalloc(b->n + 1);
+	       for (cp = bp, rp = b->s; *rp; rp++) {
+		       cp += runetochar(cp, *rp);
+	       }
+	       *cp = 0;
+	       dprint(L"?warning: %s `%.*s' and `%.*s'\n", s, a->n, ap, b->n, bp);
+	       free(ap);
+	       free(bp);
 }
 
 void print_s(char *s, String *a) {
-	char	*ap, *cp;
-	wchar_t *rp;
+	char *ap, *cp;
+	Rune *rp;
 
 	ap = emalloc(a->n + 1);
 	for (cp = ap, rp = a->s; *rp; rp++) {
@@ -163,9 +163,9 @@ void *erealloc(void *p, uint64_t n) {
 	return p;
 }
 
-void dprint(wchar_t *z, ...) {
+void dprint(Rune *z, ...) {
 	va_list args;
-	wchar_t buf[BLOCKSIZE + 1] = {0};
+	Rune	buf[BLOCKSIZE + 1] = {0};
 
 	va_start(args, z);
 	vswprintf(buf, BLOCKSIZE, z, args);

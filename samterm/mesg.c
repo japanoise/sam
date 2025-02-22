@@ -412,7 +412,7 @@ void outTsl(Tmesg type, int s1, int64_t l1) {
 	outsend();
 }
 
-void outTslS(Tmesg type, int s1, int64_t l1, wchar_t *s) {
+void outTslS(Tmesg type, int s1, int64_t l1, Rune *s) {
 	char  buf[DATASIZE * 3 + 1];
 	char *c;
 
@@ -490,7 +490,7 @@ void horigin(int m, int64_t p0, Flayer *l) {
 	l = l ? l : &t->l[t->front];
 	int64_t	 a;
 	uint64_t n;
-	wchar_t *r;
+	Rune	*r;
 
 	if (getlayer(l, t) < 0) {
 		return; /* the user managed to close the layer during the round
@@ -528,11 +528,11 @@ void hmoveto(int m, int64_t p0, Flayer *l) {
 }
 
 void hcheck(int m) {
-	Flayer	*l;
-	Text	*t;
-	int	 reqd = 0, i;
-	int64_t	 n, nl, a;
-	wchar_t *r;
+	Flayer *l;
+	Text   *t;
+	int	reqd = 0, i;
+	int64_t n, nl, a;
+	Rune   *r;
 
 	if (m == Untagged) {
 		return;
@@ -671,7 +671,7 @@ void hgrow(int m, int64_t a, int64_t new, bool req) {
 	}
 }
 
-int hdata1(Text *t, int64_t a, wchar_t *r, int len) {
+int hdata1(Text *t, int64_t a, Rune *r, int len) {
 	int	i;
 	Flayer *l;
 	int64_t o, b;
@@ -694,9 +694,9 @@ int hdata1(Text *t, int64_t a, wchar_t *r, int len) {
 }
 
 int hdata(int m, int64_t a, uint8_t *s, int len) {
-	int	i, w;
-	Text   *t = whichtext(m);
-	wchar_t buf[DATASIZE], *r;
+	int   i, w;
+	Text *t = whichtext(m);
+	Rune  buf[DATASIZE], *r;
 
 	if (t->lock) {
 		--t->lock;
@@ -711,7 +711,7 @@ int hdata(int m, int64_t a, uint8_t *s, int len) {
 	return hdata1(t, a, buf, r - buf);
 }
 
-int hdatarune(int m, int64_t a, wchar_t *r, int len) {
+int hdatarune(int m, int64_t a, Rune *r, int len) {
 	Text *t = whichtext(m);
 
 	if (t->lock) {
