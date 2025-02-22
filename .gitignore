@@ -6,3 +6,10 @@ samterm/samterm
 ssam/ssam
 .cache/
 compile_commands.json
+libutf/runetype/isalpharune.c
+libutf/runetype/iscntrlrune.c
+libutf/runetype/isdigitrune.c
+libutf/runetype/islowerrune.c
+libutf/runetype/isspacerune.c
+libutf/runetype/istitlerune.c
+libutf/runetype/isupperrune.c
