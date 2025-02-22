@@ -124,7 +124,7 @@ void rresize(Rasp *r, int64_t a, int64_t old, int64_t new) {
 	r->nrunes += new - old;
 }
 
-void rdata(Rasp *r, int64_t p0, int64_t p1, wchar_t *cp) {
+void rdata(Rasp *r, int64_t p0, int64_t p1, Rune *cp) {
 	Section *s, *t, *ns;
 
 	s = findsect(r, r->sect, 0L, p0);
@@ -161,13 +161,13 @@ void rclean(Rasp *r) {
 	}
 }
 
-void Strcpy(wchar_t *to, wchar_t *from) {
+void Strcpy(Rune *to, Rune *from) {
 	do
 		;
 	while ((*to++ = *from++));
 }
 
-wchar_t *rload(Rasp *r, uint64_t p0, uint64_t p1, uint64_t *nrp) {
+Rune *rload(Rasp *r, uint64_t p0, uint64_t p1, uint64_t *nrp) {
 	Section *s;
 	int64_t	 p;
 	int	 n, nb;
@@ -248,7 +248,7 @@ int rcontig(Rasp *r, uint64_t p0, uint64_t p1, bool text) {
 	return np;
 }
 
-void Strgrow(wchar_t **s, int64_t *n,
+void Strgrow(Rune **s, int64_t *n,
 	     int want) /* can always toss the old data when called */
 {
 	if (*n >= want) {

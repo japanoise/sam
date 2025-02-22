@@ -19,7 +19,7 @@ XLIBS=-lXt -lX11 -lXft -lXi
 
 CFLAGS+=$(INCS) $(STANDARDS) $(INCLUDES)
 
-LIBS=../libframe/libframe.a ../libXg/libXg.a
+LIBS=../libframe/libframe.a ../libXg/libXg.a ../libutf/libutf.a
 CC?=c99
 
 OBJ=main.o flayer.o  io.o menu.o mesg.o rasp.o samrc.o scroll.o unix.o

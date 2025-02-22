@@ -11,7 +11,7 @@ extern uint64_t _bgpixel;
 extern void	hmoveto(int, int64_t, Flayer *);
 
 Text		cmd;
-wchar_t	       *scratch;
+Rune	       *scratch;
 int64_t		nscralloc;
 extern Bitmap	screen;
 unsigned int	cursor;
@@ -262,7 +262,7 @@ Flayer *findl(Text *t) {
 void duplicate(Flayer *l, Rectangle r, XftFont *f, int close) {
 	Text	*t = (Text *)l->user1;
 	Flayer	*nl = findl(t);
-	wchar_t *rp;
+	Rune	*rp;
 	uint64_t n;
 
 	if (nl) {
@@ -411,10 +411,10 @@ int64_t ctlu(Rasp *r, int64_t o, int64_t p) {
 }
 
 int64_t indent(Flayer *l, long p) {
-	Text	      *t = (Text *)l->user1;
-	static wchar_t sbuf[7] = {' ', ' ', ' ', ' ', ' ', ' ', ' '};
-	static wchar_t tbuf[7] = {'\t', '\t', '\t', '\t', '\t', '\t', '\t'};
-	int	       i, is, it, q, c, space;
+	Text	   *t = (Text *)l->user1;
+	static Rune sbuf[7] = {' ', ' ', ' ', ' ', ' ', ' ', ' '};
+	static Rune tbuf[7] = {'\t', '\t', '\t', '\t', '\t', '\t', '\t'};
+	int	    i, is, it, q, c, space;
 
 	q = p - 1;
 	is = 0;
@@ -960,9 +960,9 @@ void type(
     Flayer *l) /* what a bloody mess this is -- but it's getting better! */
 {
 	Text	 *t = (Text *)l->user1;
-	wchar_t	  buf[100];
+	Rune	  buf[100];
 	Keystroke k = {0};
-	wchar_t	 *p = buf;
+	Rune	 *p = buf;
 	int64_t	  a;
 
 	if (lock || t->lock) {
@@ -1064,7 +1064,7 @@ void panic(char *s) {
 	abort();
 }
 
-wchar_t *stgettext(Flayer *l, int64_t n, uint64_t *np) {
+Rune *stgettext(Flayer *l, int64_t n, uint64_t *np) {
 	Text *t;
 
 	t = l->user1;

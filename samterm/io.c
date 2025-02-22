@@ -109,7 +109,7 @@ int getch(void) {
 }
 
 int externchar(void) {
-	wchar_t r;
+	Rune r;
 
 loop:
 	if (got & (Eextern & ~block)) {

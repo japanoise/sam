@@ -4,10 +4,10 @@
 #include "sam.h"
 #include "parse.h"
 
-static wchar_t linex[] = L"\n";
-static wchar_t wordx[] = L" \t\n";
+static Rune   linex[] = L"\n";
+static Rune   wordx[] = L" \t\n";
 
-struct cmdtab  cmdtab[] = {
+struct cmdtab cmdtab[] = {
     /*  cmdc    text    regexp  addr defcmd defaddr count   token    keepslash
 	 fn */
     {'\n', 0, 0, 0, 0, aDot, 0, 0, 0, nl_cmd},
@@ -46,39 +46,39 @@ struct cmdtab  cmdtab[] = {
 
     {0, 0, 0, 0, 0, 0, 0, 0},
 };
-Cmd	*parsecmd(int);
-Addr	*compoundaddr(void);
-Addr	*simpleaddr(void);
-void	 freecmd(void);
-void	 okdelim(int);
+Cmd  *parsecmd(int);
+Addr *compoundaddr(void);
+Addr *simpleaddr(void);
+void  freecmd(void);
+void  okdelim(int);
 
-wchar_t	 line[BLOCKSIZE];
-wchar_t	 termline[BLOCKSIZE];
-wchar_t *linep = line;
-wchar_t *terminp = termline;
-wchar_t *termoutp = termline;
-List	 cmdlist;
-List	 addrlist;
-List	 relist;
-List	 stringlist;
-bool	 eof;
+Rune  line[BLOCKSIZE];
+Rune  termline[BLOCKSIZE];
+Rune *linep = line;
+Rune *terminp = termline;
+Rune *termoutp = termline;
+List  cmdlist;
+List  addrlist;
+List  relist;
+List  stringlist;
+bool  eof;
 
-void	 freecmdlists(void) {
-	    if (cmdlist.listptr) {
-		    free(cmdlist.listptr);
-	    }
+void  freecmdlists(void) {
+	 if (cmdlist.listptr) {
+		 free(cmdlist.listptr);
+	 }
 
-	    if (addrlist.listptr) {
-		    free(addrlist.listptr);
-	    }
+	 if (addrlist.listptr) {
+		 free(addrlist.listptr);
+	 }
 
-	    if (relist.listptr) {
-		    free(relist.listptr);
-	    }
+	 if (relist.listptr) {
+		 free(relist.listptr);
+	 }
 
-	    if (stringlist.listptr) {
-		    free(stringlist.listptr);
-	    }
+	 if (stringlist.listptr) {
+		 free(stringlist.listptr);
+	 }
 }
 
 void resetcmd(void) {
@@ -89,7 +89,7 @@ void resetcmd(void) {
 }
 
 int inputc(void) {
-	wchar_t r = 0;
+	Rune r = 0;
 
 Again:
 	if (downloaded) {
@@ -356,7 +356,7 @@ void getrhs(String *s, int delim, int cmd) {
 	ungetch(); /* let client read whether delimeter, '\n' or whatever */
 }
 
-String *collecttoken(wchar_t *end, bool keepslash) {
+String *collecttoken(Rune *end, bool keepslash) {
 	String *s = newstring();
 	int	c;
 	bool	esc = false;
@@ -374,7 +374,7 @@ String *collecttoken(wchar_t *end, bool keepslash) {
 			if (keepslash) {
 				Straddc(s, c);
 			}
-		} else if (wcschr(end, (wchar_t)c) != NULL) {
+		} else if (wcschr(end, (Rune)c) != NULL) {
 			break;
 		} else {
 			Straddc(s, c);

@@ -39,7 +39,7 @@ int64_t strwidth(XftFont *f, char *s) {
 	return extents.xOff;
 }
 
-int64_t charwidth(XftFont *f, wchar_t r) {
+int64_t charwidth(XftFont *f, Rune r) {
 	char chars[MB_LEN_MAX + 1] = {0};
 
 	if (runetochar(chars, r) < 0) {

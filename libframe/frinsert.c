@@ -7,7 +7,7 @@
 #define TMPSIZE 256
 static Frame frame;
 
-static Point bxscan(Frame *f, wchar_t *sp, wchar_t *ep, Point *ppt) {
+static Point bxscan(Frame *f, Rune *sp, Rune *ep, Point *ppt) {
 	int	 w, c, nb, delta, nl, nr, rw;
 	Frbox	*b;
 	char	*s, tmp[TMPSIZE + 3]; /* +3 for rune overflow */
@@ -96,7 +96,7 @@ static void chopframe(Frame *f, Point pt, uint64_t p, int bn) {
 	}
 }
 
-void frinsert(Frame *f, wchar_t *sp, wchar_t *ep, uint64_t p0) {
+void frinsert(Frame *f, Rune *sp, Rune *ep, uint64_t p0) {
 	Point	  pt0, pt1, ppt0, ppt1, pt;
 	Frbox	 *b;
 	int	  n, n0, nn0, y;

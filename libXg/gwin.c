@@ -237,7 +237,7 @@ static void Keyaction(Widget w, XEvent *e, String *p, Cardinal *np) {
 	Charfunc   f;
 	Modifiers  md;
 	Status	   s;
-	wchar_t	   buf[32] = {0};
+	Rune	   buf[32] = {0};
 
 	c = 0;
 	len = 0;

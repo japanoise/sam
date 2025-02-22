@@ -22,6 +22,7 @@ SHELLPATH=/bin/sh
 
 CFLAGS+=$(STANDARDS) $(INCS) $(INCLUDES) -DRXPATH='"$(RXPATH)"'
 
+LIBS=../libutf/libutf.a
 CC?=c99
 
 OBJ=sam.o address.o buffer.o cmd.o error.o file.o io.o \
@@ -30,8 +31,8 @@ OBJ=sam.o address.o buffer.o cmd.o error.o file.o io.o \
 
 all:    sam
 
-sam:	$(OBJ)
-	$(CC) -o sam $(OBJ) $(LDFLAGS)
+sam:	$(OBJ) $(LIBS)
+	$(CC) -o sam $(OBJ) $(LIBS) $(LDFLAGS)
 
 clean:
 	rm -f *.o core sam

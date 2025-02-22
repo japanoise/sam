@@ -8,7 +8,7 @@
  */
 
 #define BLOCKSIZE 2048
-#define RUNESIZE sizeof(wchar_t)
+#define RUNESIZE sizeof(Rune)
 #define NDISC 5
 #define NBUFFILES 3 + 2 * NDISC /* plan 9+undo+snarf+NDISC*(transcript+buf) */
 #define NSUBEXP 10
@@ -69,9 +69,9 @@ struct List {
 #define listval g.listv
 
 struct String {
-	int16_t	 n;
-	int16_t	 size;
-	wchar_t *s;
+	int16_t n;
+	int16_t size;
+	Rune   *s;
 };
 
 struct Gapbuffer;
@@ -108,7 +108,7 @@ struct File {
 	int64_t	  date;	    /* time stamp of plan9 file */
 	Posn	  cp1, cp2; /* Write-behind cache positions and */
 	String	  cache;    /* string */
-	wchar_t	  getcbuf[NGETC];
+	Rune	  getcbuf[NGETC];
 	char	  mbbuf[BUFSIZ]; /* partial character during read */
 	size_t	  mblen;	 /* number of bytes in partial character */
 	mbstate_t ps;		 /* state of multibyte decoding */
@@ -162,10 +162,10 @@ void	Bdelete(Buffer *, Posn, Posn);
 void	Bflush(Buffer *);
 void	Binsert(Buffer *, String *, Posn);
 Buffer *Bopen(void);
-int	Bread(Buffer *, wchar_t *, int, Posn);
+int	Bread(Buffer *, Rune *, int, Posn);
 int	Fbgetcload(File *, Posn);
 int	Fbgetcset(File *, Posn);
-int64_t Fchars(File *, wchar_t *, Posn, Posn);
+int64_t Fchars(File *, Rune *, Posn, Posn);
 void	Fclose(File *);
 void	Fdelete(File *, Posn, Posn);
 int	Fgetcload(File *, Posn);
@@ -191,7 +191,7 @@ void delete(File *);
 void	delfile(File *);
 void	dellist(List *, int);
 void	doubleclick(File *, Posn);
-void	dprint(wchar_t *, ...);
+void	dprint(Rune *, ...);
 void	edit(File *, int);
 void   *emalloc(uint64_t);
 void   *erealloc(void *, uint64_t);
@@ -243,27 +243,27 @@ void	startup(char *, bool, bool);
 void	state(File *, state_t);
 int	statfd(int, uint64_t *, uint64_t *, int64_t *, int64_t *, int64_t *);
 int   statfile(char *, uint64_t *, uint64_t *, int64_t *, int64_t *, int64_t *);
-void  Straddc(String *, wchar_t);
+void  Straddc(String *, Rune);
 void  Strclose(String *);
 int   Strcmp(String *, String *);
 void  Strdelete(String *, Posn, Posn);
-void  Strdupl(String *, wchar_t *);
+void  Strdupl(String *, Rune *);
 void  Strduplstr(String *, String *);
 void  Strinit(String *);
 void  Strinit0(String *);
 void  Strinsert(String *, String *, Posn);
 void  Strinsure(String *, uint64_t);
 void  Strzero(String *);
-int   Strlen(wchar_t *);
+int   Strlen(Rune *);
 char *Strtoc(String *);
 void  syserror(char *);
 void  telldot(File *);
 void  tellpat(void);
 String	       *tmpcstr(char *);
-String	       *tmprstr(wchar_t *, int);
+String	       *tmprstr(Rune *, int);
 void		freetmpstr(String *);
 void		termcommand(void);
-void		termwrite(wchar_t *);
+void		termwrite(Rune *);
 File	       *tofile(String *);
 void		toterminal(File *, int);
 void		trytoclose(File *);
@@ -282,15 +282,15 @@ void		flushio(void);
 bool		canlocksocket(const char *);
 int		mkdir_p(const char *path, mode_t mode);
 
-extern wchar_t	samname[]; /* compiler dependent */
-extern wchar_t *left[];
-extern wchar_t *right[];
+extern Rune	samname[]; /* compiler dependent */
+extern Rune    *left[];
+extern Rune    *right[];
 
 extern char    *rsamname; /* globals */
 extern char    *samterm;
 extern char    *sh;
 extern char    *shpath;
-extern wchar_t	genbuf[];
+extern Rune	genbuf[];
 extern char    *genc;
 extern FILE    *io;
 extern bool	patset;
@@ -317,7 +317,7 @@ extern bool	downloaded;
 extern bool	eof;
 extern bool	bpipeok;
 extern bool	panicking;
-extern wchar_t	empty[];
+extern Rune	empty[];
 extern int	termlocked;
 extern bool	noflush;
 

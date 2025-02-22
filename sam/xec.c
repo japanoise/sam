@@ -22,8 +22,8 @@ int  cmdexec(File *f, Cmd *cp) {
 		 load(f);
 	 }
 	 if (f == 0 && (cp->addr == 0 || cp->addr->type != '"') &&
-	     !wcschr(L"bBnqUXY!", (wchar_t)cp->cmdc) &&
-	     cp->cmdc != ('c' | 0x100) && !(cp->cmdc == 'D' && cp->ctext)) {
+	     !wcschr(L"bBnqUXY!", (Rune)cp->cmdc) && cp->cmdc != ('c' | 0x100) &&
+	     !(cp->cmdc == 'D' && cp->ctext)) {
 		 error(Enofile);
 	 }
 	 i = lookup(cp->cmdc);

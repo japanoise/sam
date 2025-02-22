@@ -173,7 +173,7 @@ extern void	 bitblt(Bitmap *, Point, Bitmap *, Rectangle, Fcode);
 
 extern Point	 string(Bitmap *, Point, XftFont *, char *, Fcode);
 extern int64_t	 strwidth(XftFont *, char *);
-extern int64_t	 charwidth(XftFont *, wchar_t);
+extern int64_t	 charwidth(XftFont *, Rune);
 extern void	 texture(Bitmap *, Rectangle, Bitmap *, Fcode);
 extern void	 wrbitmap(Bitmap *, int, int, unsigned char *);
 extern int	 ptinrect(Point, Rectangle);

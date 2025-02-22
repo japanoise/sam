@@ -9,10 +9,10 @@ typedef size_t		 pos_t;
 typedef struct Gapbuffer Gapbuffer;
 
 struct Gapbuffer {
-	size_t	 size;
-	pos_t	 gs;
-	pos_t	 ge;
-	wchar_t *buf;
+	size_t size;
+	pos_t  gs;
+	pos_t  ge;
+	Rune  *buf;
 };
 
 static void movegap(Gapbuffer *b, pos_t p) {
@@ -54,7 +54,7 @@ static void deletebuffer(Gapbuffer *b, pos_t p, size_t l) {
 	b->ge += l;
 }
 
-static size_t readbuffer(Gapbuffer *b, pos_t p, size_t l, wchar_t *c) {
+static size_t readbuffer(Gapbuffer *b, pos_t p, size_t l, Rune *c) {
 	size_t r = 0;
 
 	if (p < b->gs) {
@@ -78,7 +78,7 @@ static size_t readbuffer(Gapbuffer *b, pos_t p, size_t l, wchar_t *c) {
 	return r;
 }
 
-static void insertbuffer(Gapbuffer *b, pos_t p, const wchar_t *s, size_t l) {
+static void insertbuffer(Gapbuffer *b, pos_t p, const Rune *s, size_t l) {
 	ensuregap(b, l);
 	movegap(b, p);
 	wmemcpy(b->buf + b->gs, s, l);
@@ -117,7 +117,7 @@ void Bterm(Buffer *b) {
 }
 
 /* XXX - modify at call sites to use the internal functions */
-int Bread(Buffer *b, wchar_t *c, int l, Posn p) {
+int Bread(Buffer *b, Rune *c, int l, Posn p) {
 	if (p + l > b->nrunes) {
 		l = b->nrunes - p;
 	}

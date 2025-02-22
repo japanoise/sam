@@ -24,7 +24,7 @@ void		 lldelete(Flayer *);
 
 void		 flstart(Rectangle r) { lDrect = r; }
 
-void flnew(Flayer *l, wchar_t *(*fn)(Flayer *, int64_t, uint64_t *), int u0,
+void flnew(Flayer *l, Rune *(*fn)(Flayer *, int64_t, uint64_t *), int u0,
 	   void *u1) {
 	if (nllist == nlalloc) {
 		nlalloc += DELTA;
@@ -200,7 +200,7 @@ void lldelete(Flayer *l) {
 	panic("lldelete");
 }
 
-void flinsert(Flayer *l, wchar_t *sp, wchar_t *ep, int64_t p0) {
+void flinsert(Flayer *l, Rune *sp, Rune *ep, int64_t p0) {
 	if (flprepare(l)) {
 		frinsert(&l->f, sp, ep, p0 - l->origin);
 		scrdraw(l, scrtotal(l));
@@ -355,7 +355,7 @@ void flreshape(Rectangle dr) {
 int flprepare(Flayer *l) {
 	Frame	*f;
 	uint64_t n;
-	wchar_t *r;
+	Rune	*r;
 
 	if (l->visible == None) {
 		return 0;
