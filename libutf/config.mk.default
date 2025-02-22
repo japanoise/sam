@@ -1,0 +1,11 @@
+# See LICENSE file for copyright and license details.
+
+PREFIX = /usr/local
+
+UNICODE = 16.0.0
+
+CFLAGS  = -ansi -pedantic -I../include -Os -Wall -Wextra
+LDFLAGS = -s
+
+CC  = cc
+AWK = awk

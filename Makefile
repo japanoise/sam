@@ -6,10 +6,13 @@
 
 MODE?=user
 
-all:    config.mk lXg lframe samdir samtermdir docdir
+all:    config.mk lXg lframe libutf samdir samtermdir docdir
 
 config.mk:
 	cp config.mk.def config.mk
+
+libutf:
+	cd libutf; $(MAKE)
 
 lXg:
 	cd libXg; $(MAKE)
