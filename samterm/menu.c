@@ -274,7 +274,7 @@ void setpat(char *s) {
 bool haspat(void) { return (bool)(menu2str[Search]); }
 
 #define NBUF 64
-static uint8_t buf[NBUF * MB_LEN_MAX] = {' ', ' ', ' ', ' '};
+static uint8_t buf[NBUF * UTFmax] = {' ', ' ', ' ', ' '};
 
 char	      *paren(char *s) {
 	 uint8_t *t = buf;
