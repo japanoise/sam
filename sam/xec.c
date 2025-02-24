@@ -1,9 +1,9 @@
-/* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
 #include "sam.h"
 #include "parse.h"
 
 int  Glooping;
 int  nest;
+int  newcur;
 
 bool append(File *, Cmd *, Posn);
 bool display(File *);
@@ -18,11 +18,11 @@ int  cmdexec(File *f, Cmd *cp) {
 	 Addr	*ap;
 	 Address a;
 
-	 if (f && f->state == Unread) {
+	 if (f && f->unread) {
 		 load(f);
 	 }
 	 if (f == 0 && (cp->addr == 0 || cp->addr->type != '"') &&
-	     !wcschr(L"bBnqUXY!", (Rune)cp->cmdc) && cp->cmdc != ('c' | 0x100) &&
+	     !utfrune("bBnqUXY!^M", cp->cmdc) && cp->cmdc != ('c' | 0x100) &&
 	     !(cp->cmdc == 'D' && cp->ctext)) {
 		 error(Enofile);
 	 }
@@ -71,23 +71,34 @@ int  cmdexec(File *f, Cmd *cp) {
 bool a_cmd(File *f, Cmd *cp) { return append(f, cp, addr.r.p2); }
 
 bool b_cmd(File *f, Cmd *cp) {
-	f = cp->cmdc == 'b' ? tofile(cp->ctext) : getfile(cp->ctext);
-	if (f->state == Unread) {
+	String *s;
+	s = cp->ctext;
+	if (nest > 0 && s->s[0] == 0) {
+		if (f == NULL) {
+			return true;
+		}
+		tofile(&f->name, 0);
+		current(f);
+		newcur = 1;
+	} else {
+		f = cp->cmdc == 'b' ? tofile(s, 1) : getfile(s);
+	}
+	if (f->unread) {
 		load(f);
-	} else if (nest == 0) {
+	} else if (nest == 0 || newcur) {
 		filename(f);
 	}
 	return true;
 }
 
 bool c_cmd(File *f, Cmd *cp) {
-	Fdelete(f, addr.r.p1, addr.r.p2);
+	logdelete(f, addr.r.p1, addr.r.p2);
 	f->ndot.r.p1 = f->ndot.r.p2 = addr.r.p2;
 	return append(f, cp, addr.r.p2);
 }
 
 bool d_cmd(File *f, Cmd *cp) {
-	Fdelete(f, addr.r.p1, addr.r.p2);
+	logdelete(f, addr.r.p1, addr.r.p2);
 	f->ndot.r.p1 = f->ndot.r.p2 = addr.r.p1;
 	return true;
 }
@@ -142,6 +153,25 @@ bool m_cmd(File *f, Cmd *cp) {
 	return true;
 }
 
+/*
+ * https://man.9front.org/1/sam
+ *
+ *  * M command
+ *      Toggle the appearance of a menu entry for the
+ *      command in the button 2 menu.  Selecting the
+ *      entry with button 2 will run the command.
+ */
+/*
+bool M_cmd(File *f, Cmd *cp) {
+	if (downloaded) {
+		outTS(Hmenucmd, cp->ctext);
+	} else {
+		dprint("not downloaded\n");
+	}
+	return true;
+}
+*/
+
 bool n_cmd(File *f, Cmd *cp) {
 	int i;
 	for (i = 0; i < file.nused; i++) {
@@ -173,8 +203,7 @@ bool q_cmd(File *f, Cmd *cp) {
 
 bool s_cmd(File *f, Cmd *cp) {
 	int  i, j, c, n;
-	Posn p1, op, delta = 0;
-	bool didsub = false;
+	Posn p1, op, didsub = 0, delta = 0;
 
 	n = cp->num;
 	op = -1;
@@ -204,8 +233,8 @@ bool s_cmd(File *f, Cmd *cp) {
 					    BLOCKSIZE) {
 						error(Elongtag);
 					}
-					Fchars(f, genbuf, sel.p[j].p1,
-					       sel.p[j].p2);
+					bufread(&f->buf, sel.p[j].p1, genbuf,
+						sel.p[j].p2 - sel.p[j].p1);
 					Strinsert(
 					    &genstr,
 					    tmprstr(genbuf, (sel.p[j].p2 -
@@ -220,7 +249,8 @@ bool s_cmd(File *f, Cmd *cp) {
 				if (sel.p[0].p2 - sel.p[0].p1 > BLOCKSIZE) {
 					error(Elongrhs);
 				}
-				Fchars(f, genbuf, sel.p[0].p1, sel.p[0].p2);
+				bufread(&f->buf, sel.p[0].p1, genbuf,
+					sel.p[0].p2 - sel.p[0].p1);
 				Strinsert(&genstr,
 					  tmprstr(genbuf, (int)(sel.p[0].p2 -
 								sel.p[0].p1)),
@@ -228,14 +258,14 @@ bool s_cmd(File *f, Cmd *cp) {
 			}
 		}
 		if (sel.p[0].p1 != sel.p[0].p2) {
-			Fdelete(f, sel.p[0].p1, sel.p[0].p2);
+			logdelete(f, sel.p[0].p1, sel.p[0].p2);
 			delta -= sel.p[0].p2 - sel.p[0].p1;
 		}
 		if (genstr.n) {
-			Finsert(f, &genstr, sel.p[0].p2);
+			loginsert(f, sel.p[0].p2, genstr.s, genstr.n);
 			delta += genstr.n;
 		}
-		didsub = true;
+		didsub = 1;
 		if (!cp->flag) {
 			break;
 		}
@@ -249,18 +279,28 @@ bool s_cmd(File *f, Cmd *cp) {
 
 bool u_cmd(File *f, Cmd *cp) {
 	int n;
+
 	n = cp->num;
-	while (n-- && undo())
-		;
+	if (n >= 0) {
+		while (n-- && undo(true))
+			;
+	} else {
+		while (n++ && undo(false))
+			;
+	}
+	moveto(f, f->dot.r);
 	return true;
 }
 
 bool w_cmd(File *f, Cmd *cp) {
-	if (f == cmd) {
-		return true;
-	}
+	int fseq;
+
+	fseq = f->seq;
 	if (getname(f, cp->ctext, false) == 0) {
 		error(Enoname);
+	}
+	if (fseq == seq) {
+		error_s(Ewseq, genc);
 	}
 	writef(f);
 	return true;
@@ -305,10 +345,13 @@ bool eq_cmd(File *f, Cmd *cp) {
 }
 
 bool nl_cmd(File *f, Cmd *cp) {
+	Address a;
+
 	if (cp->addr == 0) {
 		/* First put it on newline boundaries */
 		addr = lineaddr((Posn)0, f->dot, -1);
-		addr.r.p2 = lineaddr((Posn)0, f->dot, 1).r.p2;
+		a = lineaddr((Posn)0, f->dot, 1);
+		addr.r.p2 = a.r.p2;
 		if (addr.r.p1 == f->dot.r.p1 && addr.r.p2 == f->dot.r.p2) {
 			addr = lineaddr((Posn)1, f->dot, 1);
 		}
@@ -331,7 +374,7 @@ bool append(File *f, Cmd *cp, Posn p) {
 		--cp->ctext->n;
 	}
 	if (cp->ctext->n > 0) {
-		Finsert(f, cp->ctext, p);
+		loginsert(f, p, cp->ctext->s, cp->ctext->n);
 	}
 	f->ndot.r.p1 = p;
 	f->ndot.r.p2 = p + cp->ctext->n;
@@ -339,27 +382,33 @@ bool append(File *f, Cmd *cp, Posn p) {
 }
 
 bool display(File *f) {
-	Posn p1, p2;
-	int  np, n;
+	Posn  p1, p2;
+	int   np;
+	char *c;
 
 	p1 = addr.r.p1;
 	p2 = addr.r.p2;
+	if (p2 > f->buf.nc) {
+		fprintf(stderr, "bad display addr p1=%ld p2=%ld f->buf.nc=%d\n",
+			p1, p2,
+			f->buf.nc); /*ZZZ should never happen, can remove */
+		p2 = f->buf.nc;
+	}
 	while (p1 < p2) {
 		np = p2 - p1;
 		if (np > BLOCKSIZE - 1) {
 			np = BLOCKSIZE - 1;
 		}
-		n = Fchars(f, genbuf, p1, p1 + np);
-		if (n <= 0) {
-			panic("display");
-		}
-		genbuf[n] = 0;
+		bufread(&f->buf, p1, genbuf, np);
+		genbuf[np] = 0;
+		c = Strtoc(tmprstr(genbuf, np + 1));
 		if (downloaded) {
-			termwrite(genbuf);
+			termwrite(c);
 		} else {
-			fprintf(stdout, "%ls", genbuf);
+			Write(stdout, c, strlen(c));
 		}
-		p1 += n;
+		free(c);
+		p1 += np;
 	}
 	f->dot = addr;
 	return true;
@@ -407,7 +456,7 @@ void looper(File *f, Cmd *cp, int xy) {
 void linelooper(File *f, Cmd *cp) {
 	Posn	p;
 	Range	r, linesel;
-	Address a3;
+	Address a, a3;
 
 	nest++;
 	r = addr.r;
@@ -415,11 +464,12 @@ void linelooper(File *f, Cmd *cp) {
 	a3.r.p1 = a3.r.p2 = r.p1;
 	for (p = r.p1; p < r.p2; p = a3.r.p2) {
 		a3.r.p1 = a3.r.p2;
-		/*pjw       if(p!=r.p1 || (linesel = lineaddr((Posn)0, a3,
+		/*pjw		if(p!=r.p1 || (linesel = lineaddr((Posn)0, a3,
 		 * 1)).r.p2==p)*/
-		if (p != r.p1 ||
-		    ((linesel = lineaddr((Posn)0, a3, 1).r), linesel.p2 == p)) {
-			linesel = lineaddr((Posn)1, a3, 1).r;
+		if (p != r.p1 || (a = lineaddr((Posn)0, a3, 1), linesel = a.r,
+				  linesel.p2 == p)) {
+			a = lineaddr((Posn)1, a3, 1);
+			linesel = a.r;
 		}
 		if (linesel.p1 >= r.p2) {
 			break;
@@ -450,6 +500,7 @@ void filelooper(Cmd *cp, int XY) {
 	nest++;
 	settempfile();
 	cur = curfile;
+	newcur = 0;
 	for (i = 0; i < tempfile.nused; i++) {
 		f = tempfile.filepptr[i];
 		if (f == cmd) {
@@ -459,7 +510,8 @@ void filelooper(Cmd *cp, int XY) {
 			cmdexec(f, cp->ccmd);
 		}
 	}
-	if (cur && whichmenu(cur) >= 0) { /* check that cur is still a file */
+	if (newcur == 0 && cur &&
+	    whichmenu(cur) >= 0) { /* check that cur is still a file */
 		current(cur);
 	}
 	--Glooping;

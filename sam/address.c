@@ -1,4 +1,3 @@
-/* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
 #include "sam.h"
 #include "parse.h"
 
@@ -27,7 +26,7 @@ Address address(Addr *ap, Address a, int sign) {
 			break;
 
 		case '$':
-			a.r.p1 = a.r.p2 = f->nrunes;
+			a.r.p1 = a.r.p2 = f->buf.nc;
 			break;
 
 		case '\'':
@@ -49,13 +48,13 @@ Address address(Addr *ap, Address a, int sign) {
 		case '"':
 			a = matchfile(ap->are)->dot;
 			f = a.f;
-			if (f->state == Unread) {
+			if (f->unread) {
 				load(f);
 			}
 			break;
 
 		case '*':
-			a.r.p1 = 0, a.r.p2 = f->nrunes;
+			a.r.p1 = 0, a.r.p2 = f->buf.nc;
 			return a;
 
 		case ',':
@@ -67,12 +66,13 @@ Address address(Addr *ap, Address a, int sign) {
 			}
 			if (ap->type == ';') {
 				f = a1.f;
-				f->dot = a = a1;
+				a = a1;
+				f->dot = a1;
 			}
 			if (ap->next) {
 				a2 = address(ap->next, a, 0);
 			} else {
-				a2.f = a.f, a2.r.p1 = a2.r.p2 = f->nrunes;
+				a2.f = a.f, a2.r.p1 = a2.r.p2 = f->buf.nc;
 			}
 			if (a1.f != a2.f) {
 				error(Eorder);
@@ -109,7 +109,7 @@ void nextmatch(File *f, String *r, Posn p, int sign) {
 			error(Esearch);
 		}
 		if (sel.p[0].p1 == sel.p[0].p2 && sel.p[0].p1 == p) {
-			if (++p > f->nrunes) {
+			if (++p > f->buf.nc) {
 				p = 0;
 			}
 			if (!execute(f, p, INFINITY)) {
@@ -122,7 +122,7 @@ void nextmatch(File *f, String *r, Posn p, int sign) {
 		}
 		if (sel.p[0].p1 == sel.p[0].p2 && sel.p[0].p2 == p) {
 			if (--p < 0) {
-				p = f->nrunes;
+				p = f->buf.nc;
 			}
 			if (!bexecute(f, p)) {
 				panic("address");
@@ -159,7 +159,7 @@ int filematch(File *f, String *r) {
 	String *t;
 
 	c = Strtoc(&f->name);
-	snprintf(buf, sizeof(buf) - 1, "%c%c%c %s\n", " '"[f->state == Dirty],
+	snprintf(buf, sizeof(buf) - 1, "%c%c%c %s\n", " '"[f->mod],
 		 "-+"[f->rasp != 0], " ."[f == curfile], c);
 	free(c);
 	t = tmpcstr(buf);
@@ -167,13 +167,12 @@ int filematch(File *f, String *r) {
 	freetmpstr(t);
 	/* A little dirty... */
 	if (menu == 0) {
-		(menu = Fopen())->state = Clean;
+		menu = fileopen();
 	}
-	Bdelete(menu->buf, 0, menu->buf->nrunes);
-	Binsert(menu->buf, &genstr, 0);
-	menu->nrunes = menu->buf->nrunes;
+	bufreset(&menu->buf);
+	bufinsert(&menu->buf, 0, genstr.s, genstr.n);
 	compile(r);
-	return execute(menu, 0, menu->nrunes);
+	return execute(menu, 0, menu->buf.nc);
 }
 
 Address charaddr(Posn l, Address addr, int sign) {
@@ -184,7 +183,7 @@ Address charaddr(Posn l, Address addr, int sign) {
 	} else if (sign > 0) {
 		addr.r.p1 = addr.r.p2 += l;
 	}
-	if (addr.r.p1 < 0 || addr.r.p2 > addr.f->nrunes) {
+	if (addr.r.p1 < 0 || addr.r.p2 > addr.f->buf.nc) {
 		error(Erange);
 	}
 	return addr;
@@ -195,6 +194,7 @@ Address lineaddr(Posn l, Address addr, int sign) {
 	int	c;
 	File   *f = addr.f;
 	Address a;
+	Posn	p;
 
 	a.f = f;
 	if (sign >= 0) {
@@ -204,57 +204,55 @@ Address lineaddr(Posn l, Address addr, int sign) {
 				return a;
 			}
 			a.r.p1 = addr.r.p2;
-			Fgetcset(f, addr.r.p2 - 1);
+			p = addr.r.p2 - 1;
 		} else {
 			if (sign == 0 || addr.r.p2 == 0) {
-				Fgetcset(f, (Posn)0);
+				p = (Posn)0;
 				n = 1;
 			} else {
-				Fgetcset(f, addr.r.p2 - 1);
-				n = Fgetc(f) == '\n';
+				p = addr.r.p2 - 1;
+				n = filereadc(f, p++) == '\n';
 			}
-			for (; n < l;) {
-				c = Fgetc(f);
-				if (c == -1) {
+			while (n < l) {
+				if (p >= f->buf.nc) {
 					error(Erange);
-				} else if (c == '\n') {
+				}
+				if (filereadc(f, p++) == '\n') {
 					n++;
 				}
 			}
-			a.r.p1 = f->getcp;
+			a.r.p1 = p;
 		}
-		do
+		while (p < f->buf.nc && filereadc(f, p++) != '\n')
 			;
-		while ((c = Fgetc(f)) != '\n' && c != -1);
-		a.r.p2 = f->getcp;
+		a.r.p2 = p;
 	} else {
-		Fbgetcset(f, addr.r.p1);
+		p = addr.r.p1;
 		if (l == 0) {
 			a.r.p2 = addr.r.p1;
 		} else {
-			c = 0;
 			for (n = 0; n < l;) { /* always runs once */
-				c = Fbgetc(f);
-				if (c == '\n') {
-					n++;
-				} else if (c == -1) {
+				if (p == 0) {
 					if (++n != l) {
 						error(Erange);
 					}
+				} else {
+					c = filereadc(f, p - 1);
+					if (c != '\n' || ++n != l) {
+						p--;
+					}
 				}
 			}
-			a.r.p2 = f->getcp;
-			if (c == '\n') {
-				a.r.p2++; /* lines start after a newline */
+			a.r.p2 = p;
+			if (p > 0) {
+				p--;
 			}
 		}
-		do
-			;
-		while ((c = Fbgetc(f)) != '\n' && c != -1);
-		a.r.p1 = f->getcp;
-		if (c == '\n') {
-			a.r.p1++; /* lines start after a newline */
+		while (p > 0 && filereadc(f, p - 1) !=
+				    '\n') { /* lines start after a newline */
+			p--;
 		}
+		a.r.p1 = p;
 	}
 	return a;
 }

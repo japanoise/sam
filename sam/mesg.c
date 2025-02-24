@@ -1,5 +1,5 @@
-/* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
 #include "sam.h"
+#include <stdint.h>
 
 Header	 h;
 uint8_t	 indata[DATASIZE];
@@ -9,15 +9,22 @@ uint8_t *outp;
 uint8_t *outmsg = outdata;
 Posn	 cmdpt;
 Posn	 cmdptadv;
-Buffer	*snarfbuf;
+Buffer	 snarfbuf;
 bool	 waitack;
 bool	 noflush;
 int	 tversion;
+bool	 outbuffered;
 
 int64_t	 inlong(void);
 int	 inshort(void);
 int	 inmesg(Tmesg);
 void	 setgenstr(File *, Posn, Posn);
+
+void	 outstart(Hmesg);
+void	 outsend(void);
+void	 outcopy(int, void *);
+void	 outshort(int);
+void	 outlong(int64_t);
 
 #ifdef DEBUG
 char *hname[] = {
@@ -189,16 +196,17 @@ int inmesg(Tmesg type) {
 		journaln(0, l);
 		Strdupl(&genstr, samname);
 		cmd = newfile();
+		cmd->unread = 0;
 		outTsv(Hbindname, cmd->tag, l);
 		outTs(Hcurrent, cmd->tag);
-		Fsetname(cmd, &genstr);
-		cmd->rasp = emalloc(sizeof(List));
-		cmd->state = Clean;
+		logsetname(cmd, &genstr);
+		cmd->rasp = listalloc('P');
+		cmd->mod = 0;
 		if (cmdstr.n) {
-			Finsert(cmd, &cmdstr, 0L);
+			loginsert(cmd, 0L, cmdstr.s, cmdstr.n);
 			Strdelete(&cmdstr, 0L, (Posn)cmdstr.n);
 		}
-		Fupdate(cmd, false, true);
+		fileupdate(cmd, false, true);
 		outT0(Hunlock);
 		break;
 
@@ -213,15 +221,15 @@ int inmesg(Tmesg type) {
 		p1 = p0 + inshort();
 		journaln(0, p0);
 		journaln(0, p1 - p0);
-		if (f->state == Unread) {
+		if (f->unread) {
 			panic("Trequest: unread");
 		}
-		if (p1 > f->nrunes) {
-			p1 = f->nrunes;
+		if (p1 > f->buf.nc) {
+			p1 = f->buf.nc;
 		}
 		if (p0 >
-		    f->nrunes) { /* can happen e.g. scrolling during command */
-			p0 = f->nrunes;
+		    f->buf.nc) { /* can happen e.g. scrolling during command */
+			p0 = f->buf.nc;
 		}
 		if (p0 == p1) {
 			i = 0;
@@ -229,9 +237,7 @@ int inmesg(Tmesg type) {
 		} else {
 			r = rdata(f->rasp, p0, p1 - p0);
 			i = r.p2 - r.p1;
-			if (Fchars(f, buf, r.p1, r.p2) != i) {
-				panic("Trequest 2");
-			}
+			bufread(&f->buf, r.p1, buf, i);
 		}
 		buf[i] = 0;
 		outTslS(Hdata, f->tag, r.p1, tmprstr(buf, i + 1));
@@ -251,18 +257,18 @@ int inmesg(Tmesg type) {
 		termlocked++;
 		f = whichfile(inshort());
 		if (!f->rasp) { /* this might be a duplicate message */
-			f->rasp = emalloc(sizeof(List));
+			f->rasp = listalloc('P');
 		}
 		current(f);
 		outTsv(Hbindname, f->tag, inlong()); /* for 64-bit pointers */
 		outTs(Hcurrent, f->tag);
 		journaln(0, f->tag);
-		if (f->state == Unread) {
+		if (f->unread) {
 			load(f);
 		} else {
-			if (f->nrunes > 0) {
-				rgrow(f->rasp, 0L, f->nrunes);
-				outTsll(Hgrow, f->tag, 0L, f->nrunes);
+			if (f->buf.nc > 0) {
+				rgrow(f->rasp, 0L, f->buf.nc);
+				outTsll(Hgrow, f->tag, 0L, f->buf.nc);
 			}
 			outTs(Hcheck0, f->tag);
 			moveto(f, f->dot.r);
@@ -288,11 +294,11 @@ int inmesg(Tmesg type) {
 		journal(0, (char *)inp);
 		str = tmpcstr((char *)inp);
 		i = str->n;
-		Finsert(f, str, p0);
-		if (Fupdate(f, false, false)) {
-			modnum++;
+		loginsert(f, p0, str->s, str->n);
+		if (fileupdate(f, false, false)) {
+			seq++;
 		}
-		if (f == cmd && p0 == f->nrunes - i && i > 0 &&
+		if (f == cmd && p0 == f->buf.nc - i && i > 0 &&
 		    str->s[i - 1] == '\n') {
 			freetmpstr(str);
 			termlocked++;
@@ -311,9 +317,9 @@ int inmesg(Tmesg type) {
 		p1 = inlong();
 		journaln(0, p0);
 		journaln(0, p1);
-		Fdelete(f, p0, p1);
-		if (Fupdate(f, false, false)) {
-			modnum++;
+		logdelete(f, p0, p1);
+		if (fileupdate(f, false, false)) {
+			seq++;
 		}
 		f->dot.r.p1 = f->dot.r.p2 = p0;
 		f->tdot =
@@ -324,19 +330,19 @@ int inmesg(Tmesg type) {
 		f = whichfile(inshort());
 		p0 = inlong();
 		journaln(0, p0);
-		for (l = 0; l < snarfbuf->nrunes; l += m) {
-			m = snarfbuf->nrunes - l;
+		for (l = 0; l < snarfbuf.nc; l += m) {
+			m = snarfbuf.nc - l;
 			if (m > BLOCKSIZE) {
 				m = BLOCKSIZE;
 			}
-			Bread(snarfbuf, genbuf, m, l);
-			Finsert(f, tmprstr(genbuf, m), p0);
+			bufread(&snarfbuf, l, genbuf, m);
+			loginsert(f, p0, tmprstr(genbuf, m)->s, m);
 		}
-		if (Fupdate(f, false, true)) {
-			modnum++;
+		if (fileupdate(f, false, true)) {
+			seq++;
 		}
 		f->dot.r.p1 = p0;
-		f->dot.r.p2 = p0 + snarfbuf->nrunes;
+		f->dot.r.p2 = p0 + snarfbuf.nc;
 		f->tdot.p1 = -1; /* force telldot to tell (arguably a BUG) */
 		telldot(f);
 		outTs(Hunlockfile, f->tag);
@@ -346,16 +352,16 @@ int inmesg(Tmesg type) {
 		i = inshort();
 		p0 = inlong();
 		p1 = inlong();
-		snarf(whichfile(i), p0, p1, snarfbuf, 0);
+		snarf(whichfile(i), p0, p1, &snarfbuf, 0);
 		break;
 
 	case Tstartnewfile:
 		l = inlong();
 		Strdupl(&genstr, empty);
 		f = newfile();
-		f->rasp = emalloc(sizeof(List));
+		f->rasp = listalloc('P');
 		outTsv(Hbindname, f->tag, l);
-		Fsetname(f, &genstr);
+		logsetname(f, &genstr);
 		outTs(Hcurrent, f->tag);
 		current(f);
 		load(f);
@@ -367,7 +373,7 @@ int inmesg(Tmesg type) {
 		journaln(0, i);
 		f = whichfile(i);
 		addr.r.p1 = 0;
-		addr.r.p2 = f->nrunes;
+		addr.r.p2 = f->buf.nc;
 		if (f->name.s[0] == 0) {
 			error(Enoname);
 		}
@@ -398,8 +404,10 @@ int inmesg(Tmesg type) {
 		setgenstr(f, p0, p1);
 		for (l = 0; l < genstr.n; l++) {
 			i = genstr.s[l];
-			if (wcschr(L".*+?(|)\\[]^$", (Rune)i)) {
-				Strinsert(&genstr, tmpcstr("\\"), l++);
+			if (utfrune(".*+?(|)\\[]^$", i)) {
+				str = tmpcstr("\\");
+				Strinsert(&genstr, str, l++);
+				freetmpstr(str);
 			}
 		}
 		Straddc(&genstr, '\0');
@@ -425,15 +433,15 @@ int inmesg(Tmesg type) {
 		p0 = inlong();
 		p1 = inlong();
 		setgenstr(cmd, p0, p1);
-		Bdelete(snarfbuf, (Posn)0, snarfbuf->nrunes);
-		Binsert(snarfbuf, &genstr, (Posn)0);
+		bufreset(&snarfbuf);
+		bufinsert(&snarfbuf, (Posn)0, genstr.s, genstr.n);
 		outTl(Hsnarflen, genstr.n);
 		if (genstr.s[genstr.n - 1] != '\n') {
 			Straddc(&genstr, '\n');
 		}
-		Finsert(cmd, &genstr, cmd->nrunes);
-		Fupdate(cmd, false, true);
-		cmd->dot.r.p1 = cmd->dot.r.p2 = cmd->nrunes;
+		loginsert(cmd, cmd->buf.nc, genstr.s, genstr.n);
+		fileupdate(cmd, false, true);
+		cmd->dot.r.p1 = cmd->dot.r.p2 = cmd->buf.nc;
 		telldot(cmd);
 		termcommand();
 		break;
@@ -441,27 +449,27 @@ int inmesg(Tmesg type) {
 	case Tdclick:
 		f = whichfile(inshort());
 		p1 = inlong();
-		doubleclick(f, p1);
+		stretchsel(f, p1, false);
 		f->tdot.p1 = f->tdot.p2 = p1;
 		telldot(f);
 		outTs(Hunlockfile, f->tag);
 		break;
 
 	case Tstartsnarf:
-		if (snarfbuf->nrunes <= 0) { /* nothing to export */
+		if (snarfbuf.nc <= 0) { /* nothing to export */
 			outTs(Hsetsnarf, 0);
 			break;
 		}
 		c = 0;
 		i = 0;
-		m = snarfbuf->nrunes;
-		if (m > 32000) { /* tmprstr stores len in a int16_t */
-			m = 32000;
-			dprint(L"?warning: snarf buffer truncated\n");
+		m = snarfbuf.nc;
+		if (m > SNARFSIZE) {
+			m = SNARFSIZE;
+			dprint("?warning: snarf buffer truncated\n");
 		}
 		rp = malloc(m * sizeof(Rune));
 		if (rp) {
-			Bread(snarfbuf, rp, m, 0);
+			bufread(&snarfbuf, 0, rp, m);
 			c = Strtoc(tmprstr(rp, m));
 			free(rp);
 			i = strlen(c);
@@ -471,7 +479,7 @@ int inmesg(Tmesg type) {
 			Write(stdout, c, i);
 			free(c);
 		} else {
-			dprint(L"snarf buffer too long\n");
+			dprint("snarf buffer too long\n");
 		}
 		break;
 
@@ -488,8 +496,8 @@ int inmesg(Tmesg type) {
 			c[m] = 0;
 			str = tmpcstr(c);
 			free(c);
-			Bdelete(snarfbuf, (Posn)0, snarfbuf->nrunes);
-			Binsert(snarfbuf, str, (Posn)0);
+			bufreset(&snarfbuf);
+			bufinsert(&snarfbuf, (Posn)0, str->s, str->n);
 			freetmpstr(str);
 			outT0(Hunlock);
 		}
@@ -512,12 +520,18 @@ void snarf(File *f, Posn p1, Posn p2, Buffer *buf, bool emptyok) {
 	if (!emptyok && p1 == p2) {
 		return;
 	}
-	Bdelete(buf, (Posn)0, buf->nrunes);
+	bufreset(buf);
 	/* Stage through genbuf to avoid compaction problems (vestigial) */
+	if (p2 > f->buf.nc) {
+		fprintf(stderr, "bad snarf addr p1=%ld p2=%ld f->buf->nc=%d\n",
+			p1, p2,
+			f->buf.nc); /*ZZZ should never happen, can remove */
+		p2 = f->buf.nc;
+	}
 	for (l = p1; l < p2; l += i) {
 		i = p2 - l > BLOCKSIZE ? BLOCKSIZE : p2 - l;
-		Fchars(f, genbuf, l, l + i);
-		Binsert(buf, tmprstr(genbuf, i), buf->nrunes);
+		bufread(&f->buf, l, genbuf, i);
+		bufinsert(buf, buf->nc, tmprstr(genbuf, i)->s, i);
 	}
 }
 
@@ -545,20 +559,20 @@ void setgenstr(File *f, Posn p0, Posn p1) {
 			error(Etoolong);
 		}
 		Strinsure(&genstr, p1 - p0);
-		Fchars(f, genbuf, p0, p1);
+		bufread(&f->buf, p0, genbuf, p1 - p0);
 		memmove(genstr.s, genbuf, RUNESIZE * (p1 - p0));
 		genstr.n = p1 - p0;
 	} else {
-		if (snarfbuf->nrunes == 0) {
+		if (snarfbuf.nc == 0) {
 			error(Eempty);
 		}
-		if (snarfbuf->nrunes > TBLOCKSIZE) {
+		if (snarfbuf.nc > TBLOCKSIZE) {
 			error(Etoolong);
 		}
-		Bread(snarfbuf, genbuf, snarfbuf->nrunes, (Posn)0);
-		Strinsure(&genstr, snarfbuf->nrunes);
-		memmove(genstr.s, genbuf, RUNESIZE * snarfbuf->nrunes);
-		genstr.n = snarfbuf->nrunes;
+		bufread(&snarfbuf, (Posn)0, genbuf, snarfbuf.nc);
+		Strinsure(&genstr, snarfbuf.nc);
+		memmove(genstr.s, genbuf, RUNESIZE * snarfbuf.nc);
+		genstr.n = snarfbuf.nc;
 	}
 }
 
@@ -690,25 +704,25 @@ void outsend(void) {
 	outmsg[1] = outcount;
 	outmsg[2] = outcount >> 8;
 	outmsg = outp;
-	if (!noflush) {
+	if (!outbuffered) {
 		outcount = outmsg - outdata;
-		if (write(1, (char *)outdata, outcount) != outcount) {
+		if (write(STDOUT_FILENO, (char *)outdata, outcount) !=
+		    outcount) {
 			rescue();
 		}
 		outmsg = outdata;
 		return;
 	}
-	if (outmsg < outdata + DATASIZE) {
-		return;
-	}
-	outflush();
 }
+
+int  needoutflush(void) { return outmsg >= outdata + DATASIZE; }
 
 void outflush(void) {
 	if (outmsg == outdata) {
 		return;
 	}
-	noflush = false;
+	outbuffered = 0;
+	/* flow control */
 	outT0(Hack);
 	waitack = true;
 	do {
@@ -718,5 +732,5 @@ void outflush(void) {
 		}
 	} while (waitack);
 	outmsg = outdata;
-	noflush = true;
+	outbuffered = 1;
 }

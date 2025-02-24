@@ -1,6 +1,7 @@
+#include <stdint.h>
 #include <u.h>
+#include "sam.h"
 
-/* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
 typedef struct Addr Addr;
 typedef struct Cmd  Cmd;
 
@@ -39,7 +40,9 @@ struct Cmd {
 #define ctext g.text
 #define caddr g.addr
 
-extern struct cmdtab {
+typedef struct Cmdtab Cmdtab;
+
+extern struct Cmdtab {
 	uint16_t cmdc;		   /* command character */
 	uint8_t	 text;		   /* takes a textual argument? */
 	uint8_t	 regexp;	   /* takes a regular expression? */
@@ -47,7 +50,7 @@ extern struct cmdtab {
 	uint8_t	 defcmd;	   /* default command; 0==>none */
 	uint8_t	 defaddr;	   /* default address */
 	uint8_t	 count;		   /* takes a count e.g. s2/// */
-	Rune	*token;		   /* takes text terminated by one of these */
+	char	*token;		   /* takes text terminated by one of these */
 	bool	 keepslash;	   /* pass slashes in unchanged */
 	bool (*fn)(File *, Cmd *); /* function to call with parse tree */
 } cmdtab[];
@@ -62,7 +65,8 @@ bool	nl_cmd(File *, Cmd *), a_cmd(File *, Cmd *), b_cmd(File *, Cmd *);
 bool	c_cmd(File *, Cmd *), cd_cmd(File *, Cmd *), d_cmd(File *, Cmd *);
 bool	D_cmd(File *, Cmd *), e_cmd(File *, Cmd *);
 bool	f_cmd(File *, Cmd *), g_cmd(File *, Cmd *), i_cmd(File *, Cmd *);
-bool	k_cmd(File *, Cmd *), m_cmd(File *, Cmd *), n_cmd(File *, Cmd *);
+bool	k_cmd(File *, Cmd *), m_cmd(File *, Cmd *);
+bool	M_cmd(File *, Cmd *), n_cmd(File *, Cmd *);
 bool	p_cmd(File *, Cmd *), q_cmd(File *, Cmd *);
 bool	P_cmd(File *, Cmd *), P_cmd(File *, Cmd *);
 bool	s_cmd(File *, Cmd *), u_cmd(File *, Cmd *), w_cmd(File *, Cmd *);

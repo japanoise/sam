@@ -1,4 +1,3 @@
-/* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
 typedef enum Err {
 	/* error_s */
 	Eopen,
@@ -6,6 +5,7 @@ typedef enum Err {
 	Emenu,
 	Emodified,
 	Eio,
+	Ewseq,
 	/* error_c */
 	Eunk,
 	Emissop,
@@ -46,7 +46,9 @@ typedef enum Err {
 	Elongtag,
 	Esubexp,
 	Etmpovfl,
-	Eappend
+	Eappend,
+	Ecantplumb,
+	Ebufload,
 } Err;
 
 typedef enum Warn {

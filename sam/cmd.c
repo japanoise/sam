@@ -1,51 +1,51 @@
-/* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
-#include <errno.h>
-
 #include "sam.h"
 #include "parse.h"
+#include <stdint.h>
 
-static Rune   linex[] = L"\n";
-static Rune   wordx[] = L" \t\n";
+static char linex[] = "\n";
+static char wordx[] = " \t\n";
 
-struct cmdtab cmdtab[] = {
-    /*  cmdc    text    regexp  addr defcmd defaddr count   token    keepslash
-	 fn */
-    {'\n', 0, 0, 0, 0, aDot, 0, 0, 0, nl_cmd},
-    {'a', 1, 0, 0, 0, aDot, 0, 0, 0, a_cmd},
-    {'b', 0, 0, 0, 0, aNo, 0, linex, 1, b_cmd},
-    {'B', 0, 0, 0, 0, aNo, 0, linex, 1, b_cmd},
-    {'c', 1, 0, 0, 0, aDot, 0, 0, 0, c_cmd},
-    {'d', 0, 0, 0, 0, aDot, 0, 0, 0, d_cmd},
-    {'D', 0, 0, 0, 0, aNo, 0, linex, 1, D_cmd},
-    {'e', 0, 0, 0, 0, aNo, 0, linex, 1, e_cmd},
-    {'f', 0, 0, 0, 0, aNo, 0, linex, 1, f_cmd},
-    {'g', 0, 1, 0, 'p', aDot, 0, 0, 0, g_cmd},
-    {'i', 1, 0, 0, 0, aDot, 0, 0, 0, i_cmd},
-    {'k', 0, 0, 0, 0, aDot, 0, 0, 0, k_cmd},
-    {'m', 0, 0, 1, 0, aDot, 0, 0, 0, m_cmd},
-    {'n', 0, 0, 0, 0, aNo, 0, 0, 0, n_cmd},
-    {'p', 0, 0, 0, 0, aDot, 0, 0, 0, p_cmd},
-    {'P', 0, 0, 0, 0, aNo, 0, 0, 0, P_cmd},
-    {'q', 0, 0, 0, 0, aNo, 0, 0, 0, q_cmd},
-    {'r', 0, 0, 0, 0, aDot, 0, linex, 1, e_cmd},
-    {'s', 0, 1, 0, 0, aDot, 1, 0, 0, s_cmd},
-    {'t', 0, 0, 1, 0, aDot, 0, 0, 0, m_cmd},
-    {'u', 0, 0, 0, 0, aNo, 1, 0, 0, u_cmd},
-    {'v', 0, 1, 0, 'p', aDot, 0, 0, 0, g_cmd},
-    {'w', 0, 0, 0, 0, aAll, 0, linex, 1, w_cmd},
-    {'x', 0, 1, 0, 'p', aDot, 0, 0, 0, x_cmd},
-    {'y', 0, 1, 0, 'p', aDot, 0, 0, 0, x_cmd},
-    {'X', 0, 1, 0, 'f', aNo, 0, 0, 0, X_cmd},
-    {'Y', 0, 1, 0, 'f', aNo, 0, 0, 0, X_cmd},
-    {'!', 0, 0, 0, 0, aNo, 0, linex, 1, plan9_cmd},
-    {'>', 0, 0, 0, 0, aDot, 0, linex, 1, plan9_cmd},
-    {'<', 0, 0, 0, 0, aDot, 0, linex, 1, plan9_cmd},
-    {'|', 0, 0, 0, 0, aDot, 0, linex, 1, plan9_cmd},
-    {'=', 0, 0, 0, 0, aDot, 0, linex, 0, eq_cmd},
-    {'c' | 0x100, 0, 0, 0, 0, aNo, 0, linex, 1, cd_cmd},
+/* clang-format off */
+Cmdtab cmdtab[] = {
+	 /*  cmdc    text    regexp  addr defcmd defaddr count   token    keepslash fn */
+	 {'\n', 0, 0, 0, 0, aDot, 0, 0, 0, nl_cmd},
+	 {'a', 1, 0, 0, 0, aDot, 0, 0, 0, a_cmd},
+	 {'b', 0, 0, 0, 0, aNo, 0, linex, 1, b_cmd},
+	 {'B', 0, 0, 0, 0, aNo, 0, linex, 1, b_cmd},
+	 {'c', 1, 0, 0, 0, aDot, 0, 0, 0, c_cmd},
+	 {'d', 0, 0, 0, 0, aDot, 0, 0, 0, d_cmd},
+	 {'D', 0, 0, 0, 0, aNo, 0, linex, 1, D_cmd},
+	 {'e', 0, 0, 0, 0, aNo, 0, linex, 1, e_cmd},
+	 {'f', 0, 0, 0, 0, aNo, 0, linex, 1, f_cmd},
+	 {'g', 0, 1, 0, 'p', aDot, 0, 0, 0, g_cmd},
+	 {'i', 1, 0, 0, 0, aDot, 0, 0, 0, i_cmd},
+	 {'k', 0, 0, 0, 0, aDot, 0, 0, 0, k_cmd},
+	 {'m', 0, 0, 1, 0, aDot, 0, 0, 0, m_cmd},
+	 {'n', 0, 0, 0, 0, aNo, 0, 0, 0, n_cmd},
+	 {'p', 0, 0, 0, 0, aDot, 0, 0, 0, p_cmd},
+	 {'P', 0, 0, 0, 0, aNo, 0, 0, 0, P_cmd},
+	 {'q', 0, 0, 0, 0, aNo, 0, 0, 0, q_cmd},
+	 {'r', 0, 0, 0, 0, aDot, 0, linex, 1, e_cmd},
+	 {'s', 0, 1, 0, 0, aDot, 1, 0, 0, s_cmd},
+	 {'t', 0, 0, 1, 0, aDot, 0, 0, 0, m_cmd},
+	 {'u', 0, 0, 0, 0, aNo, 1, 0, 0, u_cmd},
+	 {'v', 0, 1, 0, 'p', aDot, 0, 0, 0, g_cmd},
+	 {'w', 0, 0, 0, 0, aAll, 0, linex, 1, w_cmd},
+	 {'x', 0, 1, 0, 'p', aDot, 0, 0, 0, x_cmd},
+	 {'y', 0, 1, 0, 'p', aDot, 0, 0, 0, x_cmd},
+	 {'X', 0, 1, 0, 'f', aNo, 0, 0, 0, X_cmd},
+	 {'Y', 0, 1, 0, 'f', aNo, 0, 0, 0, X_cmd},
+	 {'!', 0, 0, 0, 0, aNo, 0, linex, 1, plan9_cmd},
+	 {'>', 0, 0, 0, 0, aDot, 0, linex, 1, plan9_cmd},
+	 {'<', 0, 0, 0, 0, aDot, 0, linex, 1, plan9_cmd},
+	 {'|', 0, 0, 0, 0, aDot, 0, linex, 1, plan9_cmd},
+	 {'=', 0, 0, 0, 0, aDot, 0, linex, 0, eq_cmd},
+	 {'c' | 0x100, 0, 0, 0, 0, aNo, 0, linex, 1, cd_cmd},
 
-    {0, 0, 0, 0, 0, 0, 0, 0},
+	 {0, 0, 0, 0, 0, 0, 0, 0},
 };
+/* clang-format on */
+
 Cmd  *parsecmd(int);
 Addr *compoundaddr(void);
 Addr *simpleaddr(void);
@@ -57,10 +57,11 @@ Rune  termline[BLOCKSIZE];
 Rune *linep = line;
 Rune *terminp = termline;
 Rune *termoutp = termline;
-List  cmdlist;
-List  addrlist;
-List  relist;
-List  stringlist;
+
+List  cmdlist = {'p'};
+List  addrlist = {'p'};
+List  relist = {'p'};
+List  stringlist = {'p'};
 bool  eof;
 
 void  freecmdlists(void) {
@@ -89,10 +90,19 @@ void resetcmd(void) {
 }
 
 int inputc(void) {
-	Rune r = 0;
+	int  n, nbuf;
+	char buf[UTFmax];
+	Rune r;
 
 Again:
-	if (downloaded) {
+	nbuf = 0;
+	if (cmdbufpos > cmdbuf.nc && cmdbuf.nc > 0) {
+		cmdbufpos = 0;
+		bufreset(&cmdbuf);
+	}
+	if (cmdbufpos < cmdbuf.nc && cmdbuf.nc > 0) {
+		bufread(&cmdbuf, cmdbufpos++, &r, 1);
+	} else if (downloaded) {
 		while (termoutp == terminp) {
 			cmdupdate();
 			if (patset) {
@@ -111,16 +121,14 @@ Again:
 			terminp = termoutp = termline;
 		}
 	} else {
-		int    olderr = errno;
-		wint_t err;
-		r = err = fgetwc(stdin);
-		if (err = WEOF && errno == EILSEQ) {
-			clearerr(stdin);
-			fflush(stdin);
-			fgetc(stdin);
-			r = UNICODE_REPLACEMENT_CHAR;
-		}
-		errno = olderr;
+		do {
+			n = read(STDIN_FILENO, buf + nbuf, 1);
+			if (n <= 0) {
+				return -1;
+			}
+			nbuf += n;
+		} while (!fullrune(buf, nbuf));
+		chartorune(&r, buf);
 	}
 
 	if (r == 0) {
@@ -172,18 +180,23 @@ void ungetch(void) {
 	}
 }
 
-Posn getnum(void) {
+Posn getnum(int signok) {
 	Posn n = 0;
-	int  c;
+	int  c, sign;
 
+	sign = 1;
+	if (signok > 1 && nextc() == '-') {
+		sign = -1;
+		getch();
+	}
 	if ((c = nextc()) < '0' || '9' < c) { /* no number defaults to 1 */
-		return 1;
+		return sign;
 	}
 	while ('0' <= (c = getch()) && c <= '9') {
 		n = n * 10 + (c - '0');
 	}
 	ungetch();
-	return n;
+	return sign * n;
 }
 
 int skipbl(void) {
@@ -200,15 +213,14 @@ int skipbl(void) {
 void termcommand(void) {
 	Posn p;
 
-	Fgetcset(cmd, cmdpt);
-	for (p = cmdpt; p < cmd->nrunes; p++) {
+	for (p = cmdpt; p < cmd->buf.nc; p++) {
 		if (terminp >= &termline[BLOCKSIZE]) {
-			cmdpt = cmd->nrunes;
+			cmdpt = cmd->buf.nc;
 			error(Etoolong);
 		}
-		*terminp++ = Fgetc(cmd);
+		*terminp++ = filereadc(cmd, p);
 	}
-	cmdpt = cmd->nrunes;
+	cmdpt = cmd->buf.nc;
 }
 
 void cmdloop(void) {
@@ -217,7 +229,7 @@ void cmdloop(void) {
 	int   loaded;
 
 	for (;;) {
-		if (!downloaded && curfile && curfile->state == Unread) {
+		if (!downloaded && curfile && curfile->unread) {
 			load(curfile);
 		}
 		if ((cmdp = parsecmd(0)) == NULL) {
@@ -228,7 +240,7 @@ void cmdloop(void) {
 			break;
 		}
 		ocurfile = curfile;
-		loaded = curfile && curfile->state != Unread;
+		loaded = curfile && !curfile->unread;
 		if (cmdexec(curfile, cmdp) == 0) {
 			freecmd();
 			break;
@@ -237,8 +249,7 @@ void cmdloop(void) {
 		cmdupdate();
 		update();
 		if (downloaded && curfile &&
-		    (ocurfile != curfile ||
-		     (!loaded && curfile->state != Unread))) {
+		    (ocurfile != curfile || (!loaded && !curfile->unread))) {
 			outTs(Hcurrent, curfile->tag);
 		}
 		/* don't allow type ahead on files that aren't bound */
@@ -261,7 +272,7 @@ Addr *newaddr(void) {
 	Addr *p;
 
 	p = emalloc(sizeof(Addr));
-	inslist(&addrlist, addrlist.nused, (int64_t)p);
+	inslist(&addrlist, addrlist.nused, p);
 	return p;
 }
 
@@ -269,7 +280,7 @@ String *newre(void) {
 	String *p;
 
 	p = emalloc(sizeof(String));
-	inslist(&relist, relist.nused, (int64_t)p);
+	inslist(&relist, relist.nused, p);
 	Strinit(p);
 	return p;
 }
@@ -278,7 +289,7 @@ String *newstring(void) {
 	String *p;
 
 	p = emalloc(sizeof(String));
-	inslist(&stringlist, stringlist.nused, (int64_t)p);
+	inslist(&stringlist, stringlist.nused, p);
 	Strinit(p);
 	return p;
 }
@@ -287,11 +298,11 @@ void freecmd(void) {
 	int i;
 
 	while (cmdlist.nused > 0) {
-		free(cmdlist.uint8_tpptr[--cmdlist.nused]);
+		free(cmdlist.voidpptr[--cmdlist.nused]);
 	}
 
 	while (addrlist.nused > 0) {
-		free(addrlist.uint8_tpptr[--addrlist.nused]);
+		free(addrlist.voidpptr[--addrlist.nused]);
 	}
 
 	while (relist.nused > 0) {
@@ -356,7 +367,7 @@ void getrhs(String *s, int delim, int cmd) {
 	ungetch(); /* let client read whether delimeter, '\n' or whatever */
 }
 
-String *collecttoken(Rune *end, bool keepslash) {
+String *collecttoken(char *end, bool keepslash) {
 	String *s = newstring();
 	int	c;
 	bool	esc = false;
@@ -369,12 +380,12 @@ String *collecttoken(Rune *end, bool keepslash) {
 		if (esc) {
 			Straddc(s, c);
 			esc = false;
-		} else if (c == L'\\') {
+		} else if (c == '\\') {
 			esc = true;
 			if (keepslash) {
 				Straddc(s, c);
 			}
-		} else if (wcschr(end, (Rune)c) != NULL) {
+		} else if (utfrune(end, c) != NULL) {
 			break;
 		} else {
 			Straddc(s, c);
@@ -420,10 +431,10 @@ Return:
 }
 
 Cmd *parsecmd(int nest) {
-	int	       i, c;
-	struct cmdtab *ct;
-	Cmd	      *cp, *ncp;
-	Cmd	       cmd;
+	int	i, c;
+	Cmdtab *ct;
+	Cmd    *cp, *ncp;
+	Cmd	cmd;
 
 	cmd.next = cmd.ccmd = 0;
 	cmd.re = 0;
@@ -450,7 +461,7 @@ Cmd *parsecmd(int nest) {
 			error(Enoaddr);
 		}
 		if (ct->count) {
-			cmd.num = getnum();
+			cmd.num = getnum(ct->count);
 		}
 		if (ct->regexp) {
 			/* x without pattern -> .*\n, indicated by cmd.re==0 */
@@ -566,7 +577,7 @@ Addr *simpleaddr(void) {
 	switch (skipbl()) {
 	case '#':
 		addr.type = getch();
-		addr.num = getnum();
+		addr.num = getnum(1);
 		break;
 	case '0':
 	case '1':
@@ -578,7 +589,7 @@ Addr *simpleaddr(void) {
 	case '7':
 	case '8':
 	case '9':
-		addr.num = getnum();
+		addr.num = getnum(1);
 		addr.type = 'l';
 		break;
 	case '/':
