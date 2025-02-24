@@ -413,7 +413,7 @@ void outTsl(Tmesg type, int s1, int64_t l1) {
 }
 
 void outTslS(Tmesg type, int s1, int64_t l1, Rune *s) {
-	char  buf[DATASIZE * 3 + 1];
+	char  buf[DATASIZE * UTFmax + 1];
 	char *c;
 
 	outstart(type);
@@ -421,7 +421,7 @@ void outTslS(Tmesg type, int s1, int64_t l1, Rune *s) {
 	outlong(l1);
 	c = buf;
 	while (*s) {
-		c += runetochar(c, *s++);
+		c += runetochar(c, s++);
 	}
 	*c++ = 0;
 	outcopy(c - buf, (uint8_t *)buf);

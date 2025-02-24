@@ -3,8 +3,8 @@
 
 #define TBLOCKSIZE 512 /* largest piece of text sent to terminal */
 #define DATASIZE                                                               \
-	(MB_LEN_MAX * TBLOCKSIZE + 30) /* ... including protocol header stuff  \
-					*/
+	(UTFmax * TBLOCKSIZE + 30) /* ... including protocol header stuff      \
+				    */
 #define SNARFSIZE 16384 /* maximum length of exchanged snarf buffer */
 
 /*

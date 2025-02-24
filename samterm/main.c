@@ -394,12 +394,12 @@ int64_t ctlw(Rasp *r, int64_t o, int64_t p) {
 	if (raspc(r, p) == '\n') {
 		return p;
 	}
-	for (; p >= o && !iswalnum(c = raspc(r, p)); --p) {
+	for (; p >= o && !isalnumrune(c = raspc(r, p)); --p) {
 		if (c == '\n') {
 			return p + 1;
 		}
 	}
-	for (; p > o && iswalnum(raspc(r, p - 1)); --p)
+	for (; p > o && isalnumrune(raspc(r, p - 1)); --p)
 		;
 	return p >= o ? p : o;
 }

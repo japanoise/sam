@@ -40,9 +40,9 @@ int64_t strwidth(XftFont *f, char *s) {
 }
 
 int64_t charwidth(XftFont *f, Rune r) {
-	char chars[MB_LEN_MAX + 1] = {0};
+	char chars[UTFmax + 1] = {0};
 
-	if (runetochar(chars, r) < 0) {
+	if (runetochar(chars, &r) < 0) {
 		return 0;
 	}
 

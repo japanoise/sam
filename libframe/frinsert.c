@@ -52,7 +52,7 @@ static Point bxscan(Frame *f, Rune *sp, Rune *ep, Point *ppt) {
 				if (c == '\t' || c == '\n') {
 					break;
 				}
-				rw = runetochar(s, *sp);
+				rw = runetochar(s, sp);
 				if (s + rw >= tmp + TMPSIZE) {
 					break;
 				}
