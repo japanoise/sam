@@ -1,5 +1,5 @@
-/* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
 #include "sam.h"
+#include <stdint.h>
 
 Rangeset sel;
 String	 lastregexp;
@@ -13,8 +13,9 @@ struct Inst {
 	int64_t type; /* < 0x100000000 ==> literal, otherwise action */
 
 	union {
+		int rsid;
 		int rsubid;
-		int class; /* index into `Rune **class` */
+		int class;
 		struct Inst *rother;
 		struct Inst *rright;
 	} r;
@@ -107,7 +108,7 @@ int Nclass;	  /* high water mark */
 Rune **class;
 bool	negateclass;
 
-void	addinst(Ilist *l, Inst *inst, Rangeset *sep);
+int	addinst(Ilist *l, Inst *inst, Rangeset *sep);
 void	newmatch(Rangeset *);
 void	bnewmatch(Rangeset *);
 void	pushand(Inst *, Inst *);
@@ -215,6 +216,10 @@ void operator(int64_t t) {
 		regerror(Erightpar);
 	}
 	if (t == LBRA) {
+		/*
+		 *		if(++cursubid >= NSUBEXP)
+		 *			regerror(Esubexp);
+		 */
 		cursubid++; /* silently ignored */
 		nbra++;
 		if (lastwasand) {
@@ -359,16 +364,16 @@ void optimize(Inst *start) {
 
 #ifdef DEBUG
 void dumpstack(void) {
-	Node *stk;
-	int  *ip;
+	Node	*stk;
+	int64_t *ip;
 
-	dprint(L"operators\n");
+	dprint("operators\n");
 	for (ip = atorstack; ip < atorp; ip++) {
-		dprint(L"0%o\n", *ip);
+		dprint("0%o\n", *ip);
 	}
-	dprint(L"operands\n");
+	dprint("operands\n");
 	for (stk = andstack; stk < andp; stk++) {
-		dprint(L"0%o\t0%o\n", stk->first->type, stk->last->type);
+		dprint("0%o\t0%o\n", stk->first->type, stk->last->type);
 	}
 }
 
@@ -377,7 +382,7 @@ void dump(void) {
 
 	l = program;
 	do {
-		dprint(L"%d:\t0%o\t%d\t%d\n", l - program, l->type,
+		dprint("%d:\t0%o\t%d\t%d\n", l - program, l->type,
 		       l->left - program, l->right - program);
 	} while (l++->type);
 }
@@ -518,10 +523,10 @@ bool classmatch(int classno, Rune c, bool negate) {
 
 /*
  * Note optimization in addinst:
- *  *l must be pending when addinst called; if *l has been looked
- *      at already, the optimization is a bug.
+ * 	*l must be pending when addinst called; if *l has been looked
+ *		at already, the optimization is a bug.
  */
-void addinst(Ilist *l, Inst *inst, Rangeset *sep) {
+int addinst(Ilist *l, Inst *inst, Rangeset *sep) {
 	Ilist *p;
 
 	for (p = l; p->inst; p++) {
@@ -529,12 +534,13 @@ void addinst(Ilist *l, Inst *inst, Rangeset *sep) {
 			if ((sep)->p[0].p1 < p->se.p[0].p1) {
 				p->se = *sep; /* this would be bug */
 			}
-			return; /* It's already there */
+			return 0; /* It's already there */
 		}
 	}
 	p->inst = inst;
 	p->se = *sep;
 	(p + 1)->inst = 0;
+	return 1;
 }
 
 int execute(File *f, Posn startp, Posn eof) {
@@ -549,11 +555,10 @@ int execute(File *f, Posn startp, Posn eof) {
 
 	list[0][0].inst = list[1][0].inst = 0;
 	sel.p[0].p1 = -1;
-	Fgetcset(f, startp);
 	/* Execute machine once for each character */
 	for (;; p++) {
 	doloop:
-		c = Fgetc(f);
+		c = filereadc(f, p);
 		if (p >= eof || c < 0) {
 			switch (wrapped++) {
 			case 0: /* let loop run one more click */
@@ -564,7 +569,6 @@ int execute(File *f, Posn startp, Posn eof) {
 					goto Return;
 				}
 				list[0][0].inst = list[1][0].inst = 0;
-				Fgetcset(f, (Posn)0);
 				p = 0;
 				goto doloop;
 			default:
@@ -586,12 +590,13 @@ int execute(File *f, Posn startp, Posn eof) {
 		if (sel.p[0].p1 < 0 &&
 		    (!wrapped || p < startp || startp == eof)) {
 			/* Add first instruction to this list */
-			if (++ntl >= NLIST) {
-			Overflow:
-				error(Eoverflow);
-			}
 			sempty.p[0].p1 = p;
-			addinst(tl, startinst, &sempty);
+			if (addinst(tl, startinst, &sempty)) {
+				if (++ntl >= NLIST) {
+				Overflow:
+					error(Eoverflow);
+				}
+			}
 		}
 		/* Execute machine until this list is empty */
 		for (tlp = tl; (inst = tlp->inst); tlp++) { /* assignment = */
@@ -600,10 +605,11 @@ int execute(File *f, Posn startp, Posn eof) {
 			default: /* regular character */
 				if (inst->type == c) {
 				Addinst:
-					if (++nnl >= NLIST) {
-						goto Overflow;
+					if (addinst(nl, inst->next, &tlp->se)) {
+						if (++nnl >= NLIST) {
+							goto Overflow;
+						}
 					}
-					addinst(nl, inst->next, &tlp->se);
 				}
 				break;
 			case LBRA:
@@ -624,21 +630,10 @@ int execute(File *f, Posn startp, Posn eof) {
 				}
 				break;
 			case BOL:
-				if (p == 0) {
+				if (p == 0 || filereadc(f, p - 1) == '\n') {
 				Step:
 					inst = inst->next;
 					goto Switchstmt;
-				}
-				if (f->getci > 1) {
-					if (f->getcbuf[f->getci - 2] == '\n') {
-						goto Step;
-					}
-				} else {
-					Rune c;
-					if (Fchars(f, &c, p - 1, p) == 1 &&
-					    c == '\n') {
-						goto Step;
-					}
 				}
 				break;
 			case EOL:
@@ -658,10 +653,11 @@ int execute(File *f, Posn startp, Posn eof) {
 				break;
 			case OR:
 				/* evaluate right choice later */
-				if (++ntl >= NLIST) {
-					goto Overflow;
+				if (addinst(tlp, inst->right, &tlp->se)) {
+					if (++ntl >= NLIST) {
+						goto Overflow;
+					}
 				}
-				addinst(tlp, inst->right, &tlp->se);
 				/* efficiency: advance and re-evaluate */
 				inst = inst->left;
 				goto Switchstmt;
@@ -699,11 +695,10 @@ int bexecute(File *f, Posn startp) {
 
 	list[0][0].inst = list[1][0].inst = 0;
 	sel.p[0].p1 = -1;
-	Fgetcset(f, startp);
 	/* Execute machine once for each character, including terminal NUL */
 	for (;; --p) {
 	doloop:
-		if ((c = Fbgetc(f)) == -1) {
+		if ((c = filereadc(f, p - 1)) == -1) {
 			switch (wrapped++) {
 			case 0: /* let loop run one more click */
 			case 2:
@@ -714,8 +709,7 @@ int bexecute(File *f, Posn startp) {
 					goto Return;
 				}
 				list[0][0].inst = list[1][0].inst = 0;
-				Fgetcset(f, f->nrunes);
-				p = f->nrunes;
+				p = f->buf.nc;
 				goto doloop;
 			default:
 				goto Return;
@@ -735,13 +729,14 @@ int bexecute(File *f, Posn startp) {
 		nnl = 0;
 		if (sel.p[0].p1 < 0 && (!wrapped || p > startp)) {
 			/* Add first instruction to this list */
-			if (++ntl >= NLIST) {
-			Overflow:
-				error(Eoverflow);
-			}
 			/* the minus is so the optimizations in addinst work */
 			sempty.p[0].p1 = -p;
-			addinst(tl, bstartinst, &sempty);
+			if (addinst(tl, bstartinst, &sempty)) {
+				if (++ntl >= NLIST) {
+				Overflow:
+					error(Eoverflow);
+				}
+			}
 		}
 		/* Execute machine until this list is empty */
 		for (tlp = tl; (inst = tlp->inst); tlp++) { /* assignment = */
@@ -750,10 +745,11 @@ int bexecute(File *f, Posn startp) {
 			default: /* regular character */
 				if (inst->type == c) {
 				Addinst:
-					if (++nnl >= NLIST) {
-						goto Overflow;
+					if (addinst(nl, inst->next, &tlp->se)) {
+						if (++nnl >= NLIST) {
+							goto Overflow;
+						}
 					}
-					addinst(nl, inst->next, &tlp->se);
 				}
 				break;
 			case LBRA:
@@ -781,16 +777,8 @@ int bexecute(File *f, Posn startp) {
 				}
 				break;
 			case EOL:
-				if (f->getci < f->ngetc - 1) {
-					if (f->getcbuf[f->getci + 1] == '\n') {
-						goto Step;
-					}
-				} else if (p < f->nrunes - 1) {
-					Rune c;
-					if (Fchars(f, &c, p, p + 1) == 1 &&
-					    c == '\n') {
-						goto Step;
-					}
+				if (p == f->buf.nc || filereadc(f, p) == '\n') {
+					goto Step;
 				}
 				break;
 			case CCLASS:
@@ -805,10 +793,11 @@ int bexecute(File *f, Posn startp) {
 				break;
 			case OR:
 				/* evaluate right choice later */
-				if (++ntl >= NLIST) {
-					goto Overflow;
+				if (addinst(tl, inst->right, &tlp->se)) {
+					if (++ntl >= NLIST) {
+						goto Overflow;
+					}
 				}
-				addinst(tlp, inst->right, &tlp->se);
 				/* efficiency: advance and re-evaluate */
 				inst = inst->left;
 				goto Switchstmt;

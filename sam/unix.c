@@ -1,10 +1,10 @@
 /* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
 #include "sam.h"
+#include "utf.h"
 #include <limits.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <signal.h>
 
 #ifdef NEEDVARARG
 #include <varargs.h>
@@ -30,15 +30,15 @@ void	    print_ss(char *s, String *a, String *b) {
 
 	       ap = emalloc(a->n + 1);
 	       for (cp = ap, rp = a->s; *rp; rp++) {
-		       cp += runetochar(cp, *rp);
+		       cp += runetochar(cp, rp);
 	       }
 	       *cp = 0;
 	       bp = emalloc(b->n + 1);
 	       for (cp = bp, rp = b->s; *rp; rp++) {
-		       cp += runetochar(cp, *rp);
+		       cp += runetochar(cp, rp);
 	       }
 	       *cp = 0;
-	       dprint(L"?warning: %s `%.*s' and `%.*s'\n", s, a->n, ap, b->n, bp);
+	       dprint("?warning: %s `%.*s' and `%.*s'\n", s, a->n, ap, b->n, bp);
 	       free(ap);
 	       free(bp);
 }
@@ -49,10 +49,10 @@ void print_s(char *s, String *a) {
 
 	ap = emalloc(a->n + 1);
 	for (cp = ap, rp = a->s; *rp; rp++) {
-		cp += runetochar(cp, *rp);
+		cp += runetochar(cp, rp);
 	}
 	*cp = 0;
-	dprint(L"?warning: %s `%.*s'\n", s, a->n, ap);
+	dprint("?warning: %s `%.*s'\n", s, a->n, ap);
 	free(ap);
 }
 
@@ -163,14 +163,14 @@ void *erealloc(void *p, uint64_t n) {
 	return p;
 }
 
-void dprint(Rune *z, ...) {
+void dprint(char *z, ...) {
+	char	buf[BLOCKSIZE + 1] = {0};
 	va_list args;
-	Rune	buf[BLOCKSIZE + 1] = {0};
 
 	va_start(args, z);
-	vswprintf(buf, BLOCKSIZE, z, args);
-	termwrite(buf);
+	vsnprintf(buf, BLOCKSIZE, z, args);
 	va_end(args);
+	termwrite(buf);
 }
 
 int mkdir_p(const char *path, mode_t mode) {

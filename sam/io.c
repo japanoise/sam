@@ -1,5 +1,5 @@
 /* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
-#include <errno.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "sam.h"
+#include "utf.h"
 
 #define NSYSFILE 3
 #define NOFILE 128
@@ -24,14 +25,13 @@ void checkqid(File *f) {
 		if (w == i) {
 			continue;
 		}
-		if (f->dev == g->dev && f->qid == g->qid) {
+		if (f->dev == g->dev && f->qidpath == g->qidpath) {
 			warn_SS(Wdupfile, &f->name, &g->name);
 		}
 	}
 }
 
 void writef(File *f) {
-	Rune	 c;
 	Posn	 n;
 	char	*name;
 	int	 i, samename, newfile;
@@ -45,11 +45,12 @@ void writef(File *f) {
 	if (i == -1) {
 		newfile++;
 	} else if (samename &&
-		   (f->dev != dev || f->qid != qid || f->date < mtime)) {
+		   (f->dev != dev || f->qidpath != qid || f->mtime < mtime)) {
 		f->dev = dev;
-		f->qid = qid;
-		f->date = mtime;
+		f->qidpath = qid;
+		f->mtime = mtime;
 		warn_S(Wdate, &genstr);
+		free(name);
 		return;
 	}
 	if (genc) {
@@ -59,75 +60,103 @@ void writef(File *f) {
 	if ((io = fopen(genc, "w+")) == NULL) {
 		error_s(Ecreate, genc);
 	}
-	dprint(L"%s: ", genc);
+	dprint("%s: ", genc);
 	if (statfd(fileno(io), 0, 0, 0, &length, &appendonly) > 0 &&
 	    appendonly && length > 0) {
 		error(Eappend);
 	}
 	n = writeio(f);
 	if (f->name.s[0] == 0 || samename) {
-		state(f,
-		      addr.r.p1 == 0 && addr.r.p2 == f->nrunes ? Clean : Dirty);
+		if (addr.r.p1 == 0 && addr.r.p2 == f->buf.nc) {
+			f->cleanseq = f->seq;
+		}
+		state(f, f->cleanseq == f->seq ? Clean : Dirty);
 	}
 	if (newfile) {
-		dprint(L"(new file) ");
+		dprint("(new file) ");
 	}
-	if (addr.r.p2 > 0 && Fchars(f, &c, addr.r.p2 - 1, addr.r.p2) &&
-	    c != '\n') {
+	if (addr.r.p2 > 0 && filereadc(f, addr.r.p2 - 1) != '\n') {
 		warn(Wnotnewline);
 	}
 	closeio(n);
 	if (f->name.s[0] == 0 || samename) {
-		if (statfile(name, &dev, &qid, &mtime, 0, 0) > 0) {
+		if (statfile(genc, &dev, &qid, &mtime, 0, 0) > 0) {
 			f->dev = dev;
-			f->qid = qid;
-			f->date = mtime;
+			f->qidpath = qid;
+			f->mtime = mtime;
 			checkqid(f);
 		}
 	}
+	free(name);
 }
 
-Posn readio(File *f, bool *nulls, bool setdate) {
+Posn readio(File *f, bool *nulls, bool setdate, bool toterm) {
 	uint64_t dev, qid;
 	int64_t	 mtime;
-	int	 olderr = errno;
 	Posn	 nt = 0;
+	int	 n, b, w;
+	Rune	*r;
+	Posn	 p = addr.r.p2;
+	char	 buf[BLOCKSIZE + 1], *s;
 
-	Rune	 buf[2] = {0};
-	while (true) {
-		wint_t err;
-		buf[0] = err = fgetwc(io);
-		if (err == WEOF) {
-			if (errno == EILSEQ) {
-				clearerr(io);
-				fflush(io);
-				fgetc(io); /* POSIX does not mandate that we
-					      advance here... */
-				buf[0] = UNICODE_REPLACEMENT_CHAR;
-				errno = 0;
-			} else {
+	*nulls = false;
+	b = 0;
+	if (f->unread) {
+		nt = bufload(&f->buf, 0, fileno(io), nulls);
+		if (toterm) {
+			raspload(f);
+		}
+	} else {
+		for (nt = 0; (n = read(fileno(io), buf + b, BLOCKSIZE - b)) > 0;
+		     nt += (r - genbuf)) {
+			n += b;
+			b = 0;
+			r = genbuf;
+			s = buf;
+			while (n > 0) {
+				if ((*r = *(uint8_t *)s) < Runeself) {
+					if (*r) {
+						r++;
+					} else {
+						*nulls = true;
+					}
+					--n;
+					s++;
+					continue;
+				}
+				if (fullrune(s, n)) {
+					w = chartorune(r, s);
+					if (*r) {
+						r++;
+					} else {
+						*nulls = true;
+					}
+					n -= w;
+					s += w;
+					continue;
+				}
+				b = n;
+				memmove(buf, s, b);
 				break;
 			}
+			loginsert(f, p, genbuf, r - genbuf);
 		}
-
-		if (buf[0] == 0) {
-			*nulls = true;
-		}
-
-		nt++;
-		Finsert(f, tmprstr(buf, 1), addr.r.p2);
 	}
 
+	if (b) {
+		*nulls = true;
+	}
+	if (*nulls) {
+		warn(Wnulls);
+	}
 	if (setdate) {
 		if (statfd(fileno(io), &dev, &qid, &mtime, 0, 0) > 0) {
 			f->dev = dev;
-			f->qid = qid;
-			f->date = mtime;
+			f->qidpath = qid;
+			f->mtime = mtime;
 			checkqid(f);
 		}
 	}
-
-	errno = olderr;
 	return nt;
 }
 
@@ -148,14 +177,9 @@ Posn writeio(File *f) {
 		} else {
 			n = addr.r.p2 - p;
 		}
-		if (Fchars(f, genbuf, p, p + n) != n) {
-			panic("writef read");
-		}
+		bufread(&f->buf, p, genbuf, n);
 		c = Strtoc(tmprstr(genbuf, n));
 		m = strlen(c);
-		if (m < n) {
-			panic("corrupted file");
-		}
 		if (Write(io, c, m) != m) {
 			free(c);
 			if (p > 0) {
@@ -173,7 +197,7 @@ void closeio(Posn p) {
 	fclose(io);
 	io = NULL;
 	if (p >= 0) {
-		dprint(L"#%lu\n", p);
+		dprint("#%lu\n", p);
 	}
 }
 
@@ -246,14 +270,12 @@ void connectto(char *machine) {
 
 	snprintf(sockname, FILENAME_MAX, "%s/sam.remote.%s",
 		 getenv("RSAMSOCKETPATH") ? getenv("RSAMSOCKETPATH") : "/tmp",
-		 getenv("USER")	     ? getenv("USER")
-		 : getenv("LOGNAME") ? getenv("LOGNAME")
-				     : "nemo");
+		 getuser());
 
 	snprintf(rarg, FILENAME_MAX, "%s:%s", sockname, exname);
 
 	if (pipe(p1) < 0 || pipe(p2) < 0) {
-		dprint(L"can't pipe\n");
+		dprint("can't pipe\n");
 		exit(EXIT_FAILURE);
 	}
 	remotefd0 = p1[0];
@@ -269,11 +291,11 @@ void connectto(char *machine) {
 		execlp(getenv("RSH") ? getenv("RSH") : RXPATH,
 		       getenv("RSH") ? getenv("RSH") : RXPATH, "-R", rarg,
 		       machine, rsamname, "-R", sockname, NULL);
-		dprint(L"can't exec %s\n", RXPATH);
+		dprint("can't exec %s\n", RXPATH);
 		exit(EXIT_FAILURE);
 
 	case -1:
-		dprint(L"can't fork\n");
+		dprint("can't fork\n");
 		exit(EXIT_FAILURE);
 	}
 	close(p1[1]);

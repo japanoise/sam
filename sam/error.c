@@ -1,4 +1,3 @@
-/* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
 #include "sam.h"
 
 static char *emsg[] = {
@@ -8,6 +7,7 @@ static char *emsg[] = {
     "not in menu:",
     "changes to",
     "I/O error:",
+    "can't write while changing:",
     /* error_c */
     "unknown command",
     "no operand for",
@@ -49,57 +49,72 @@ static char *emsg[] = {
     "too many subexpressions",
     "temporary file too large",
     "file is append-only",
+    "no destination for plumb message",
+    "internal read error in buffer load",
 };
 static char *wmsg[] = {
     /* warn_s */
-    "duplicate file name", "no such file", "write might change good version of",
+    "duplicate file name",
+    "no such file",
+    "write might change good version of",
     /* warn_S */
     "files might be aliased",
     /* warn */
-    "null characters elided; file will be different upon write",
-    "can't run pwd", "last char not newline", "exit status not 0",
-    "file is not text"};
+    "null characters elided",
+    "can't run pwd",
+    "last char not newline",
+    "exit status",
+};
 
 void error(Err s) {
 	char buf[512];
 
-	snprintf(buf, sizeof(buf) - 1, "?%s", emsg[s]);
+	sprintf(buf, "?%s", emsg[s]);
 	hiccough(buf);
 }
 
 void error_s(Err s, char *a) {
 	char buf[512];
 
-	snprintf(buf, sizeof(buf) - 1, "?%s \"%s\"", emsg[s], a);
+	sprintf(buf, "?%s \"%s\"", emsg[s], a);
+	hiccough(buf);
+}
+
+void error_r(Err s, char *a) {
+	char buf[512];
+
+	sprintf(buf, "?%s \"%s\": %r", emsg[s], a);
 	hiccough(buf);
 }
 
 void error_c(Err s, int c) {
 	char buf[512];
 
-	snprintf(buf, sizeof(buf) - 1, "?%s `%c'", emsg[s], c);
+	sprintf(buf, "?%s `%C'", emsg[s], c);
 	hiccough(buf);
 }
 
-void warn(Warn s) { dprint(L"?warning: %s\n", wmsg[s]); }
+void warn(Warn s) { dprint("?warning: %s\n", wmsg[s]); }
 
 void warn_S(Warn s, String *a) { print_s(wmsg[s], a); }
 
 void warn_SS(Warn s, String *a, String *b) { print_ss(wmsg[s], a, b); }
 
-void warn_s(Warn s, char *a) { dprint(L"?warning: %s `%s'\n", wmsg[s], a); }
+void warn_s(Warn s, char *a) { dprint("?warning: %s `%s'\n", wmsg[s], a); }
 
-void termwrite(Rune *p) {
-	size_t l = wcslen(p);
+void termwrite(char *s) {
+	String *p;
 
 	if (downloaded) {
+		p = tmpcstr(s);
 		if (cmd) {
-			Finsert(cmd, tmprstr(p, l), cmdpt);
+			loginsert(cmd, cmdpt, p->s, p->n);
 		} else {
-			Strinsert(&cmdstr, tmprstr(p, l), cmdstr.n);
+			Strinsert(&cmdstr, p, cmdstr.n);
 		}
-		cmdptadv += wcslen(p);
+		cmdptadv += p->n;
+		freetmpstr(p);
 	} else {
-		fprintf(stderr, "%ls", p);
+		Write(stderr, s, strlen(s));
 	}
 }

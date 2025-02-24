@@ -8,8 +8,10 @@ extern jmp_buf mainloop;
 
 char	       errfile[PATH_MAX + 1];
 String	       plan9cmd; /* null terminated */
-Buffer	      *plan9buf;
+Buffer	       plan9buf;
 void	       checkerrs(void);
+Buffer	       cmdbuf;
+int	       cmdbufpos;
 
 int	       plan9(File *f, int type, String *s, int nest) {
 	   int64_t l;
@@ -32,7 +34,7 @@ int	       plan9(File *f, int type, String *s, int nest) {
 		   error(Epipe);
 	   }
 	   if (type == '|') {
-		   snarf(f, addr.r.p1, addr.r.p2, plan9buf, true);
+		   snarf(f, addr.r.p1, addr.r.p2, &plan9buf, true);
 	   }
 	   if (downloaded) {
 		   remove(errfile);
@@ -77,13 +79,13 @@ int	       plan9(File *f, int type, String *s, int nest) {
 				   if ((retcode = !setjmp(
 					    mainloop))) { /* assignment = */
 					   char *c;
-					   for (l = 0; l < plan9buf->nrunes;
-						l += m) {
-						   m = plan9buf->nrunes - l;
+					   for (l = 0; l < plan9buf.nc; l += m) {
+						   m = plan9buf.nc - l;
 						   if (m > BLOCKSIZE - 1) {
 							   m = BLOCKSIZE - 1;
 						   }
-						   Bread(plan9buf, genbuf, m, l);
+						   bufread(&plan9buf, l, genbuf,
+								   m);
 						   genbuf[m] = 0;
 						   c = Strtoc(
 						       tmprstr(genbuf, m + 1));
@@ -105,7 +107,7 @@ int	       plan9(File *f, int type, String *s, int nest) {
 			   close(0); /* so it won't read from terminal */
 			   open("/dev/null", 0);
 		   }
-		   execl(shpath, sh, "-c", Strtoc(&plan9cmd), NULL);
+		   execl(SHPATH, SH, "-c", Strtoc(&plan9cmd), NULL);
 		   exit(EXIT_FAILURE);
 	   }
 	   if (pid == -1) {
@@ -116,12 +118,12 @@ int	       plan9(File *f, int type, String *s, int nest) {
 		   if (downloaded && addr.r.p1 != addr.r.p2) {
 			   outTl(Hsnarflen, addr.r.p2 - addr.r.p1);
 		   }
-		   snarf(f, addr.r.p1, addr.r.p2, snarfbuf, false);
-		   Fdelete(f, addr.r.p1, addr.r.p2);
+		   snarf(f, addr.r.p1, addr.r.p2, &snarfbuf, false);
+		   logdelete(f, addr.r.p1, addr.r.p2);
 		   close(pipe1[1]);
 		   io = fdopen(pipe1[0], "r");
 		   f->tdot.p1 = -1;
-		   f->ndot.r.p2 = addr.r.p2 + readio(f, &nulls, 0);
+		   f->ndot.r.p2 = addr.r.p2 + readio(f, &nulls, 0, false);
 		   f->ndot.r.p1 = addr.r.p2;
 		   closeio((Posn)-1);
 	   } else if (type == '>') {
@@ -142,7 +144,7 @@ int	       plan9(File *f, int type, String *s, int nest) {
 		   checkerrs();
 	   }
 	   if (!nest) {
-		   dprint(L"!\n");
+		   dprint("!\n");
 	   }
 	   return retcode;
 }
@@ -163,9 +165,9 @@ void checkerrs(void) {
 					}
 				}
 				*p = 0;
-				dprint(L"%s", buf);
+				dprint("%s", buf);
 				if (p - buf < l - 1) {
-					dprint(L"(sam: more in %s)\n", errfile);
+					dprint("(sam: more in %s)\n", errfile);
 				}
 			}
 			close(f);

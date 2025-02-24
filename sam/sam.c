@@ -1,6 +1,7 @@
 /* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
 /* Copyright (c) 2016 Rob King */
 
+#include <stdint.h>
 #define _XOPEN_SOURCE 500
 #include "sam.h"
 
@@ -8,6 +9,7 @@
 #include <limits.h>
 #include <signal.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -40,9 +42,12 @@ bool	    bpipeok;
 int	    termlocked;
 char	   *samterm = "samterm";
 char	   *rsamname = "sam";
-char	   *sh = "sh";
-char	   *shpath = "/bin/sh";
+char	   *SH = "sh";
+char	   *SHPATH = "/bin/sh";
 char	   *rmsocketname = NULL;
+File	   *lastfile;
+Disk	   *disk;
+int64_t	    seq;
 
 Rune	    baddir[] = {'<', 'b', 'a', 'd', 'd', 'i', 'r', '>', '\n'};
 
@@ -66,9 +71,7 @@ int main(int argc, char *argv[]) {
 #define B_CMD_MAX 4095
 
 const char *getbsocketname(const char *machine) {
-	const char *user = getenv("USER")      ? getenv("USER")
-			   : getenv("LOGNAME") ? getenv("LOGNAME")
-					       : "nemo";
+	const char *user = getuser();
 	const char *path =
 	    getenv("SAMSOCKETPATH") ? getenv("SAMSOCKETPATH") : getenv("HOME");
 	static char name[FILENAME_MAX + 1] = {0};
@@ -226,15 +229,20 @@ int sammain(int argc, char *argv[]) {
 	Strinit0(&rhs);
 	Strinit0(&wd);
 	Strinit0(&plan9cmd);
+	disk = diskinit();
 
 	tempfile.listptr = emalloc(0);
 	home = getenv("HOME") ? getenv("HOME") : "/";
-	shpath = getenv("SHELL") ? getenv("SHELL") : shpath;
-	sh = basename(shpath);
+	SHPATH = getenv("SHELL") ? getenv("SHELL") : SHPATH;
+	SH = basename(SHPATH);
 	if (!dflag) {
 		startup(machine, rmsocketname != NULL, trylock);
 	}
-	Fstart();
+	/* Previously: allocate the buffers */
+	/* Doesn't appear to be needed in 9front sam */
+	/* Fstart(); */
+
+	getcurwd();
 
 	signal(SIGINT, SIG_IGN);
 	signal(SIGHUP, hup);
@@ -247,12 +255,13 @@ int sammain(int argc, char *argv[]) {
 				Straddc(t, '\0');
 				Strduplstr(&genstr, t);
 				freetmpstr(t);
-				Fsetname(newfile(), &genstr);
+				filesetname(newfile(), &genstr);
 			}
 		}
 	} else if (!downloaded) {
-		newfile()->state = Clean;
+		newfile()->unread = false;
 	}
+	seq++;
 	modnum++;
 	if (file.nused) {
 		current(file.filepptr[0]);
@@ -270,11 +279,11 @@ int sammain(int argc, char *argv[]) {
 void scram(void) {
 	freecmd();
 	for (int i = 0; i < file.nused; i++) {
-		Fclose(file.filepptr[i]);
+		fileclose(file.filepptr[i]);
 	}
 
 	if (!downloaded) {
-		Fclose(cmd);
+		fileclose(cmd);
 	}
 
 	if (genc) {
@@ -320,7 +329,7 @@ void rescue(void) {
 	for (int i = 0; i < file.nused; i++) {
 		char  buf[PATH_MAX] = {0};
 		File *f = file.filepptr[i];
-		if (f == cmd || f->nrunes == 0 || f->state != Dirty) {
+		if (f == cmd || f->buf.nc == 0 || fileisdirty(f)) {
 			continue;
 		}
 
@@ -346,10 +355,9 @@ void rescue(void) {
 		}
 
 		fprintf(io, "samsave %s <<'---%s'\n", buf, buf);
-		addr.r.p1 = 0, addr.r.p2 = f->nrunes;
+		addr.r.p1 = 0, addr.r.p2 = f->buf.nc;
 		writeio(f);
 		fprintf(io, "\n---%s\n", (char *)buf);
-		flushio();
 	}
 }
 
@@ -359,7 +367,7 @@ void panic(char *s) {
 	if (!panicking++ && !setjmp(mainloop)) {
 		wasd = downloaded;
 		downloaded = 0;
-		dprint(L"sam: panic: %s\n", s);
+		dprint("sam: panic: %s: %r\n", s);
 		if (wasd) {
 			fprintf(stderr, "sam: panic: %s\n", s);
 		}
@@ -369,12 +377,15 @@ void panic(char *s) {
 }
 
 void hiccough(char *s) {
+	File *f;
+	int   i;
+
 	if (rescuing) {
 		exit(EXIT_FAILURE);
 	}
 
 	if (s) {
-		dprint(L"%s\n", s);
+		dprint("%s\n", s);
 	}
 
 	resetcmd();
@@ -386,15 +397,28 @@ void hiccough(char *s) {
 		io = NULL;
 	}
 
-	if (undobuf->nrunes) {
-		Bdelete(undobuf, (Posn)0, undobuf->nrunes);
+	/*
+	 * back out any logged changes & restore old sequences
+	 */
+	for (i = 0; i < file.nused; i++) {
+		f = file.filepptr[i];
+		if (f == cmd) {
+			continue;
+		}
+		if (f->seq == seq) {
+			bufdelete(&f->epsilon, 0, f->epsilon.nc);
+			f->seq = f->prevseq;
+			f->dot.r = f->prevdot;
+			f->mark = f->prevmark;
+			state(f, f->prevmod ? Dirty : Clean);
+		}
 	}
 
 	update();
 
 	if (curfile) {
-		if (curfile->state == Unread) {
-			curfile->state = Clean;
+		if (curfile->unread) {
+			curfile->unread = false;
 		} else if (downloaded) {
 			outTs(Hcurrent, curfile->tag);
 		}
@@ -415,7 +439,7 @@ void trytoclose(File *f) {
 	if (f->deleted) {
 		return;
 	}
-	if (f->state == Dirty && !f->closeok) {
+	if (fileisdirty(f) && !f->closeok) {
 		f->closeok = true;
 		if (f->name.s[0]) {
 			t = Strtoc(&f->name);
@@ -436,7 +460,7 @@ void trytoquit(void) {
 	if (!quitok) {
 		for (c = 0; c < file.nused; c++) {
 			f = file.filepptr[c];
-			if (f != cmd && f->state == Dirty) {
+			if (f != cmd && fileisdirty(f)) {
 				quitok = true;
 				eof = false;
 				error(Echanges);
@@ -455,15 +479,17 @@ void load(File *f) {
 		edit(f, 'I');
 		addr = saveaddr;
 	} else {
-		f->state = Clean;
+		f->unread = 0;
+		f->cleanseq = f->seq;
 	}
-	Fupdate(f, true, true);
+
+	fileupdate(f, true, true);
 }
 
 void cmdupdate(void) {
-	if (cmd && cmd->mod != 0) {
-		Fupdate(cmd, false, downloaded);
-		cmd->dot.r.p1 = cmd->dot.r.p2 = cmd->nrunes;
+	if (cmd && cmd->seq != 0) {
+		fileupdate(cmd, false, downloaded);
+		cmd->dot.r.p1 = cmd->dot.r.p2 = cmd->buf.nc;
 		telldot(cmd);
 	}
 }
@@ -492,7 +518,7 @@ void update(void) {
 			delete (f);
 			continue;
 		}
-		if (f->mod == modnum && Fupdate(f, false, downloaded)) {
+		if (f->seq == seq && fileupdate(f, false, downloaded)) {
 			anymod++;
 		}
 		if (f->rasp) {
@@ -500,37 +526,34 @@ void update(void) {
 		}
 	}
 	if (anymod) {
-		modnum++;
+		seq++;
 	}
 }
 
 File *current(File *f) { return curfile = f; }
 
 void  edit(File *f, int cmd) {
-	 bool empty = true;
+	 int  empty = true;
 	 Posn p;
 	 bool nulls;
 
 	 if (cmd == 'r') {
-		 Fdelete(f, addr.r.p1, addr.r.p2);
+		 logdelete(f, addr.r.p1, addr.r.p2);
 	 }
 	 if (cmd == 'e' || cmd == 'I') {
-		 Fdelete(f, (Posn)0, f->nrunes);
-		 addr.r.p2 = f->nrunes;
-	 } else if (f->nrunes != 0 ||
+		 logdelete(f, (Posn)0, f->buf.nc);
+		 addr.r.p2 = f->buf.nc;
+	 } else if (f->buf.nc != 0 ||
 		    (f->name.s[0] && Strcmp(&genstr, &f->name) != 0)) {
 		 empty = false;
 	 }
 	 if ((io = fopen(genc, "r")) == NULL) {
-		 if (curfile && curfile->state == Unread) {
-			 curfile->state = Clean;
+		 if (curfile && curfile->unread) {
+			 curfile->unread = false;
 		 }
-		 error_s(Eopen, genc);
+		 error_r(Eopen, genc);
 	 }
-	 p = readio(f, &nulls, empty);
-	 if (nulls) {
-		 warn(Wnulls);
-	 }
+	 p = readio(f, &nulls, empty, true);
 	 closeio((cmd == 'e' || cmd == 'I') ? -1 : p);
 	 if (cmd == 'r') {
 		 f->ndot.r.p1 = addr.r.p2, f->ndot.r.p2 = addr.r.p2 + p;
@@ -543,7 +566,10 @@ void  edit(File *f, int cmd) {
 	 } else {
 		 quitok = false;
 	 }
-	 state(f, empty ? Clean : Dirty);
+	 state(f, empty && !nulls ? Clean : Dirty);
+	 if (empty && !nulls) {
+		 f->cleanseq = f->seq;
+	 }
 	 if (cmd == 'e') {
 		 filename(f);
 	 }
@@ -565,15 +591,14 @@ int getname(File *f, String *s, bool save) {
 		}
 		goto Return;
 	}
-	if (c != L' ' && c != L'\t') {
+	if (c != ' ' && c != '\t') {
 		error(Eblank);
 	}
-
-	for (i = 0; (c = s->s[i]) == L' ' || c == L'\t'; i++)
+	for (i = 0; (c = s->s[i]) == ' ' || c == '\t'; i++)
 		;
 
-	while (s->s[i] > L' ' && i < s->n) {
-		if (s->s[i] == L'\\') {
+	while (s->s[i] > ' ' && i < s->n) {
+		if (s->s[i] == '\\') {
 			i++;
 			if (i >= s->n) {
 				break;
@@ -585,67 +610,73 @@ int getname(File *f, String *s, bool save) {
 	if (s->s[i]) {
 		error(Enewline);
 	}
-	Straddc(&genstr, '\0');
+	fixname(&genstr);
 	if (f && (save || f->name.s[0] == 0)) {
-		Fsetname(f, &genstr);
+		logsetname(f, &genstr);
 		if (Strcmp(&f->name, &genstr)) {
-			quitok = (f->closeok = false);
-			f->qid = 0;
-			f->date = 0;
+			quitok = f->closeok = false;
+			f->qidpath = 0;
+			f->mtime = 0;
 			state(f, Dirty); /* if it's 'e', fix later */
 		}
 	}
 Return:
 	genc = Strtoc(&genstr);
-	return genstr.n; /* strlen(name) */
+	i = genstr.n;
+	if (i && genstr.s[i - 1] == 0) {
+		i--;
+	}
+	return i; /* strlen(name) */
 }
 
 void filename(File *f) {
 	if (genc) {
 		free(genc);
 	}
-	genc = Strtoc(&f->name);
-	dprint(L"%c%c%c %s\n", " '"[f->state == Dirty], "-+"[f->rasp != 0],
+	genc = Strtoc(&genstr);
+	dprint("%c%c%c %s\n", " '"[f->mod], "-+"[f->rasp != 0],
 	       " ."[f == curfile], genc);
 }
 
-void undostep(File *f) {
-	Buffer *t;
-	int	changes;
-	Mark	mark;
+void undostep(File *f, int isundo) {
+	uint p1, p2;
+	int  mod;
 
-	t = f->transcript;
-	changes = Fupdate(f, true, true);
-	Bread(t, (Rune *)&mark, (sizeof mark) / RUNESIZE, f->markp);
-	Bdelete(t, f->markp, t->nrunes);
-	f->markp = mark.p;
-	f->dot.r = mark.dot;
-	f->ndot.r = mark.dot;
-	f->mark = mark.mark;
-	f->mod = mark.m;
-	f->closeok = mark.s1 != Dirty;
-	if (mark.s1 == Dirty) {
-		quitok = false;
-	}
-	if (f->state == Clean && mark.s1 == Clean && changes) {
-		state(f, Dirty);
+	mod = f->mod;
+	fileundo(f, isundo, 1, &p1, &p2, true);
+	f->ndot = f->dot;
+	if (f->mod) {
+		f->closeok = 0;
+		quitok = 0;
 	} else {
-		state(f, mark.s1);
+		f->closeok = 1;
+	}
+
+	if (f->mod != mod) {
+		f->mod = mod;
+		if (mod) {
+			mod = Clean;
+		} else {
+			mod = Dirty;
+		}
+		state(f, mod);
 	}
 }
 
-int undo(void) {
+int undo(int isundo) {
 	File *f;
 	int   i;
 	Mod   max;
-	if ((max = curfile->mod) == 0) {
+
+	max = undoseq(curfile, isundo);
+	if (max == 0) {
 		return 0;
 	}
 	settempfile();
 	for (i = 0; i < tempfile.nused; i++) {
 		f = tempfile.filepptr[i];
-		if (f != cmd && f->mod == max) {
-			undostep(f);
+		if (f != cmd && undoseq(f, isundo) == max) {
+			undostep(f, isundo);
 		}
 	}
 	return 1;
@@ -654,34 +685,53 @@ int undo(void) {
 int readcmd(String *s) {
 	int retcode;
 
-	if (flist == 0) {
-		(flist = Fopen())->state = Clean;
+	if (flist != 0) {
+		fileclose(flist);
 	}
-	addr.r.p1 = 0, addr.r.p2 = flist->nrunes;
+	flist = fileopen();
+
+	addr.r.p1 = 0, addr.r.p2 = flist->buf.nc;
 	retcode = plan9(flist, '<', s, false);
-	Fupdate(flist, false, false);
-	flist->mod = 0;
-	if (flist->nrunes > BLOCKSIZE) {
+	fileupdate(flist, false, false);
+	flist->seq = 0;
+	if (flist->buf.nc > BLOCKSIZE) {
 		error(Etoolong);
 	}
 	Strzero(&genstr);
-	Strinsure(&genstr, flist->nrunes);
-	Fchars(flist, genbuf, (Posn)0, flist->nrunes);
-	memmove(genstr.s, genbuf, flist->nrunes * RUNESIZE);
-	genstr.n = flist->nrunes;
+	Strinsure(&genstr, flist->buf.nc);
+	bufread(&flist->buf, (Posn)0, genbuf, flist->buf.nc);
+	memmove(genstr.s, genbuf, flist->buf.nc * RUNESIZE);
+	genstr.n = flist->buf.nc;
 	Straddc(&genstr, '\0');
 	return retcode;
+}
+
+void getcurwd(void) {
+	String *t;
+	char	buf[PATH_MAX + 1];
+
+	buf[0] = 0;
+	getcwd(buf, sizeof(buf));
+	t = tmpcstr(buf);
+	Strduplstr(&wd, t);
+	freetmpstr(t);
+	if (wd.n == 0) {
+		warn(Wpwd);
+	} else if (wd.s[wd.n - 1] != '/') {
+		Straddc(&wd, '/');
+	}
 }
 
 void cd(String *str) {
 	int	i;
 	File   *f;
 	String *t;
+	String	owd;
 
 	t = tmpcstr("/bin/pwd");
 	Straddc(t, '\0');
 	if (flist) {
-		Fclose(flist);
+		fileclose(flist);
 		flist = 0;
 	}
 	if (readcmd(t) != 0) {
@@ -690,14 +740,8 @@ void cd(String *str) {
 		Straddc(&genstr, '\0');
 	}
 	freetmpstr(t);
-	Strduplstr(&wd, &genstr);
-	if (wd.s[0] == 0) {
-		wd.n = 0;
-		warn(Wpwd);
-	} else if (wd.s[wd.n - 2] == '\n') {
-		--wd.n;
-		wd.s[wd.n - 1] = '/';
-	}
+
+	getcurwd();
 	if (chdir(getname((File *)0, str, false) ? genc : home)) {
 		syserror("chdir");
 	}
@@ -705,25 +749,30 @@ void cd(String *str) {
 	for (i = 0; i < tempfile.nused; i++) {
 		f = tempfile.filepptr[i];
 		if (f != cmd && f->name.s[0] != '/' && f->name.s[0] != 0) {
-			Strinsert(&f->name, &wd, (Posn)0);
+			Strinsert(&f->name, &owd, (Posn)0);
+			fixname(&f->name);
+			sortname(f);
+		} else if (f != cmd && Strispre(&wd, &f->name)) {
+			fixname(&f->name);
 			sortname(f);
 		}
 	}
+	Strclose(&owd);
 }
 
-int loadflist(String *s) {
+int loadflist(String *s, int blank) {
 	int c, i;
 
 	c = s->s[0];
-	for (i = 0; s->s[i] == ' ' || s->s[i] == '\t'; i++)
+	for (i = 0; i < s->n && (s->s[i] == ' ' || s->s[i] == '\t'); i++)
 		;
-	if ((c == ' ' || c == '\t') && s->s[i] != '\n') {
+	if (blank == 0 || ((c == ' ' || c == '\t') && s->s[i] != '\n')) {
 		if (s->s[i] == '<') {
 			Strdelete(s, 0L, (int64_t)i + 1);
 			readcmd(s);
 		} else {
 			Strzero(&genstr);
-			while ((c = s->s[i++]) && c != '\n') {
+			while (i < s->n && (c = s->s[i++]) && c != '\n') {
 				Straddc(&genstr, c);
 			}
 			Straddc(&genstr, '\0');
@@ -785,7 +834,7 @@ File *readflist(bool readall, bool delete) {
 				trytoclose(f);
 			}
 		} else if (f == NULL && readall) {
-			Fsetname(f = newfile(), &t);
+			logsetname(f = newfile(), &t);
 		}
 
 		if (i == 0 || i >= genstr.n || t.n == 0) {
@@ -800,14 +849,14 @@ File *readflist(bool readall, bool delete) {
 	return f;
 }
 
-File *tofile(String *s) {
+File *tofile(String *s, int blank) {
 	File *f = NULL;
 
-	if (s->s[0] != L' ') {
+	if (blank && s->s[0] != ' ') {
 		error(Eblank);
 	}
 
-	if (loadflist(s) == 0) {
+	if (loadflist(s, blank) == 0) {
 		f = lookfile(&genstr, false);
 	}
 
@@ -829,9 +878,9 @@ File *tofile(String *s) {
 File *getfile(String *s) {
 	File *f;
 
-	if (loadflist(s) == 0) {
-		Fsetname(f = newfile(), &genstr);
-	} else if ((f = readflist(true, false)) == NULL) {
+	if (loadflist(s, 1) == 0) {
+		logsetname(f = newfile(), &genstr);
+	} else if ((f = readflist(true, false)) == 0) {
 		error(Eblank);
 	}
 	return current(f);
@@ -845,10 +894,10 @@ void closefiles(File *f, String *s) {
 		trytoclose(f);
 		return;
 	}
-	if (s->s[0] != L' ') {
+	if (s->s[0] != ' ') {
 		error(Eblank);
 	}
-	if (loadflist(s) == 0) {
+	if (loadflist(s, 1) == 0) {
 		error(Enewline);
 	}
 	readflist(false, true);
@@ -862,8 +911,8 @@ void copy(File *f, Address addr2) {
 		if (ni > BLOCKSIZE) {
 			ni = BLOCKSIZE;
 		}
-		Fchars(f, genbuf, p, p + ni);
-		Finsert(addr2.f, tmprstr(genbuf, ni), addr2.r.p2);
+		bufread(&f->buf, p, genbuf, ni);
+		loginsert(addr2.f, addr2.r.p2, tmprstr(genbuf, ni)->s, ni);
 	}
 	addr2.f->ndot.r.p2 = addr2.r.p2 + (f->dot.r.p2 - f->dot.r.p1);
 	addr2.f->ndot.r.p1 = addr2.r.p2;
@@ -871,11 +920,11 @@ void copy(File *f, Address addr2) {
 
 void move(File *f, Address addr2) {
 	if (addr.r.p2 <= addr2.r.p2) {
-		Fdelete(f, addr.r.p1, addr.r.p2);
+		logdelete(f, addr.r.p1, addr.r.p2);
 		copy(f, addr2);
 	} else if (addr.r.p1 >= addr2.r.p2) {
 		copy(f, addr2);
-		Fdelete(f, addr.r.p1, addr.r.p2);
+		logdelete(f, addr.r.p1, addr.r.p2);
 	} else {
 		error(Eoverlap);
 	}
@@ -884,47 +933,58 @@ void move(File *f, Address addr2) {
 Posn nlcount(File *f, Posn p0, Posn p1) {
 	Posn nl = 0;
 
-	Fgetcset(f, p0);
-	while (p0++ < p1) {
-		if (Fgetc(f) == '\n') {
+	while (p0 < p1) {
+		if (filereadc(f, p0++) == '\n') {
 			nl++;
 		}
 	}
 	return nl;
 }
 
-void printposn(File *f, int charsonly) {
-	Posn l1, l2;
+void printposn(File *f, int chars) {
+	Posn  l1, l2;
+	char *s;
 
-	if (!charsonly) {
+	if (f->name.s[0]) {
+		if (f->name.s[0] != '/') {
+			getcurwd();
+			s = Strtoc(&wd);
+			dprint("%s", s);
+			free(s);
+		}
+		s = Strtoc(&f->name);
+		dprint("%s:", s);
+		free(s);
+	}
+	if (chars) {
+		dprint("#%lud", addr.r.p1);
+		if (addr.r.p2 != addr.r.p1) {
+			dprint(",#%lud", addr.r.p2);
+		}
+	} else {
 		l1 = 1 + nlcount(f, (Posn)0, addr.r.p1);
 		l2 = l1 + nlcount(f, addr.r.p1, addr.r.p2);
 		/* check if addr ends with '\n' */
 		if (addr.r.p2 > 0 && addr.r.p2 > addr.r.p1 &&
-		    (Fgetcset(f, addr.r.p2 - 1), Fgetc(f) == '\n')) {
+		    filereadc(f, addr.r.p2 - 1) == '\n') {
 			--l2;
 		}
-		dprint(L"%lu", l1);
+		dprint("%lud", l1);
 		if (l2 != l1) {
-			dprint(L",%lu", l2);
+			dprint(",%lud", l2);
 		}
-		dprint(L"; ");
 	}
-	dprint(L"#%lu", addr.r.p1);
-	if (addr.r.p2 != addr.r.p1) {
-		dprint(L",#%lu", addr.r.p2);
-	}
-	dprint(L"\n");
+	dprint("\n");
 }
 
 void settempfile(void) {
 	if (tempfile.nalloc < file.nused) {
-		free(tempfile.listptr);
-		tempfile.listptr =
-		    emalloc(sizeof(*tempfile.filepptr) * file.nused);
+		if (tempfile.filepptr) {
+			free(tempfile.filepptr);
+		}
+		tempfile.filepptr = emalloc(sizeof(File *) * file.nused);
 		tempfile.nalloc = file.nused;
 	}
+	memmove(tempfile.filepptr, file.filepptr, sizeof(File *) * file.nused);
 	tempfile.nused = file.nused;
-	memmove(&tempfile.filepptr[0], &file.filepptr[0],
-		file.nused * sizeof(File *));
 }
