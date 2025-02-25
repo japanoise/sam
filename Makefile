@@ -6,12 +6,12 @@
 
 MODE?=user
 
-all:    config.mk lXg lframe libutf samdir samtermdir docdir
+all:    config.mk lXg lframe lutf samdir samtermdir docdir
 
 config.mk:
 	cp config.mk.def config.mk
 
-libutf:
+lutf:
 	cd libutf; $(MAKE)
 
 lXg:
@@ -53,6 +53,7 @@ clean:
 	cd sam; $(MAKE) clean
 	cd samterm; $(MAKE) clean
 	cd ssam; $(MAKE) clean
+	cd libutf; $(MAKE) clean
 
 format:
 	find ./ -iname "*.[ch]" | xargs clang-format -i
