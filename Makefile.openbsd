@@ -8,12 +8,12 @@ MODE?=user
 
 DESKTOPFILE=deadpixi-sam.desktop
 
-all:    config.mk lXg lframe libutf samdir samtermdir docdir
+all:    config.mk lXg lframe lutf samdir samtermdir docdir
 
 config.mk:
 	cp config.mk.openbsd config.mk
 
-libutf:
+lutf:
 	cd libutf; $(MAKE)
 
 lXg:
