@@ -3,35 +3,40 @@
 
 static Block *blist;
 
-static int    tempdisk(void) {
-	   char buf[128];
-	   int	i, fd;
+char	      buf[128];
+Disk	      d;
 
-	   snprintf(buf, sizeof buf, "/tmp/X%d.%.4ssam", getpid(), getuser());
-	   for (i = 'A'; i <= 'Z'; i++) {
-		   buf[5] = i;
-		   if (access(buf, F_OK) == 0) {
-			   continue;
-		   }
-		   /* maybe? fd = open(buf, O_RDWR|O_TMPFILE); */
-		   fd = open(buf, O_RDWR | O_EXCL | O_CREAT);
-		   if (fd >= 0) {
-			   return fd;
-		   }
-	   }
-	   return -1;
+static void   diskcleanup() {
+	  close(d.fd);
+	  remove(buf);
+}
+
+static int tempdisk(void) {
+	int i, fd;
+
+	snprintf(buf, sizeof buf, "/tmp/X%d.%.4ssam", getpid(), getuser());
+	for (i = 'A'; i <= 'Z'; i++) {
+		buf[5] = i;
+		if (access(buf, F_OK) == 0) {
+			continue;
+		}
+		/* maybe? fd = open(buf, O_RDWR|O_TMPFILE); */
+		fd = open(buf, O_RDWR | O_EXCL | O_CREAT);
+		if (fd >= 0) {
+			return fd;
+		}
+	}
+	return -1;
 }
 
 Disk *diskinit() {
-	Disk *d;
-
-	d = emalloc(sizeof(Disk));
-	d->fd = tempdisk();
-	if (d->fd < 0) {
+	d.fd = tempdisk();
+	if (d.fd < 0) {
 		fprintf(stderr, "sam: can't create temp file\n");
 		exit(EXIT_FAILURE);
 	}
-	return d;
+	atexit(diskcleanup);
+	return &d;
 }
 
 static uint ntosize(uint n, uint *ip) {
