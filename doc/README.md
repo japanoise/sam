@@ -1,6 +1,7 @@
 # sam documentation
 
 * `sam.1` is the manpage for sam, B, etc.
+* `ssam.1` is the manpage for ssam, stream interface to sam
 * `samrc.5` is the manpage for sam's configuration file.
 * `samrc` is a sample configuration file.
 * `sam.ps` is the sam whitepaper by Rob Pike. It can be turned into a pdf with
