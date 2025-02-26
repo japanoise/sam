@@ -99,7 +99,7 @@ enum {
 };
 
 struct Block {
-	uint addr; /* disk address in bytes */
+	int64_t addr; /* disk address in bytes */
 
 	union {
 		uint   n;    /* number of used runes in block */
@@ -145,7 +145,7 @@ struct File {
 	String	 name;	  /* name of associated file */
 	uint64_t qidpath; /* of file when read */
 	uint	 mtime;	  /* of file when read */
-	int	 dev;	  /* of file when read */
+	uint64_t dev;	  /* of file when read */
 	int	 unread;  /* file has not been read from disk */
 
 	int64_t	 seq;	   /* if seq==0, File acts like Buffer */
