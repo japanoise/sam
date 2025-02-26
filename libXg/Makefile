@@ -30,6 +30,9 @@ OBJS=	  arith.o balloc.o bitblt.o   border.o bscreenrect.o\
 	rectclip.o string.o texture.o\
 	wrbitmap.o   xtbinit.o
 
+debug: CFLAGS+=-g -O0
+debug: $(LIB)
+
 all install:	$(LIB)
 uninstall:
 compile:	$(LIB)

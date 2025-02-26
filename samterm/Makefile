@@ -24,6 +24,9 @@ CC?=c99
 
 OBJ=main.o flayer.o  io.o menu.o mesg.o rasp.o samrc.o scroll.o unix.o
 
+debug: CFLAGS+=-g -O0 -DDEBUG
+debug: samterm
+
 all:	samterm
 
 samterm:	$(OBJ) $(LIBS)
