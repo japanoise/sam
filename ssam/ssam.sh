@@ -1,5 +1,5 @@
 #!/bin/sh
-arg0=`basename "$0"`
+arg0=$(basename "$0")
 
 usage()
 {
@@ -34,16 +34,23 @@ while getopts ne:f:h OPT; do
             usage "$arg0"
             exit 0
             ;;
+        *)
+            usage "$arg0"
+            exit 1
+            ;;
     esac
 done
-shift `expr "$OPTIND" - 1`
+shift "$((OPTIND - 1))"
 
 if [ -z "$TMPDIR" ]; then
     TMPDIR="/tmp"
 fi
 tmp="$TMPDIR/ssam.tmp.$USER.$$"
 
-trap 'result=$?; rm -f "$tmp"; exit $result' INT EXIT KILL
+# Variable is referenced in non-expanded string, it's OK that it's not
+# set by the parent script here.
+# shellcheck disable=SC2154
+trap 'result=$?; rm -f "$tmp"; exit $result' INT EXIT
 cat "$@" >"$tmp"
 
 {
@@ -54,8 +61,8 @@ cat "$@" >"$tmp"
     echo 0k
 
     # run scripts, print
-    [ ! -z "$flagf" ] && cat "$flagf"
-    [ ! -z "$flage" ] && echo "$flage"
+    [ -n "$flagf" ] && cat "$flagf"
+    [ -n "$flage" ] && echo "$flage"
     [ "$flagn" -eq 0 ] && echo ','
 } | sam -d "$tmp" 2>/dev/null
 
