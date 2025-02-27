@@ -2,8 +2,8 @@
 #include "parse.h"
 
 Address addr;
-String	lastpat;
-bool	patset;
+String  lastpat;
+bool    patset;
 File   *menu;
 
 File   *matchfile(String *);
@@ -190,11 +190,11 @@ Address charaddr(Posn l, Address addr, int sign) {
 }
 
 Address lineaddr(Posn l, Address addr, int sign) {
-	int	n;
-	int	c;
+	int     n;
+	int     c;
 	File   *f = addr.f;
 	Address a;
-	Posn	p;
+	Posn    p;
 
 	a.f = f;
 	if (sign >= 0) {

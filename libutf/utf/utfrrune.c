@@ -4,8 +4,8 @@
 
 char *utfrrune(const char *s, Rune r) {
 	const char *p = NULL;
-	Rune	    r0;
-	int	    n;
+	Rune        r0;
+	int         n;
 
 	if (r < Runeself) {
 		return strrchr(s, r);

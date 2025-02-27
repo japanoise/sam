@@ -21,7 +21,7 @@ uint8_t *_frallocstr(unsigned n) {
 }
 
 void _frinsure(Frame *f, int bn, unsigned n) {
-	Frbox	*b;
+	Frbox   *b;
 	uint8_t *p;
 
 	b = &f->box[bn];

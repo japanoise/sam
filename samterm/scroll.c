@@ -8,32 +8,32 @@
 extern Bitmap *darkgrey;
 extern Mouse   mouse;
 
-Rectangle      scrpos(Rectangle r, int64_t p0, int64_t p1, int64_t tot) {
-	     int64_t   h;
-	     Rectangle q;
+Rectangle scrpos(Rectangle r, int64_t p0, int64_t p1, int64_t tot) {
+	int64_t   h;
+	Rectangle q;
 
-	     q = inset(r, 1);
-	     h = q.max.y - q.min.y;
-	     if (tot == 0) {
-		     return q;
-	     }
-	     if (tot > 1024L * 1024L) {
-		     tot >>= 10, p0 >>= 10, p1 >>= 10;
-	     }
-	     if (p0 > 0) {
-		     q.min.y += h * p0 / tot;
-	     }
-	     if (p1 < tot) {
-		     q.max.y -= h * (tot - p1) / tot;
-	     }
-	     if (q.max.y < q.min.y + 2) {
-		     if (q.min.y + 2 <= r.max.y) {
-			     q.max.y = q.min.y + 2;
-		     } else {
-			     q.min.y = q.max.y - 2;
-		     }
-	     }
-	     return q;
+	q = inset(r, 1);
+	h = q.max.y - q.min.y;
+	if (tot == 0) {
+		return q;
+	}
+	if (tot > 1024L * 1024L) {
+		tot >>= 10, p0 >>= 10, p1 >>= 10;
+	}
+	if (p0 > 0) {
+		q.min.y += h * p0 / tot;
+	}
+	if (p1 < tot) {
+		q.max.y -= h * (tot - p1) / tot;
+	}
+	if (q.max.y < q.min.y + 2) {
+		if (q.min.y + 2 <= r.max.y) {
+			q.max.y = q.min.y + 2;
+		} else {
+			q.min.y = q.max.y - 2;
+		}
+	}
+	return q;
 }
 
 void scrflip(Flayer *l, Rectangle r) {
@@ -44,9 +44,9 @@ void scrflip(Flayer *l, Rectangle r) {
 
 void scrdraw(Flayer *l, int64_t tot) {
 	Rectangle      r, r1, r2;
-	Bitmap	      *b;
+	Bitmap        *b;
 	static Bitmap *x;
-	int	       h;
+	int            h;
 
 	if (l->f.b == 0) {
 		panic("scrdraw");
@@ -87,11 +87,11 @@ void scrdraw(Flayer *l, int64_t tot) {
  * 3 = Right
  */
 void scroll(Flayer *l, int pbut, int but) {
-	int	  in = 0, oin;
-	int64_t	  tot = scrtotal(l);
+	int       in = 0, oin;
+	int64_t   tot = scrtotal(l);
 	Rectangle scr, r, s, rt;
-	int	  x, y, my, oy, h;
-	int64_t	  p0; /* Goal point */
+	int       x, y, my, oy, h;
+	int64_t   p0; /* Goal point */
 
 	s = inset(l->scroll, 1);
 	x = s.min.x + FLSCROLLWID / 2;

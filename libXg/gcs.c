@@ -35,22 +35,22 @@
  * source and dest use 1 for black.  This is a straight translation.
  */
 static int gx[16] = {
-    GXclear,	    /* Zero */
-    GXnor,	    /* DnorS */
+    GXclear,        /* Zero */
+    GXnor,          /* DnorS */
     GXandInverted,  /* DandnotS */
     GXcopyInverted, /* notS */
     GXandReverse,   /* notDandS */
-    GXinvert,	    /* notD */
-    GXxor,	    /* DxorS */
-    GXnand,	    /* DnandS */
-    GXand,	    /* DandS */
-    GXequiv,	    /* DxnorS */
-    GXnoop,	    /* D */
+    GXinvert,       /* notD */
+    GXxor,          /* DxorS */
+    GXnand,         /* DnandS */
+    GXand,          /* DandS */
+    GXequiv,        /* DxnorS */
+    GXnoop,         /* D */
     GXorInverted,   /* DornotS */
-    GXcopy,	    /* S */
+    GXcopy,         /* S */
     GXorReverse,    /* notDorS */
-    GXor,	    /* DorS */
-    GXset,	    /* F */
+    GXor,           /* DorS */
+    GXset,          /* F */
 };
 
 /*
@@ -60,22 +60,22 @@ static int gx[16] = {
  * The comment on each line is op, in Fcode terms.
  */
 static int d0s1gx[16] = {
-    GXset,	    /* Zero */
+    GXset,          /* Zero */
     GXorReverse,    /* DnorS */
-    GXor,	    /* DandnotS */
-    GXcopy,	    /* notS */
-    GXnand,	    /* notDandS */
-    GXinvert,	    /* notD */
-    GXxor,	    /* DxorS */
+    GXor,           /* DandnotS */
+    GXcopy,         /* notS */
+    GXnand,         /* notDandS */
+    GXinvert,       /* notD */
+    GXxor,          /* DxorS */
     GXandReverse,   /* DnandS */
     GXorInverted,   /* DandS */
-    GXequiv,	    /* DxnorS */
-    GXnoop,	    /* D */
-    GXand,	    /* DornotS */
+    GXequiv,        /* DxnorS */
+    GXnoop,         /* D */
+    GXand,          /* DornotS */
     GXcopyInverted, /* S */
-    GXnor,	    /* notDorS */
+    GXnor,          /* notDorS */
     GXandInverted,  /* DorS */
-    GXclear,	    /* F */
+    GXclear,        /* F */
 };
 /*
  * gx func code corresponding to libg func code when 1 means black
@@ -84,22 +84,22 @@ static int d0s1gx[16] = {
  * The comment on each line is op, in Fcode terms.
  */
 static int d1s0gx[16] = {
-    GXclear,	    /* Zero */
+    GXclear,        /* Zero */
     GXandReverse,   /* DnorS */
-    GXand,	    /* DandnotS */
-    GXcopy,	    /* notS */
-    GXnor,	    /* notDandS */
-    GXinvert,	    /* notD */
-    GXequiv,	    /* DxorS */
+    GXand,          /* DandnotS */
+    GXcopy,         /* notS */
+    GXnor,          /* notDandS */
+    GXinvert,       /* notD */
+    GXequiv,        /* DxorS */
     GXorReverse,    /* DnandS */
     GXandInverted,  /* DandS */
-    GXxor,	    /* DxnorS */
-    GXnoop,	    /* D */
-    GXor,	    /* DornotS */
+    GXxor,          /* DxnorS */
+    GXnoop,         /* D */
+    GXor,           /* DornotS */
     GXcopyInverted, /* S */
-    GXnand,	    /* notDorS */
+    GXnand,         /* notDorS */
     GXorInverted,   /* DorS */
-    GXset,	    /* F */
+    GXset,          /* F */
 };
 
 /*
@@ -109,22 +109,22 @@ static int d1s0gx[16] = {
  * The comment on each line is op, in Fcode terms.
  */
 static int d0s0gx[16] = {
-    GXset,	    /* Zero */
-    GXnand,	    /* DnorS */
+    GXset,          /* Zero */
+    GXnand,         /* DnorS */
     GXorInverted,   /* DandnotS */
     GXcopyInverted, /* notS */
     GXorReverse,    /* notDandS */
-    GXinvert,	    /* notD */
-    GXequiv,	    /* DxorS */
-    GXnor,	    /* DnandS */
-    GXor,	    /* DandS */
-    GXxor,	    /* DxnorS */
-    GXnoop,	    /* D */
+    GXinvert,       /* notD */
+    GXequiv,        /* DxorS */
+    GXnor,          /* DnandS */
+    GXor,           /* DandS */
+    GXxor,          /* DxnorS */
+    GXnoop,         /* D */
     GXandInverted,  /* DornotS */
-    GXcopy,	    /* S */
+    GXcopy,         /* S */
     GXandReverse,   /* notDorS */
-    GXand,	    /* DorS */
-    GXclear,	    /* F */
+    GXand,          /* DorS */
+    GXclear,        /* F */
 };
 
 /*
@@ -160,7 +160,7 @@ static int degengc[16] = {
 GC _getgc(Bitmap *b, uint64_t gcvm, XGCValues *pgcv) {
 	static GC   gc0, gcn;
 	static bool clipset = false;
-	GC	    g;
+	GC          g;
 	XRectangle  xr;
 
 	g = (b->ldepth == 0) ? gc0 : gcn;
@@ -203,7 +203,7 @@ GC _getfillgc(Fcode f, Bitmap *b, uint64_t val) {
 }
 
 GC _getfillgc2(Fcode f, Bitmap *b, uint64_t val, uint64_t fg, uint64_t bg) {
-	int	  xf, m;
+	int       xf, m;
 	uint64_t  v, spix, vmax;
 	XGCValues gcv;
 
@@ -312,7 +312,7 @@ GC _getcopygc(Fcode f, Bitmap *db, Bitmap *sb, int *bltfunc) {
 GC _getcopygc2(Fcode f, Bitmap *db, Bitmap *sb, int *bltfunc, uint64_t fg,
 	       uint64_t bg) {
 	uint64_t  spix, df, sf;
-	int	  xf, c;
+	int       xf, c;
 	XGCValues gcv;
 	uint64_t  gcvm;
 

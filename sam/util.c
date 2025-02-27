@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 char *getuser() {
-	return getenv("USER")	   ? getenv("USER")
+	return getenv("USER")      ? getenv("USER")
 	       : getenv("LOGNAME") ? getenv("LOGNAME")
 				   : "nemo";
 	/* Can't find the user, he must be nemo :^) */
@@ -10,8 +10,8 @@ char *getuser() {
 
 void cvttorunes(char *p, int n, Rune *r, int *nb, int *nr, bool *nulls) {
 	uint8_t *q;
-	Rune	*s;
-	int	 j, w;
+	Rune    *s;
+	int      j, w;
 
 	/*
 	 * Always guaranteed that n bytes may be interpreted
@@ -42,11 +42,11 @@ void cvttorunes(char *p, int n, Rune *r, int *nb, int *nr, bool *nulls) {
 
 void *fbufalloc(void) { return emalloc(BUFSIZE); }
 
-void  fbuffree(void *f) { free(f); }
+void fbuffree(void *f) { free(f); }
 
-uint  min(uint a, uint b) {
-	 if (a < b) {
-		 return a;
-	 }
-	 return b;
+uint min(uint a, uint b) {
+	if (a < b) {
+		return a;
+	}
+	return b;
 }

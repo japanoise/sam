@@ -4,8 +4,8 @@
 size_t utfnlen(const char *s, size_t len) {
 	unsigned char c, i, m, n, x;
 	const char   *p;
-	size_t	      k;
-	Rune	      r;
+	size_t        k;
+	Rune          r;
 
 	for (k = 0; *(p = s) != '\0'; len -= s - p, k++) {
 		if (len == 0) { /* can't even look at s[0] */

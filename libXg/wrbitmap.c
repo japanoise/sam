@@ -8,8 +8,8 @@
 
 void wrbitmap(Bitmap *b, int miny, int maxy, unsigned char *data) {
 	XImage *im;
-	int	w, h, inld, outld, l, offset, px;
-	GC	g;
+	int     w, h, inld, outld, l, offset, px;
+	GC      g;
 	char   *tdata;
 
 	w = Dx(b->r);

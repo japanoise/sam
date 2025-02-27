@@ -14,26 +14,26 @@ typedef enum Tmesg {
 	Terror = -1,   /* error */
 	Tversion,      /* version */
 	Tstartcmdfile, /* terminal just opened command frame */
-	Tcheck,	       /* ask host to poke with Hcheck */
+	Tcheck,        /* ask host to poke with Hcheck */
 	Trequest,      /* request data to fill a hole */
 	Torigin,       /* gimme an Horigin near here */
 	Tstartfile,    /* terminal just opened a file's frame */
 	Tworkfile,     /* set file to which commands apply */
-	Ttype,	       /* add some characters, but terminal already knows */
+	Ttype,         /* add some characters, but terminal already knows */
 	Tcut,
 	Tpaste,
 	Tsnarf,
 	Tstartnewfile, /* terminal just opened a new frame */
-	Twrite,	       /* write file */
-	Tclose,	       /* terminal requests file close; check mod. status */
-	Tlook,	       /* search for literal current text */
+	Twrite,        /* write file */
+	Tclose,        /* terminal requests file close; check mod. status */
+	Tlook,         /* search for literal current text */
 	Tsearch,       /* search for last regular expression */
-	Tsend,	       /* pretend he typed stuff */
+	Tsend,         /* pretend he typed stuff */
 	Tdclick,       /* double click */
 	Tstartsnarf,   /* initiate snarf buffer exchange */
 	Tsetsnarf,     /* remember string in snarf buffer */
-	Tack,	       /* acknowledge Hack */
-	Texit,	       /* exit */
+	Tack,          /* acknowledge Hack */
+	Texit,         /* exit */
 	TMAX
 } Tmesg;
 
@@ -47,33 +47,33 @@ typedef enum Hmesg {
 	Hcurrent,    /* make named file the typing file */
 	Hnewname,    /* create "" name in menu */
 	Hmovname,    /* move file name in menu */
-	Hgrow,	     /* insert space in rasp */
+	Hgrow,       /* insert space in rasp */
 	Hcheck0,     /* see below */
-	Hcheck,	     /* ask terminal to check whether it needs more data */
+	Hcheck,      /* ask terminal to check whether it needs more data */
 	Hunlock,     /* command is finished; user can do things */
-	Hdata,	     /* store this data in previously allocated space */
+	Hdata,       /* store this data in previously allocated space */
 	Horigin,     /* set origin of file/frame in terminal */
 	Hunlockfile, /* unlock file in terminal */
 	Hsetdot,     /* set dot in terminal */
 	Hgrowdata,   /* Hgrow + Hdata folded together */
 	Hmoveto,     /* scrolling, context search, etc. */
-	Hclean,	     /* named file is now 'clean' */
-	Hdirty,	     /* named file is now 'dirty' */
-	Hcut,	     /* remove space from rasp */
+	Hclean,      /* named file is now 'clean' */
+	Hdirty,      /* named file is now 'dirty' */
+	Hcut,        /* remove space from rasp */
 	Hsetpat,     /* set remembered regular expression */
 	Hdelname,    /* delete file name from menu */
-	Hclose,	     /* close file and remove from menu */
+	Hclose,      /* close file and remove from menu */
 	Hsetsnarf,   /* remember string in snarf buffer */
 	Hsnarflen,   /* report length of implicit snarf */
-	Hack,	     /* request acknowledgement */
+	Hack,        /* request acknowledgement */
 	Hexit,
 	HMAX
 } Hmesg;
 
 typedef struct Header {
-	uint8_t type;	 /* one of the above */
-	uint8_t count0;	 /* low bits of data size */
-	uint8_t count1;	 /* high bits of data size */
+	uint8_t type;    /* one of the above */
+	uint8_t count0;  /* low bits of data size */
+	uint8_t count1;  /* high bits of data size */
 	uint8_t data[1]; /* variable size */
 } Header;
 

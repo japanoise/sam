@@ -1,9 +1,9 @@
 #include "sam.h"
 #include "parse.h"
 
-int  Glooping;
-int  nest;
-int  newcur;
+int Glooping;
+int nest;
+int newcur;
 
 bool append(File *, Cmd *, Posn);
 bool display(File *);
@@ -13,59 +13,62 @@ void linelooper(File *, Cmd *);
 
 void resetxec(void) { Glooping = nest = 0; }
 
-int  cmdexec(File *f, Cmd *cp) {
-	 int	 i;
-	 Addr	*ap;
-	 Address a;
+int cmdexec(File *f, Cmd *cp) {
+	int     i;
+	Addr   *ap;
+	Address a;
 
-	 if (f && f->unread) {
-		 load(f);
-	 }
-	 if (f == 0 && (cp->addr == 0 || cp->addr->type != '"') &&
-	     !utfrune("bBnqUXY!^M", cp->cmdc) && cp->cmdc != ('c' | 0x100) &&
-	     !(cp->cmdc == 'D' && cp->ctext)) {
-		 error(Enofile);
-	 }
-	 i = lookup(cp->cmdc);
-	 if (i >= 0 && cmdtab[i].defaddr != aNo) {
-		 if ((ap = cp->addr) == 0 && cp->cmdc != '\n') {
-			 cp->addr = ap = newaddr();
-			 ap->type = '.';
-			 if (cmdtab[i].defaddr == aAll) {
-				 ap->type = '*';
-			 }
-		 } else if (ap && ap->type == '"' && ap->next == 0 &&
-			    cp->cmdc != '\n') {
-			 ap->next = newaddr();
-			 ap->next->type = '.';
-			 if (cmdtab[i].defaddr == aAll) {
-				 ap->next->type = '*';
-			 }
-		 }
-		 if (cp->addr) { /* may be false for '\n' (only) */
-			 static Address none = {{0, 0}, 0};
-			 if (f) {
-				 addr = address(ap, f->dot, 0);
-			 } else { /* a " */
-				 addr = address(ap, none, 0);
-			 }
-			 f = addr.f;
-		 }
-	 }
-	 current(f);
-	 switch (cp->cmdc) {
-	 case '{':
-		 a = cp->addr ? address(cp->addr, f->dot, 0) : f->dot;
-		 for (cp = cp->ccmd; cp; cp = cp->next) {
-			 a.f->dot = a;
-			 cmdexec(a.f, cp);
-		 }
-		 break;
-	 default:
-		 i = (*cmdtab[i].fn)(f, cp);
-		 return i;
-	 }
-	 return 1;
+	if (f && f->unread) {
+		load(f);
+	}
+	if (f == 0 && (cp->addr == 0 || cp->addr->type != '"') &&
+	    !utfrune("bBnqUXY!^M", cp->cmdc) && cp->cmdc != ('c' | 0x100) &&
+	    !(cp->cmdc == 'D' && cp->ctext)) {
+		error(Enofile);
+	}
+	i = lookup(cp->cmdc);
+	if (i >= 0 && cmdtab[i].defaddr != aNo) {
+		if ((ap = cp->addr) == 0 && cp->cmdc != '\n') {
+			cp->addr = ap = newaddr();
+			ap->type = '.';
+			if (cmdtab[i].defaddr == aAll) {
+				ap->type = '*';
+			}
+		} else if (ap && ap->type == '"' && ap->next == 0 &&
+			   cp->cmdc != '\n') {
+			ap->next = newaddr();
+			ap->next->type = '.';
+			if (cmdtab[i].defaddr == aAll) {
+				ap->next->type = '*';
+			}
+		}
+		if (cp->addr) { /* may be false for '\n' (only) */
+			static Address none = {
+			    {0, 0},
+                            0
+                        };
+			if (f) {
+				addr = address(ap, f->dot, 0);
+			} else { /* a " */
+				addr = address(ap, none, 0);
+			}
+			f = addr.f;
+		}
+	}
+	current(f);
+	switch (cp->cmdc) {
+	case '{':
+		a = cp->addr ? address(cp->addr, f->dot, 0) : f->dot;
+		for (cp = cp->ccmd; cp; cp = cp->next) {
+			a.f->dot = a;
+			cmdexec(a.f, cp);
+		}
+		break;
+	default:
+		i = (*cmdtab[i].fn)(f, cp);
+		return i;
+	}
+	return 1;
 }
 
 bool a_cmd(File *f, Cmd *cp) { return append(f, cp, addr.r.p2); }
@@ -454,8 +457,8 @@ void looper(File *f, Cmd *cp, int xy) {
 }
 
 void linelooper(File *f, Cmd *cp) {
-	Posn	p;
-	Range	r, linesel;
+	Posn    p;
+	Range   r, linesel;
 	Address a, a3;
 
 	nest++;

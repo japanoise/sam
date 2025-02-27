@@ -3,20 +3,20 @@
 #include <libgen.h>
 #include <stdint.h>
 
-List	 file = {'p'};
+List     file = {'p'};
 uint16_t tag;
 
-File	*newfile(void) {
-	   File *f;
+File *newfile(void) {
+	File *f;
 
-	   f = fileopen();
-	   inslist(&file, 0, (int64_t)f);
-	   f->tag = tag++;
-	   if (downloaded) {
-		   outTs(Hnewname, f->tag);
-	   }
-	   /* already sorted; file name is "" */
-	   return f;
+	f = fileopen();
+	inslist(&file, 0, (int64_t)f);
+	f->tag = tag++;
+	if (downloaded) {
+		outTs(Hnewname, f->tag);
+	}
+	/* already sorted; file name is "" */
+	return f;
 }
 
 int whichmenu(File *f) {

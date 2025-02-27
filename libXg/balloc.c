@@ -12,9 +12,9 @@ Bitmap *balloc(Rectangle r, int ldepth) {
 }
 
 Bitmap *_balloc(Rectangle r, int ldepth) {
-	int	  id;
-	Bitmap	 *b;
-	int	  ld;
+	int       id;
+	Bitmap   *b;
+	int       ld;
 	Rectangle rx;
 
 	b = (Bitmap *)calloc(1, sizeof(Bitmap));

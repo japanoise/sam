@@ -8,21 +8,21 @@
 #define DELTA 10
 
 static Flayer  **llist; /* front to back */
-static int	 nllist;
-static int	 nlalloc;
+static int       nllist;
+static int       nlalloc;
 static Rectangle lDrect;
 
-extern Bitmap	 screen;
-extern Mouse	 mouse;
+extern Bitmap screen;
+extern Mouse  mouse;
 
-extern uint64_t	 _bgpixel;
+extern uint64_t _bgpixel;
 
-Vis		 visibility(Flayer *);
-void		 newvisibilities(int);
-void		 llinsert(Flayer *);
-void		 lldelete(Flayer *);
+Vis  visibility(Flayer *);
+void newvisibilities(int);
+void llinsert(Flayer *);
+void lldelete(Flayer *);
 
-void		 flstart(Rectangle r) { lDrect = r; }
+void flstart(Rectangle r) { lDrect = r; }
 
 void flnew(Flayer *l, Rune *(*fn)(Flayer *, int64_t, uint64_t *), int u0,
 	   void *u1) {
@@ -123,8 +123,8 @@ void newvisibilities(int redraw)
 /* if redraw false, we know it's a flupfront, and needn't
  * redraw anyone becoming partially covered */
 {
-	int	i;
-	Vis	ov;
+	int     i;
+	Vis     ov;
 	Flayer *l;
 
 	for (i = 0; i < nllist; i++) {
@@ -296,11 +296,11 @@ Rectangle rscale(Rectangle r, Point old, Point new) {
 }
 
 void flreshape(Rectangle dr) {
-	int	  i;
-	Flayer	 *l;
-	Frame	 *f;
+	int       i;
+	Flayer   *l;
+	Frame    *f;
 	Rectangle r, olDrect;
-	int	  move;
+	int       move;
 
 	olDrect = lDrect;
 	lDrect = dr;
@@ -353,9 +353,9 @@ void flreshape(Rectangle dr) {
 }
 
 int flprepare(Flayer *l) {
-	Frame	*f;
+	Frame   *f;
 	uint64_t n;
-	Rune	*r;
+	Rune    *r;
 
 	if (l->visible == None) {
 		return 0;
@@ -384,7 +384,7 @@ int flprepare(Flayer *l) {
 
 static bool somevis, someinvis, justvis;
 
-Vis	    visibility(Flayer *l) {
+Vis visibility(Flayer *l) {
 	somevis = someinvis = false;
 	justvis = true;
 	flrefresh(l, l->entire, 0);
@@ -399,7 +399,7 @@ Vis	    visibility(Flayer *l) {
 }
 
 void flrefresh(Flayer *l, Rectangle r, int i) {
-	Flayer	 *t;
+	Flayer   *t;
 	Rectangle s;
 
 Top:

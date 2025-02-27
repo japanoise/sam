@@ -3,7 +3,7 @@
 
 Rune *runestrstr(const Rune *s1, const Rune *s2) {
 	const Rune *p1, *p2;
-	Rune	    r0, r1, r2;
+	Rune        r0, r1, r2;
 
 	r0 = *s2;
 	for (s1 = runestrchr(s1, r0); *s1 != 0; s1 = runestrchr(s1 + 1, r0)) {

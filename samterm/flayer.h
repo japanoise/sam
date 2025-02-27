@@ -14,16 +14,16 @@ typedef struct Flayer Flayer;
  */
 struct Flayer {
 	uint64_t bg;
-	Frame	 f;
-	int64_t	 origin; /* offset of first char in flayer */
-	int64_t	 p0, p1;
-	int64_t	 click; /* time at which selection click occurred, in HZ */
+	Frame    f;
+	int64_t  origin; /* offset of first char in flayer */
+	int64_t  p0, p1;
+	int64_t  click; /* time at which selection click occurred, in HZ */
 	Rune *(*textfn)(Flayer *, int64_t, uint64_t *);
-	int	  user0;
-	void	 *user1;
+	int       user0;
+	void     *user1;
 	Rectangle entire;
 	Rectangle scroll;
-	Vis	  visible;
+	Vis       visible;
 };
 
 void flborder(Flayer *, bool);
@@ -35,13 +35,13 @@ void flinsert(Flayer *, Rune *, Rune *, int64_t);
 void flnew(Flayer *, Rune *(*fn)(Flayer *, int64_t, uint64_t *), int, void *);
 int  flprepare(Flayer *);
 Rectangle flrect(Flayer *, Rectangle);
-void	  flrefresh(Flayer *, Rectangle, int);
-void	  flreshape(Rectangle);
-bool	  flselect(Flayer *);
-void	  flsetselect(Flayer *, int64_t, int64_t);
-void	  flstart(Rectangle);
-void	  flupfront(Flayer *);
-Flayer	 *flwhich(Point);
+void      flrefresh(Flayer *, Rectangle, int);
+void      flreshape(Rectangle);
+bool      flselect(Flayer *);
+void      flsetselect(Flayer *, int64_t, int64_t);
+void      flstart(Rectangle);
+void      flupfront(Flayer *);
+Flayer   *flwhich(Point);
 
 #define FLMARGIN 4
 #define FLSCROLLWID 12

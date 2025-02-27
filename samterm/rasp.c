@@ -169,8 +169,8 @@ void Strcpy(Rune *to, Rune *from) {
 
 Rune *rload(Rasp *r, uint64_t p0, uint64_t p1, uint64_t *nrp) {
 	Section *s;
-	int64_t	 p;
-	int	 n, nb;
+	int64_t  p;
+	int      n, nb;
 
 	nb = 0;
 	Strgrow(&scratch, &nscralloc, p1 - p0 + 1);
@@ -206,8 +206,8 @@ Rune *rload(Rasp *r, uint64_t p0, uint64_t p1, uint64_t *nrp) {
 
 int rmissing(Rasp *r, uint64_t p0, uint64_t p1) {
 	Section *s;
-	int64_t	 p;
-	int	 n, nm = 0;
+	int64_t  p;
+	int      n, nm = 0;
 
 	for (p = 0, s = r->sect; s && p + s->nrunes <= p0; s = s->next) {
 		p += s->nrunes;
@@ -229,8 +229,8 @@ int rmissing(Rasp *r, uint64_t p0, uint64_t p1) {
 
 int rcontig(Rasp *r, uint64_t p0, uint64_t p1, bool text) {
 	Section *s;
-	int64_t	 p, n;
-	int	 np = 0;
+	int64_t  p, n;
+	int      np = 0;
 
 	for (p = 0, s = r->sect; s && p + s->nrunes <= p0; s = s->next) {
 		p += s->nrunes;

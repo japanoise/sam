@@ -10,72 +10,72 @@ extern char   *exname;
 extern Flayer *flast;
 
 #define HSIZE 3 /* Type + int16_t count */
-Header	h;
+Header  h;
 uint8_t indata[DATASIZE + 1]; /* room for NUL */
 uint8_t outdata[DATASIZE];
 int16_t outcount;
-int	hversion;
+int     hversion;
 
-void	inmesg(Hmesg, int);
-int	inshort(int);
+void    inmesg(Hmesg, int);
+int     inshort(int);
 int64_t inlong(int);
-void	hsetdot(int, int64_t, int64_t);
-void	hmoveto(int, int64_t, Flayer *);
-void	hsetsnarf(int);
-void	clrlock(void);
-int	snarfswap(char *, int, char **);
+void    hsetdot(int, int64_t, int64_t);
+void    hmoveto(int, int64_t, Flayer *);
+void    hsetsnarf(int);
+void    clrlock(void);
+int     snarfswap(char *, int, char **);
 
-void	rcv(void) {
-	   int	      c;
-	   static int state = 0;
-	   static int count = 0;
-	   static int i = 0;
-	   static int errs = 0;
+void rcv(void) {
+	int        c;
+	static int state = 0;
+	static int count = 0;
+	static int i = 0;
+	static int errs = 0;
 
-	   while ((c = rcvchar()) != -1) {
-		   switch (state) {
-		   case 0:
-			   h.type = c;
-			   state++;
-			   break;
+	while ((c = rcvchar()) != -1) {
+		switch (state) {
+		case 0:
+			h.type = c;
+			state++;
+			break;
 
-		   case 1:
-			   h.count0 = c;
-			   state++;
-			   break;
+		case 1:
+			h.count0 = c;
+			state++;
+			break;
 
-		   case 2:
-			   h.count1 = c;
-			   count = h.count0 | (h.count1 << 8);
-			   i = 0;
-			   if (count > DATASIZE) {
-				   if (++errs < 5) {
-					   dumperrmsg(count, h.type, h.count0, c);
-					   state = 0;
-					   continue;
-				   }
-				   fprintf(stderr, "type %d count %d\n", h.type,
-					   count);
-				   panic("count>DATASIZE");
-			   }
-			   if (count == 0) {
-				   goto zerocount;
-			   }
-			   state++;
-			   break;
+		case 2:
+			h.count1 = c;
+			count = h.count0 | (h.count1 << 8);
+			i = 0;
+			if (count > DATASIZE) {
+				if (++errs < 5) {
+					dumperrmsg(count, h.type, h.count0, c);
+					state = 0;
+					continue;
+				}
+				fprintf(stderr, "type %d count %d\n", h.type,
+					count);
+				panic("count>DATASIZE");
+			}
+			if (count == 0) {
+				goto zerocount;
+			}
+			state++;
+			break;
 
-		   case 3:
-			   indata[i++] = c;
-			   if (i == count) {
-			   zerocount:
-				   indata[i] = 0;
-				   inmesg(h.type, count);
-				   state = count = 0;
-				   continue;
-			   }
-			   break;
-		   }
-	   }
+		case 3:
+			indata[i++] = c;
+			if (i == count) {
+			zerocount:
+				indata[i] = 0;
+				inmesg(h.type, count);
+				state = count = 0;
+				continue;
+			}
+			break;
+		}
+	}
 }
 
 Text *whichtext(int tg) {
@@ -92,7 +92,7 @@ Text *whichtext(int tg) {
 
 void inmesg(Hmesg type, int count) {
 	Text   *t;
-	int	i, m;
+	int     i, m;
 	int64_t l, l2;
 	Flayer *lp;
 
@@ -352,7 +352,7 @@ void startnewfile(int type, Text *t) {
 	outTl(type, (int64_t)t); /* for 64-bit pointers */
 }
 
-int	inshort(int n) { return indata[n] | (indata[n + 1] << 8); }
+int inshort(int n) { return indata[n] | (indata[n + 1] << 8); }
 
 int64_t inlong(int n) {
 	int64_t l;
@@ -456,7 +456,7 @@ void outshort(int s) {
 }
 
 void outlong(int64_t l) {
-	int	i;
+	int     i;
 	uint8_t buf[8];
 
 	for (i = 0; i < sizeof(buf); i++, l >>= 8) {
@@ -488,9 +488,9 @@ void hsetdot(int m, int64_t p0, int64_t p1) {
 void horigin(int m, int64_t p0, Flayer *l) {
 	Text *t = whichtext(m);
 	l = l ? l : &t->l[t->front];
-	int64_t	 a;
+	int64_t  a;
 	uint64_t n;
-	Rune	*r;
+	Rune    *r;
 
 	if (getlayer(l, t) < 0) {
 		return; /* the user managed to close the layer during the round
@@ -530,7 +530,7 @@ void hmoveto(int m, int64_t p0, Flayer *l) {
 void hcheck(int m) {
 	Flayer *l;
 	Text   *t;
-	int	reqd = 0, i;
+	int     reqd = 0, i;
 	int64_t n, nl, a;
 	Rune   *r;
 
@@ -633,7 +633,7 @@ void hsetsnarf(int nc) {
 }
 
 void hgrow(int m, int64_t a, int64_t new, bool req) {
-	int	i;
+	int     i;
 	Flayer *l;
 	Text   *t = whichtext(m);
 	int64_t o, b;
@@ -672,7 +672,7 @@ void hgrow(int m, int64_t a, int64_t new, bool req) {
 }
 
 int hdata1(Text *t, int64_t a, Rune *r, int len) {
-	int	i;
+	int     i;
 	Flayer *l;
 	int64_t o, b;
 
@@ -726,7 +726,7 @@ int hdatarune(int m, int64_t a, Rune *r, int len) {
 void hcut(int m, int64_t a, int64_t old) {
 	Flayer *l;
 	Text   *t = whichtext(m);
-	int	i;
+	int     i;
 	int64_t o, b;
 
 	if (t->lock) {

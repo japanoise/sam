@@ -5,9 +5,9 @@
  */
 #define GROWDATASIZE 50 /* if size is > this, send data with grow */
 
-void	    rcut(List *, Posn, Posn);
-int	    rterm(List *, Posn);
-void	    rgrow(List *, Posn, Posn);
+void rcut(List *, Posn, Posn);
+int  rterm(List *, Posn);
+void rgrow(List *, Posn, Posn);
 
 static Posn growpos;
 static Posn grown;
@@ -198,7 +198,7 @@ void raspinsert(File *f, uint p1, Rune *buf, uint n, int toterm) {
 
 #define M 0x80000000L
 #define P(i) r->posnptr[i]
-#define T(i) (P(i) & M)	 /* in terminal */
+#define T(i) (P(i) & M)  /* in terminal */
 #define L(i) (P(i) & ~M) /* length of this piece */
 
 void rcut(List *r, Posn p1, Posn p2) {

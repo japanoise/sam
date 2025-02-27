@@ -9,14 +9,14 @@
 /* Gwin instance part */
 typedef struct {
 	/* New resource fields */
-	Pixel	    foreground;
-	Boolean	    forwardr;  /* does right button scroll forward? */
+	Pixel       foreground;
+	Boolean     forwardr;  /* does right button scroll forward? */
 	Reshapefunc reshaped;  /* Notify app of reshape */
 	Charfunc    gotchar;   /* Notify app of char arrival */
 	Mousefunc   gotmouse;  /* Notify app of mouse change */
-	String	    selection; /* Current selection */
-	Boolean	    selxfered; /* Has selection been swapped. */
-	int	    compose;
+	String      selection; /* Current selection */
+	Boolean     selxfered; /* Has selection been swapped. */
+	int         compose;
 } GwinPart;
 
 /* Full instance record */

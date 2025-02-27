@@ -4,9 +4,9 @@
 #include <frame.h>
 
 int _frcanfit(Frame *f, Point pt, Frbox *b) {
-	int	 left, w, nr;
+	int      left, w, nr;
 	uint8_t *p;
-	Rune	 r;
+	Rune     r;
 
 	left = f->r.max.x - pt.x;
 	if (b->nrune < 0) {

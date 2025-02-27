@@ -11,7 +11,7 @@ const unsigned char utftab[64] = {
 
 int charntorune(Rune *p, const char *s, size_t len) {
 	unsigned char c, i, m, n, x;
-	Rune	      r;
+	Rune          r;
 
 	if (len == 0) { /* can't even look at s[0] */
 		return 0;

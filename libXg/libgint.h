@@ -58,10 +58,10 @@ extern Display *_dpy;
 
 /* screen depth foreground and background for this application */
 extern uint64_t _fgpixel, _bgpixel;
-extern XColor	_fgcolor, _bgcolor;
+extern XColor   _fgcolor, _bgcolor;
 
 /* indexed by log depth (0 <= ld <= 5), to give depth and planemask */
-extern int	_ld2d[];
+extern int      _ld2d[];
 extern uint64_t _ld2dmask[];
 
 /* libg.h defines:

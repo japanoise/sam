@@ -9,10 +9,10 @@ void bitblt(Bitmap *d, Point p, Bitmap *s, Rectangle r, Fcode f) {
 
 void bitblt2(Bitmap *d, Point p, Bitmap *s, Rectangle r, Fcode f, uint64_t fg,
 	     uint64_t bg) {
-	int	 sx, sy, dx, dy, bfunc;
-	GC	 g;
+	int      sx, sy, dx, dy, bfunc;
+	GC       g;
 	uint64_t plane;
-	Bitmap	*btmp;
+	Bitmap  *btmp;
 
 	if (fg == 0) {
 		fg = _fgpixel;

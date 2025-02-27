@@ -4,8 +4,8 @@
 
 char *utfutf(const char *s1, const char *s2) {
 	const char *p;
-	int	    n1, n2;
-	Rune	    r;
+	int         n1, n2;
+	Rune        r;
 
 	n1 = chartorune(&r, s2);
 	if (r < Runeself) {

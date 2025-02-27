@@ -11,63 +11,77 @@
 #include "flayer.h"
 #include "samterm.h"
 
-extern bool		   expandtabs;
-extern int		   tabwidth;
-extern bool		   autoindent;
+extern bool expandtabs;
+extern int  tabwidth;
+extern bool autoindent;
 
 typedef struct Namemapping Namemapping;
 
 struct Namemapping {
 	const char *name;
-	int	    value;
+	int         value;
 };
 
-static Namemapping commandmapping[] = {{"none", Cnone},
-				       {"default", Cdefault},
-				       {"escape", Cescape},
-				       {"scrolldown", Cscrolldown},
-				       {"scrollup", Cscrollup},
-				       {"scrolldownline", Cscrolldownline},
-				       {"scrollupline", Cscrollupline},
-				       {"jump", Cjump},
-				       {"charright", Ccharright},
-				       {"charleft", Ccharleft},
-				       {"linedown", Clinedown},
-				       {"lineup", Clineup},
-				       {"delword", Cdelword},
-				       {"delbol", Cdelbol},
-				       {"delbs", Cdelbs},
-				       {"del", Cdel},
-				       {"snarf", Csnarf},
-				       {"cut", Ccut},
-				       {"paste", Cpaste},
-				       {"exchange", Cexchange},
-				       {"eol", Ceol},
-				       {"bol", Cbol},
-				       {"tab", Ctab},
-				       {"send", Csend},
-				       {"look", Clook},
-				       {"search", Csearch},
-				       {"write", Cwrite},
-				       {NULL, 0}};
+static Namemapping commandmapping[] = {
+    {"none",           Cnone          },
+    {"default",        Cdefault       },
+    {"escape",         Cescape        },
+    {"scrolldown",     Cscrolldown    },
+    {"scrollup",       Cscrollup      },
+    {"scrolldownline", Cscrolldownline},
+    {"scrollupline",   Cscrollupline  },
+    {"jump",           Cjump          },
+    {"charright",      Ccharright     },
+    {"charleft",       Ccharleft      },
+    {"linedown",       Clinedown      },
+    {"lineup",         Clineup        },
+    {"delword",        Cdelword       },
+    {"delbol",         Cdelbol        },
+    {"delbs",          Cdelbs         },
+    {"del",	    Cdel           },
+    {"snarf",          Csnarf         },
+    {"cut",	    Ccut           },
+    {"paste",          Cpaste         },
+    {"exchange",       Cexchange      },
+    {"eol",	    Ceol           },
+    {"bol",	    Cbol           },
+    {"tab",	    Ctab           },
+    {"send",           Csend          },
+    {"look",           Clook          },
+    {"search",         Csearch        },
+    {"write",          Cwrite         },
+    {NULL,	     0	      }
+};
 
 static Namemapping targetmapping[] = {
-    {"current", Tcurrent}, {"mouse", Tmouse}, {NULL, 0}};
+    {"current", Tcurrent},
+    {"mouse",   Tmouse  },
+    {NULL,      0       }
+};
 
-static Namemapping buttonmapping[] = {{"0", 0},	 {"n", 0},
+static Namemapping buttonmapping[] = {
+    {"0",  0 },
+    {"n",  0 },
 #define B1 1
-				      {"1", 1},
+    {"1",  1 },
 #define B2 2
-				      {"2", 2},
+    {"2",  2 },
 #define B3 4
-				      {"3", 4},
+    {"3",  4 },
 #define B4 8
-				      {"4", 8},
+    {"4",  8 },
 #define B5 16
-				      {"5", 16}, {NULL, 0}};
+    {"5",  16},
+    {NULL, 0 }
+};
 
 static Namemapping modmapping[] = {
-    {"*", 0}, {"c", ControlMask}, {"a", Mod1Mask}, {"s", ShiftMask}, {NULL, 0}};
+    {"*",  0          },
+    {"c",  ControlMask},
+    {"a",  Mod1Mask   },
+    {"s",  ShiftMask  },
+    {NULL, 0          }
+};
 
 static int lookupmapping(const char *n, Namemapping *m) {
 	for (Namemapping *k = m; k->name != NULL; k++) {
@@ -85,76 +99,77 @@ static int lookupmapping(const char *n, Namemapping *m) {
 typedef struct Defaultbinding Defaultbinding;
 
 struct Defaultbinding {
-	int	    modifiers;
-	KeySym	    keysym;
-	int	    kind;
-	int	    command;
+	int         modifiers;
+	KeySym      keysym;
+	int         kind;
+	int         command;
 	const char *arg;
 };
 
 static Defaultbinding defaultbindings[] = {
     /* Suppress control key combinations unless explicitly bound. */
-    {ControlMask, XK_VoidSymbol, Kcommand, Cnone, NULL},
+    {ControlMask, XK_VoidSymbol,  Kcommand, Cnone,       NULL},
 
     /* Motion commands following the WordStar diamond. */
-    {ControlMask, XK_e, Kcommand, Clineup, NULL},
-    {ControlMask, XK_x, Kcommand, Clinedown, NULL},
-    {ControlMask, XK_d, Kcommand, Ccharright, NULL},
-    {ControlMask, XK_s, Kcommand, Ccharleft, NULL},
-    {ControlMask, XK_u, Kcommand, Cdelbol, NULL},
-    {ControlMask, XK_w, Kcommand, Cdelword, NULL},
-    {ControlMask, XK_k, Kcommand, Cjump, NULL},
-    {ControlMask, XK_BackSpace, Kcommand, Cdelword, NULL},
-    {ControlMask, XK_y, Kcommand, Ccut, NULL},
-    {ControlMask, XK_c, Kcommand, Csnarf, NULL},
-    {ControlMask, XK_v, Kcommand, Cpaste, NULL},
-    {ControlMask, XK_q, Kcommand, Cexchange, NULL},
+    {ControlMask, XK_e,           Kcommand, Clineup,     NULL},
+    {ControlMask, XK_x,           Kcommand, Clinedown,   NULL},
+    {ControlMask, XK_d,           Kcommand, Ccharright,  NULL},
+    {ControlMask, XK_s,           Kcommand, Ccharleft,   NULL},
+    {ControlMask, XK_u,           Kcommand, Cdelbol,     NULL},
+    {ControlMask, XK_w,           Kcommand, Cdelword,    NULL},
+    {ControlMask, XK_k,           Kcommand, Cjump,       NULL},
+    {ControlMask, XK_BackSpace,   Kcommand, Cdelword,    NULL},
+    {ControlMask, XK_y,           Kcommand, Ccut,        NULL},
+    {ControlMask, XK_c,           Kcommand, Csnarf,      NULL},
+    {ControlMask, XK_v,           Kcommand, Cpaste,      NULL},
+    {ControlMask, XK_q,           Kcommand, Cexchange,   NULL},
 
     /* Handle arrow keys, page up/down, and escape. */
-    {0, XK_Up, Kcommand, Cscrollup, NULL},
-    {0, XK_Prior, Kcommand, Cscrollup, NULL},
-    {0, XK_Left, Kcommand, Cscrollup, NULL},
-    {0, XK_Down, Kcommand, Cscrolldown, NULL},
-    {0, XK_Next, Kcommand, Cscrolldown, NULL},
-    {0, XK_Right, Kcommand, Cscrolldown, NULL},
-    {0, XK_Escape, Kcommand, Cescape, NULL},
+    {0,	   XK_Up,          Kcommand, Cscrollup,   NULL},
+    {0,	   XK_Prior,       Kcommand, Cscrollup,   NULL},
+    {0,	   XK_Left,        Kcommand, Cscrollup,   NULL},
+    {0,	   XK_Down,        Kcommand, Cscrolldown, NULL},
+    {0,	   XK_Next,        Kcommand, Cscrolldown, NULL},
+    {0,	   XK_Right,       Kcommand, Cscrolldown, NULL},
+    {0,	   XK_Escape,      Kcommand, Cescape,     NULL},
 
     /* More fundamental stuff: backspace, delete, etc. */
-    {0, XK_BackSpace, Kcommand, Cdelbs, NULL},
-    {0, XK_Delete, Kcommand, Cdel, NULL},
-    {0, XK_Tab, Kcommand, Ctab, NULL},
-    {0, XK_Return, Kraw, '\n', NULL},
-    {0, XK_KP_Enter, Kraw, '\n', NULL},
-    {0, XK_Linefeed, Kraw, '\r', NULL},
-    {0, XK_KP_0, Kraw, '0', NULL},
-    {0, XK_KP_1, Kraw, '1', NULL},
-    {0, XK_KP_2, Kraw, '2', NULL},
-    {0, XK_KP_3, Kraw, '3', NULL},
-    {0, XK_KP_4, Kraw, '4', NULL},
-    {0, XK_KP_5, Kraw, '5', NULL},
-    {0, XK_KP_6, Kraw, '6', NULL},
-    {0, XK_KP_7, Kraw, '7', NULL},
-    {0, XK_KP_8, Kraw, '8', NULL},
-    {0, XK_KP_9, Kraw, '9', NULL},
-    {0, XK_KP_Divide, Kraw, '/', NULL},
-    {0, XK_KP_Multiply, Kraw, '*', NULL},
-    {0, XK_KP_Subtract, Kraw, '-', NULL},
-    {0, XK_KP_Add, Kraw, '+', NULL},
-    {0, XK_KP_Decimal, Kraw, '.', NULL},
-    {0, XK_hyphen, Kraw, '-', NULL},
+    {0,	   XK_BackSpace,   Kcommand, Cdelbs,      NULL},
+    {0,	   XK_Delete,      Kcommand, Cdel,        NULL},
+    {0,	   XK_Tab,         Kcommand, Ctab,        NULL},
+    {0,	   XK_Return,      Kraw,     '\n',        NULL},
+    {0,	   XK_KP_Enter,    Kraw,     '\n',        NULL},
+    {0,	   XK_Linefeed,    Kraw,     '\r',        NULL},
+    {0,	   XK_KP_0,        Kraw,     '0',         NULL},
+    {0,	   XK_KP_1,        Kraw,     '1',         NULL},
+    {0,	   XK_KP_2,        Kraw,     '2',         NULL},
+    {0,	   XK_KP_3,        Kraw,     '3',         NULL},
+    {0,	   XK_KP_4,        Kraw,     '4',         NULL},
+    {0,	   XK_KP_5,        Kraw,     '5',         NULL},
+    {0,	   XK_KP_6,        Kraw,     '6',         NULL},
+    {0,	   XK_KP_7,        Kraw,     '7',         NULL},
+    {0,	   XK_KP_8,        Kraw,     '8',         NULL},
+    {0,	   XK_KP_9,        Kraw,     '9',         NULL},
+    {0,	   XK_KP_Divide,   Kraw,     '/',         NULL},
+    {0,	   XK_KP_Multiply, Kraw,     '*',         NULL},
+    {0,	   XK_KP_Subtract, Kraw,     '-',         NULL},
+    {0,	   XK_KP_Add,      Kraw,     '+',         NULL},
+    {0,	   XK_KP_Decimal,  Kraw,     '.',         NULL},
+    {0,	   XK_hyphen,      Kraw,     '-',         NULL},
 
     /* Support traditional control sequences. */
-    {ControlMask, XK_bracketleft, Kcommand, Cescape, NULL},
-    {ControlMask, XK_h, Kcommand, Cdelbs, NULL},
-    {ControlMask, XK_Delete, Kcommand, Cdel, NULL},
-    {ControlMask, XK_i, Kcommand, Ctab, NULL},
-    {ControlMask, XK_j, Kraw, '\n', NULL},
-    {ControlMask, XK_m, Kraw, '\r', NULL},
+    {ControlMask, XK_bracketleft, Kcommand, Cescape,     NULL},
+    {ControlMask, XK_h,           Kcommand, Cdelbs,      NULL},
+    {ControlMask, XK_Delete,      Kcommand, Cdel,        NULL},
+    {ControlMask, XK_i,           Kcommand, Ctab,        NULL},
+    {ControlMask, XK_j,           Kraw,     '\n',        NULL},
+    {ControlMask, XK_m,           Kraw,     '\r',        NULL},
 
     /* Use Control-Tab to insert a literal tab when tab expansion is enabled. */
-    {ControlMask, XK_Tab, Kraw, '\t', NULL},
+    {ControlMask, XK_Tab,         Kraw,     '\t',        NULL},
 
-    {0, 0, Kend, 0, NULL}};
+    {0,	   0,	      Kend,     0,           NULL}
+};
 
 void installdefaultbindings(void) {
 	for (Defaultbinding *b = defaultbindings; b->kind != Kend; b++) {
@@ -166,28 +181,30 @@ void installdefaultbindings(void) {
 typedef struct Defaultchord Defaultchord;
 
 struct Defaultchord {
-	int	    state1;
-	int	    state2;
-	int	    command;
-	int	    target;
+	int         state1;
+	int         state2;
+	int         command;
+	int         target;
 	const char *arg;
 };
 
-static Defaultchord defaultchords[] = {{B1, B1 | B2, Ccut, Tcurrent, NULL},
-				       {B1, B1 | B3, Cpaste, Tcurrent, NULL},
-				       {B1 | B2, B1, Cnone, Tcurrent, NULL},
-				       {B1 | B3, B1, Cnone, Tcurrent, NULL},
+static Defaultchord defaultchords[] = {
+    {B1,      B1 | B2, Ccut,            Tcurrent, NULL},
+    {B1,      B1 | B3, Cpaste,          Tcurrent, NULL},
+    {B1 | B2, B1,      Cnone,           Tcurrent, NULL},
+    {B1 | B3, B1,      Cnone,           Tcurrent, NULL},
 
-				       {B4, 0, Cscrollupline, Tmouse, NULL},
-				       {B5, 0, Cscrolldownline, Tmouse, NULL},
+    {B4,      0,       Cscrollupline,   Tmouse,   NULL},
+    {B5,      0,       Cscrolldownline, Tmouse,   NULL},
 
-				       {0, 0, Kend, 0, NULL}};
+    {0,       0,       Kend,            0,        NULL}
+};
 
-void		    installdefaultchords(void) {
-	       for (Defaultchord *c = defaultchords; c->state1 != 0; c++) {
-		       installchord(c->state1, c->state2, c->command, c->target,
-					    c->arg);
-	       }
+void installdefaultchords(void) {
+	for (Defaultchord *c = defaultchords; c->state1 != 0; c++) {
+		installchord(c->state1, c->state2, c->command, c->target,
+			     c->arg);
+	}
 }
 
 static int statetomask(const char *n, Namemapping *m) {
@@ -359,38 +376,39 @@ typedef struct Directive Directive;
 
 struct Directive {
 	const char *format;
-	int	    result;
+	int         result;
 	int (*action)(const char *, const char *, const char *, const char *,
 		      const char *);
 };
 
 Directive directives[] = {
-    {" chord %5[Nn12345] %5[Nn12345] %99s %99s %1023[^\n]", 5, dirchord},
-    {" chord %5[Nn12345] %5[Nn12345] %99s %99s", 4, dirchord},
-    {" unchord %5[Nn12345] %5[Nn12345]", 2, dirunchord},
-    {" bind %5[*camshNCAMSH12345] %99s raw 0x%4[0-9a-fA-F]", 3, dirraw},
-    {" bind %5[*camshNCAMSH12345] %99s raw %1s", 3, dirrawliteral},
-    {" bind %5[*camshNCAMSH12345] %99s command %99s %1023[^\n]", 4, dirbind},
-    {" bind %5[*camshNCAMSH12345] %99s command %99s", 3, dirbind},
-    {" unbind %5[*camshNCAMSH12345] %99s", 2, dirunbind},
-    {" foreground %1023s", 1, dirforeground},
-    {" background %1023s", 1, dirbackground},
-    {" border %1023s", 1, dirborder},
-    {" font %1023[^\n]", 1, dirfont},
-    {" tabs %2[0-9]", 1, dirtabs},
-    {" expandtabs %99s", 1, direxpandtabs},
-    {" autoindent %99s", 1, dirautoindent},
-    {" snarfselection %99s", 1, dirsnarfselection},
-    {" followfocus %99s", 1, dirfollowfocus},
-    {" %1[#]", 1, dircomment},
-    {" %1[^ ]", EOF, dircomment},
-    {NULL, 0, NULL}};
+    {" chord %5[Nn12345] %5[Nn12345] %99s %99s %1023[^\n]",      5,   dirchord         },
+    {" chord %5[Nn12345] %5[Nn12345] %99s %99s",                 4,   dirchord         },
+    {" unchord %5[Nn12345] %5[Nn12345]",                         2,   dirunchord       },
+    {" bind %5[*camshNCAMSH12345] %99s raw 0x%4[0-9a-fA-F]",     3,   dirraw           },
+    {" bind %5[*camshNCAMSH12345] %99s raw %1s",                 3,   dirrawliteral    },
+    {" bind %5[*camshNCAMSH12345] %99s command %99s %1023[^\n]", 4,   dirbind          },
+    {" bind %5[*camshNCAMSH12345] %99s command %99s",            3,   dirbind          },
+    {" unbind %5[*camshNCAMSH12345] %99s",                       2,   dirunbind        },
+    {" foreground %1023s",				       1,   dirforeground    },
+    {" background %1023s",				       1,   dirbackground    },
+    {" border %1023s",					   1,   dirborder        },
+    {" font %1023[^\n]",					 1,   dirfont          },
+    {" tabs %2[0-9]",					    1,   dirtabs          },
+    {" expandtabs %99s",					 1,   direxpandtabs    },
+    {" autoindent %99s",					 1,   dirautoindent    },
+    {" snarfselection %99s",				     1,   dirsnarfselection},
+    {" followfocus %99s",					1,   dirfollowfocus   },
+    {" %1[#]",						   1,   dircomment       },
+    {" %1[^ ]",						  EOF, dircomment       },
+    {NULL,						       0,   NULL             }
+};
 
 void loadrcfile(FILE *f) {
 	char   *l = NULL;
-	size_t	n = 0;
+	size_t  n = 0;
 	ssize_t r = 0;
-	size_t	ln = 0;
+	size_t  ln = 0;
 
 	while ((r = getline(&l, &n, f)) >= 0) {
 		char s1[1024] = {0};

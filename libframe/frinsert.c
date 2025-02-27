@@ -8,9 +8,9 @@
 static Frame frame;
 
 static Point bxscan(Frame *f, Rune *sp, Rune *ep, Point *ppt) {
-	int	 w, c, nb, delta, nl, nr, rw;
-	Frbox	*b;
-	char	*s, tmp[TMPSIZE + 3]; /* +3 for rune overflow */
+	int      w, c, nb, delta, nl, nr, rw;
+	Frbox   *b;
+	char    *s, tmp[TMPSIZE + 3]; /* +3 for rune overflow */
 	uint8_t *p;
 
 	frame.r = f->r;
@@ -97,17 +97,17 @@ static void chopframe(Frame *f, Point pt, uint64_t p, int bn) {
 }
 
 void frinsert(Frame *f, Rune *sp, Rune *ep, uint64_t p0) {
-	Point	  pt0, pt1, ppt0, ppt1, pt;
-	Frbox	 *b;
-	int	  n, n0, nn0, y;
+	Point     pt0, pt1, ppt0, ppt1, pt;
+	Frbox    *b;
+	int       n, n0, nn0, y;
 	Rectangle r;
 
 	static struct {
 		Point pt0, pt1;
-	}	  *pts;
+	} *pts;
 
 	static int nalloc = 0;
-	int	   npts;
+	int        npts;
 
 	if (p0 > f->nchars || sp == ep || f->b == 0) {
 		return;

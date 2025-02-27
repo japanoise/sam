@@ -58,28 +58,28 @@ Rune *linep = line;
 Rune *terminp = termline;
 Rune *termoutp = termline;
 
-List  cmdlist = {'p'};
-List  addrlist = {'p'};
-List  relist = {'p'};
-List  stringlist = {'p'};
-bool  eof;
+List cmdlist = {'p'};
+List addrlist = {'p'};
+List relist = {'p'};
+List stringlist = {'p'};
+bool eof;
 
-void  freecmdlists(void) {
-	 if (cmdlist.listptr) {
-		 free(cmdlist.listptr);
-	 }
+void freecmdlists(void) {
+	if (cmdlist.listptr) {
+		free(cmdlist.listptr);
+	}
 
-	 if (addrlist.listptr) {
-		 free(addrlist.listptr);
-	 }
+	if (addrlist.listptr) {
+		free(addrlist.listptr);
+	}
 
-	 if (relist.listptr) {
-		 free(relist.listptr);
-	 }
+	if (relist.listptr) {
+		free(relist.listptr);
+	}
 
-	 if (stringlist.listptr) {
-		 free(stringlist.listptr);
-	 }
+	if (stringlist.listptr) {
+		free(stringlist.listptr);
+	}
 }
 
 void resetcmd(void) {
@@ -369,8 +369,8 @@ void getrhs(String *s, int delim, int cmd) {
 
 String *collecttoken(char *end, bool keepslash) {
 	String *s = newstring();
-	int	c;
-	bool	esc = false;
+	int     c;
+	bool    esc = false;
 
 	while ((c = nextc()) == ' ' || c == '\t') {
 		Straddc(s, getch()); /* blanks significant for getname() */
@@ -401,7 +401,7 @@ String *collecttoken(char *end, bool keepslash) {
 
 String *collecttext(void) {
 	String *s = newstring();
-	int	begline, i, c, delim;
+	int     begline, i, c, delim;
 
 	if (skipbl() == '\n') {
 		getch();
@@ -431,10 +431,10 @@ Return:
 }
 
 Cmd *parsecmd(int nest) {
-	int	i, c;
+	int     i, c;
 	Cmdtab *ct;
 	Cmd    *cp, *ncp;
-	Cmd	cmd;
+	Cmd     cmd;
 
 	cmd.next = cmd.ccmd = 0;
 	cmd.re = 0;
@@ -448,7 +448,7 @@ Cmd *parsecmd(int nest) {
 	}
 	cmd.cmdc = c;
 	if (cmd.cmdc == 'c' && nextc() == 'd') { /* sleazy two-character case */
-		getch();			 /* the 'd' */
+		getch();                         /* the 'd' */
 		cmd.cmdc = 'c' | 0x100;
 	}
 	i = lookup(cmd.cmdc);
@@ -539,7 +539,7 @@ Return:
 String * /* BUGGERED */
 getregexp(int delim) {
 	String *r = newre();
-	int	c;
+	int     c;
 
 	for (Strzero(&genstr);; Straddc(&genstr, c)) {
 		if ((c = getch()) == '\\') {

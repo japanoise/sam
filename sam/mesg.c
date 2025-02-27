@@ -1,30 +1,30 @@
 #include "sam.h"
 #include <stdint.h>
 
-Header	 h;
-uint8_t	 indata[DATASIZE];
-uint8_t	 outdata[2 * DATASIZE + 3]; /* room for overflow message */
+Header   h;
+uint8_t  indata[DATASIZE];
+uint8_t  outdata[2 * DATASIZE + 3]; /* room for overflow message */
 uint8_t *inp;
 uint8_t *outp;
 uint8_t *outmsg = outdata;
-Posn	 cmdpt;
-Posn	 cmdptadv;
-Buffer	 snarfbuf;
-bool	 waitack;
-bool	 noflush;
-int	 tversion;
-bool	 outbuffered;
+Posn     cmdpt;
+Posn     cmdptadv;
+Buffer   snarfbuf;
+bool     waitack;
+bool     noflush;
+int      tversion;
+bool     outbuffered;
 
-int64_t	 inlong(void);
-int	 inshort(void);
-int	 inmesg(Tmesg);
-void	 setgenstr(File *, Posn, Posn);
+int64_t inlong(void);
+int     inshort(void);
+int     inmesg(Tmesg);
+void    setgenstr(File *, Posn, Posn);
 
-void	 outstart(Hmesg);
-void	 outsend(void);
-void	 outcopy(int, void *);
-void	 outshort(int);
-void	 outlong(int64_t);
+void outstart(Hmesg);
+void outsend(void);
+void outcopy(int, void *);
+void outshort(int);
+void outlong(int64_t);
 
 #ifdef DEBUG
 char *hname[] = {
@@ -103,7 +103,7 @@ int rcvchar(void) {
 }
 
 int rcv(void) {
-	int	   c;
+	int        c;
 	static int state = 0;
 	static int count = 0;
 	static int i = 0;
@@ -160,13 +160,13 @@ File *whichfile(int tag) {
 }
 
 int inmesg(Tmesg type) {
-	Rune	buf[1025];
-	int	i, m;
+	Rune    buf[1025];
+	int     i, m;
 	int16_t s;
 	int64_t l, l1, l2;
 	File   *f;
-	Posn	p0, p1;
-	Range	r;
+	Posn    p0, p1;
+	Range   r;
 	String *str;
 	char   *c;
 	Rune   *rp;
@@ -715,7 +715,7 @@ void outsend(void) {
 	}
 }
 
-int  needoutflush(void) { return outmsg >= outdata + DATASIZE; }
+int needoutflush(void) { return outmsg >= outdata + DATASIZE; }
 
 void outflush(void) {
 	if (outmsg == outdata) {

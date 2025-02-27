@@ -4,19 +4,19 @@
 #include "libgint.h"
 
 enum {
-	Margin = 3,	  /* outside to text */
-	Border = 2,	  /* outside to selection boxes */
+	Margin = 3,       /* outside to text */
+	Border = 2,       /* outside to selection boxes */
 	Blackborder = 1,  /* width of outlining border */
-	Vspacing = 1,	  /* extra spacing between lines of text */
+	Vspacing = 1,     /* extra spacing between lines of text */
 	Maxunscroll = 25, /* maximum #entries before scrolling turns on */
-	Nscroll = 20,	  /* number entries in scrolling part */
-	Scrollwid = 14,	  /* width of scroll bar */
-	Gap = 4		  /* between text and scroll bar */
+	Nscroll = 20,     /* number entries in scrolling part */
+	Scrollwid = 14,   /* width of scroll bar */
+	Gap = 4           /* between text and scroll bar */
 };
 
 extern Bitmap *darkgrey;
 
-static int     fontheight() { return font->ascent + font->descent; }
+static int fontheight() { return font->ascent + font->descent; }
 
 /*
  * r is a rectangle holding the text elements.
@@ -49,7 +49,7 @@ static int menusel(Rectangle r, Point p) {
  * invariant: nothing is highlighted on entry or exit.
  */
 static int menuscan(int but, Mouse *m, Rectangle menur, int lasti) {
-	int	  i;
+	int       i;
 	Rectangle r;
 
 	r = menurect(menur, lasti);
@@ -73,10 +73,10 @@ static int menuscan(int but, Mouse *m, Rectangle menur, int lasti) {
 }
 
 void menupaint(Menu *menu, Rectangle textr, int off, int nitemdrawn) {
-	int	  i;
-	Point	  pt;
+	int       i;
+	Point     pt;
 	Rectangle r;
-	char	 *item;
+	char     *item;
 
 	r = inset(textr, Border - Margin);
 	bitblt(&screen, r.min, &screen, r, 0);
@@ -109,12 +109,12 @@ static void menuscrollpaint(Rectangle scrollr, int off, int nitem,
 int menuhit(int but, Mouse *m, Menu *menu) {
 	int  i, nitem, nitemdrawn, maxwid, lasti, off, noff, wid, screenitem;
 	bool scrolling;
-	Rectangle	    r, menur, sc, textr, scrollr;
-	Bitmap		   *b;
-	Point		    pt;
-	char		   *item;
+	Rectangle           r, menur, sc, textr, scrollr;
+	Bitmap             *b;
+	Point               pt;
+	char               *item;
 	extern unsigned int cursor;
-	unsigned int	    oldcursor = cursor;
+	unsigned int        oldcursor = cursor;
 
 	cursorswitch(ArrowCursor);
 	sc = screen.clipr;

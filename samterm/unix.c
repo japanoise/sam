@@ -15,7 +15,7 @@
 static char *fallbacks[] = {"*scrollForwardR: true", "*geometry: 740x780",
 			    NULL};
 
-void	     getscreen(int argc, char **argv) {
+void getscreen(int argc, char **argv) {
 	Rectangle r;
 
 	signal(SIGINT, SIG_IGN);
@@ -24,11 +24,11 @@ void	     getscreen(int argc, char **argv) {
 	bitblt(&screen, r.min, &screen, r, 0);
 }
 
-int  screensize(int *w, int *h) { return scrpix(w, h); }
+int screensize(int *w, int *h) { return scrpix(w, h); }
 
 void dumperrmsg(int count, int type, int count0, int c) {
 	uint8_t *cp;
-	int	 i;
+	int      i;
 
 	cp = (uint8_t *)rcvstring();
 	fprintf(stderr,

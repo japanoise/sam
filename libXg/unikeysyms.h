@@ -1,5 +1,5 @@
 /* generated automatically from keysyms.xml */
-{0x1a1, 0x104},	      /* LATIN CAPITAL LETTER A WITH OGONEK */
+{0x1a1, 0x104},       /* LATIN CAPITAL LETTER A WITH OGONEK */
     {0x1a2, 0x2d8},   /* BREVE */
     {0x1a3, 0x141},   /* LATIN CAPITAL LETTER L WITH STROKE */
     {0x1a5, 0x13d},   /* LATIN CAPITAL LETTER L WITH CARON */

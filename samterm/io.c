@@ -5,27 +5,27 @@
 #include "flayer.h"
 #include "samterm.h"
 
-int	  cursorfd;
-int	  input;
-int	  got;
-int	  block;
+int       cursorfd;
+int       input;
+int       got;
+int       block;
 Keystroke keystroke;
-int	  reshaped;
-uint8_t	 *hostp;
-uint8_t	 *hoststop;
-uint8_t	 *externbase;
-uint8_t	 *externp;
-uint8_t	 *externstop;
-void	  panic(char *);
+int       reshaped;
+uint8_t  *hostp;
+uint8_t  *hoststop;
+uint8_t  *externbase;
+uint8_t  *externp;
+uint8_t  *externstop;
+void      panic(char *);
 
-void	  initio(void) {
-	     extern int exfd;
+void initio(void) {
+	extern int exfd;
 
-	     einit(Emouse | Ekeyboard);
-	     estart(Ehost, 0, 0, false);
-	     if (exfd >= 0) {
-		     estart(Eextern, exfd, 8192, true);
-	     }
+	einit(Emouse | Ekeyboard);
+	estart(Ehost, 0, 0, false);
+	if (exfd >= 0) {
+		estart(Eextern, exfd, 8192, true);
+	}
 }
 
 void frgetmouse(void) { mouse = emouse(); }
@@ -34,9 +34,9 @@ void mouseunblock(void) { got &= ~Emouse; }
 
 void kbdblock(void) { /* ca suffit */ block = Ekeyboard | Eextern; }
 
-int  button(int but) {
-	 frgetmouse();
-	 return mouse.buttons & (1 << (but - 1));
+int button(int but) {
+	frgetmouse();
+	return mouse.buttons & (1 << (but - 1));
 }
 
 void externload(Event *e) {
@@ -159,13 +159,13 @@ Keystroke kbdchar(void) {
 
 void ereshaped(Rectangle r) { reshaped = 1; }
 
-int  RESHAPED(void) {
-	 if (reshaped) {
-		 screen.r = bscreenrect(&screen.clipr);
-		 reshaped = 0;
-		 return 1;
-	 }
-	 return 0;
+int RESHAPED(void) {
+	if (reshaped) {
+		screen.r = bscreenrect(&screen.clipr);
+		reshaped = 0;
+		return 1;
+	}
+	return 0;
 }
 
 void mouseexit(void) { exit(EXIT_SUCCESS); }

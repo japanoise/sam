@@ -27,23 +27,26 @@ static String SelectSwap(Widget, String);
 #define Offset(field) XtOffsetOf(GwinRec, gwin.field)
 
 static XtResource resources[] = {
-    {XtNforeground, XtCForeground, XtRPixel, sizeof(Pixel), Offset(foreground),
-     XtRString, (XtPointer)XtDefaultForeground},
-    {XtNscrollForwardR, XtCScrollForwardR, XtRBoolean, sizeof(Boolean),
-     Offset(forwardr), XtRImmediate, (XtPointer) true},
-    {XtNreshaped, XtCReshaped, XtRFunction, sizeof(Reshapefunc),
-     Offset(reshaped), XtRFunction, (XtPointer)NULL},
-    {XtNgotchar, XtCGotchar, XtRFunction, sizeof(Charfunc), Offset(gotchar),
-     XtRFunction, (XtPointer)NULL},
-    {XtNgotmouse, XtCGotmouse, XtRFunction, sizeof(Mousefunc), Offset(gotmouse),
-     XtRFunction, (XtPointer)NULL},
-    {XtNselection, XtCSelection, XtRString, sizeof(String), Offset(selection),
-     XtRString, (XtPointer)NULL},
+    {XtNforeground,     XtCForeground,     XtRPixel,    sizeof(Pixel),       Offset(foreground),
+     XtRString,												(XtPointer)XtDefaultForeground},
+    {XtNscrollForwardR, XtCScrollForwardR, XtRBoolean,  sizeof(Boolean),
+     Offset(forwardr),									   XtRImmediate, (XtPointer) true              },
+    {XtNreshaped,       XtCReshaped,       XtRFunction, sizeof(Reshapefunc),
+     Offset(reshaped),									   XtRFunction,  (XtPointer)NULL               },
+    {XtNgotchar,        XtCGotchar,        XtRFunction, sizeof(Charfunc),    Offset(gotchar),
+     XtRFunction,											      (XtPointer)NULL               },
+    {XtNgotmouse,       XtCGotmouse,       XtRFunction, sizeof(Mousefunc),   Offset(gotmouse),
+     XtRFunction,											      (XtPointer)NULL               },
+    {XtNselection,      XtCSelection,      XtRString,   sizeof(String),      Offset(selection),
+     XtRString,												(XtPointer)NULL               },
 };
 #undef Offset
 
 static XtActionsRec actions[] = {
-    {"key", Keyaction}, {"mouse", Mouseaction}, {"mapping", Mappingaction}};
+    {"key",     Keyaction    },
+    {"mouse",   Mouseaction  },
+    {"mapping", Mappingaction}
+};
 
 static char tms[] = "<Key> : key() \n\
     <Motion> : mouse() \n\
@@ -89,37 +92,38 @@ GwinClassRec gwinClassRec = {
      /* extension            */ NULL},
     /* Gwin class part */
     {
-	/* select_swap    */ SelectSwap,
-    }};
+     /* select_swap    */ SelectSwap,
+     }
+};
 
 /* Class record pointer */
-WidgetClass		gwinWidgetClass = (WidgetClass)&gwinClassRec;
+WidgetClass gwinWidgetClass = (WidgetClass)&gwinClassRec;
 
 static XModifierKeymap *modmap;
-static int		keypermod;
-extern XIC		xic;
-extern XIM		xim;
+static int              keypermod;
+extern XIC              xic;
+extern XIM              xim;
 
-static void		Realize(Widget w, XtValueMask *valueMask,
-				XSetWindowAttributes *attrs) {
-	    *valueMask |= CWBackingStore;
-	    attrs->backing_store = Always;
+static void Realize(Widget w, XtValueMask *valueMask,
+		    XSetWindowAttributes *attrs) {
+	*valueMask |= CWBackingStore;
+	attrs->backing_store = Always;
 
-	    XtCreateWindow(w, InputOutput, (Visual *)0, *valueMask, attrs);
-	    XtSetKeyboardFocus(w->core.parent, w);
-	    if ((modmap = XGetModifierMapping(XtDisplay(w)))) {
-		    keypermod = modmap->max_keypermod;
-	    }
+	XtCreateWindow(w, InputOutput, (Visual *)0, *valueMask, attrs);
+	XtSetKeyboardFocus(w->core.parent, w);
+	if ((modmap = XGetModifierMapping(XtDisplay(w)))) {
+		keypermod = modmap->max_keypermod;
+	}
 
-	    Resize(w);
+	Resize(w);
 
-	    xic = XCreateIC(xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
-				    XNClientWindow, XtWindow(w), XNFocusWindow, XtWindow(w),
-				    NULL);
-	    if (!xic) {
-		    fprintf(stderr, "could not create input context\n");
-		    exit(EXIT_FAILURE);
-	    }
+	xic = XCreateIC(xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
+			XNClientWindow, XtWindow(w), XNFocusWindow, XtWindow(w),
+			NULL);
+	if (!xic) {
+		fprintf(stderr, "could not create input context\n");
+		exit(EXIT_FAILURE);
+	}
 }
 
 static void Resize(Widget w) {
@@ -152,13 +156,14 @@ static void Mappingaction(Widget w, XEvent *e, String *p, Cardinal *np) {
 typedef struct Unikeysym Unikeysym;
 
 struct Unikeysym {
-	KeySym	 keysym;
+	KeySym   keysym;
 	uint16_t value;
 };
 
 Unikeysym unikeysyms[] = {
 #include "unikeysyms.h"
-    {0, 0}};
+    {0, 0}
+};
 
 uint16_t keysymtoshort(KeySym k) {
 	for (Unikeysym *ks = unikeysyms; ks->keysym != 0; ks++) {
@@ -174,11 +179,11 @@ typedef struct Keymapping Keymapping;
 
 struct Keymapping {
 	Keymapping *next;
-	int	    m;
-	KeySym	    s;
-	int	    k;
-	int	    c;
-	char	    a[];
+	int         m;
+	KeySym      s;
+	int         k;
+	int         c;
+	char        a[];
 };
 
 static Keymapping *keymappings = NULL;
@@ -230,14 +235,14 @@ void freebindings(void) {
 
 static void Keyaction(Widget w, XEvent *e, String *p, Cardinal *np) {
 	extern XIC xic;
-	int	   kind = Kraw;
+	int        kind = Kraw;
 
-	int	   c, len, minmod;
-	KeySym	   k, mk;
-	Charfunc   f;
-	Modifiers  md;
-	Status	   s;
-	Rune	   buf[32] = {0};
+	int       c, len, minmod;
+	KeySym    k, mk;
+	Charfunc  f;
+	Modifiers md;
+	Status    s;
+	Rune      buf[32] = {0};
 
 	c = 0;
 	len = 0;
@@ -296,34 +301,34 @@ typedef struct Chordmapping Chordmapping;
 
 struct Chordmapping {
 	Chordmapping *next;
-	int	      s1;
-	int	      s2;
-	int	      c;
-	int	      t;
+	int           s1;
+	int           s2;
+	int           c;
+	int           t;
 	const char   *a;
 };
 
 static Chordmapping *chordmap = NULL;
 
-int		     installchord(int s1, int s2, int c, int t, const char *a) {
-	 if (s1 < 0 || s2 < 0 || c < 0 || (t != Tmouse && t != Tcurrent)) {
-		 return -1;
-	 }
+int installchord(int s1, int s2, int c, int t, const char *a) {
+	if (s1 < 0 || s2 < 0 || c < 0 || (t != Tmouse && t != Tcurrent)) {
+		return -1;
+	}
 
-	 Chordmapping *m = calloc(1, sizeof(Chordmapping));
-	 if (!m) {
-		 return -1;
-	 }
+	Chordmapping *m = calloc(1, sizeof(Chordmapping));
+	if (!m) {
+		return -1;
+	}
 
-	 m->s1 = s1;
-	 m->s2 = s2;
-	 m->c = c;
-	 m->t = t;
-	 m->a = a;
+	m->s1 = s1;
+	m->s2 = s2;
+	m->c = c;
+	m->t = t;
+	m->a = a;
 
-	 m->next = chordmap;
-	 chordmap = m;
-	 return 0;
+	m->next = chordmap;
+	chordmap = m;
+	return 0;
 }
 
 int removechord(int s1, int s2) {
@@ -350,11 +355,11 @@ void freechords(void) {
 }
 
 static void Mouseaction(Widget w, XEvent *e, String *p, Cardinal *np) {
-	int	      s = 0;
-	int	      ps = 0; /* the previous state */
-	int	      ob = 0;
-	static bool   chording = false;
-	Charfunc      kf;
+	int         s = 0;
+	int         ps = 0; /* the previous state */
+	int         ob = 0;
+	static bool chording = false;
+	Charfunc    kf;
 
 	XButtonEvent *be = (XButtonEvent *)e;
 	XMotionEvent *me = (XMotionEvent *)e;
@@ -494,7 +499,7 @@ static void SelCallback(Widget w, XtPointer cldata, Atom *sel, Atom *seltype,
 			XtPointer val, unsigned long *len, int *fmt) {
 	GwinWidget    gw = (GwinWidget)w;
 	XTextProperty p = {0};
-	char	     *ls[2] = {(char *)val, NULL};
+	char         *ls[2] = {(char *)val, NULL};
 
 	gw->gwin.selxfered = true;
 	if (*seltype == 0) {
@@ -527,7 +532,7 @@ static Boolean SendSel(Widget w, Atom *sel, Atom *target, Atom *rtype,
 		       XtPointer *ans, unsigned long *anslen, int *ansfmt) {
 	GwinWidget    gw = (GwinWidget)w;
 	XTextProperty p = {0};
-	char	     *ls[2] = {NULL, NULL};
+	char         *ls[2] = {NULL, NULL};
 
 	if ((*target == XA_STRING) ||
 	    (*target == XInternAtom(_dpy, "UTF8_STRING", 0))) {
@@ -550,7 +555,7 @@ static Boolean SendSel(Widget w, Atom *sel, Atom *target, Atom *rtype,
 
 static String SelectSwap(Widget w, String s) {
 	GwinWidget gw;
-	String	   ans;
+	String     ans;
 
 	gw = (GwinWidget)w;
 	gw->gwin.selxfered = false;

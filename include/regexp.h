@@ -35,10 +35,10 @@ struct Reinst {
 	int type;
 
 	union {
-		Reclass *cp;	/* class pointer */
-		Rune	 r;	/* character */
-		int	 subid; /* sub-expression id for RBRA and LBRA */
-		Reinst	*right; /* right child of OR */
+		Reclass *cp;    /* class pointer */
+		Rune     r;     /* character */
+		int      subid; /* sub-expression id for RBRA and LBRA */
+		Reinst  *right; /* right child of OR */
 	} u1;
 
 	union { /* regexp relies on these two being in the same union */

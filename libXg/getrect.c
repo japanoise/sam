@@ -21,30 +21,30 @@ static void grabcursor(void) {
 
 static void ungrabcursor(void) { XUngrabPointer(_dpy, CurrentTime); }
 
-Rectangle   getrect(int but, Mouse *m) {
-	  Rectangle r, rc;
+Rectangle getrect(int but, Mouse *m) {
+	Rectangle r, rc;
 
-	  but = 1 << (but - 1);
-	  cursorswitch(SweepCursor);
-	  while (m->buttons) {
-		  *m = emouse();
-	  }
-	  grabcursor();
-	  while (!(m->buttons & but)) {
-		  *m = emouse();
-		  if (m->buttons & (7 ^ but)) {
-			  goto Return;
-		  }
-	  }
-	  r.min = m->xy;
-	  r.max = m->xy;
-	  do {
-		  rc = rcanon(r);
-		  border(&screen, rc, 2, F & ~D, _bgpixel);
-		  *m = emouse();
-		  border(&screen, rc, 2, F & ~D, _bgpixel);
-		  r.max = m->xy;
-	  } while (m->buttons & but);
+	but = 1 << (but - 1);
+	cursorswitch(SweepCursor);
+	while (m->buttons) {
+		*m = emouse();
+	}
+	grabcursor();
+	while (!(m->buttons & but)) {
+		*m = emouse();
+		if (m->buttons & (7 ^ but)) {
+			goto Return;
+		}
+	}
+	r.min = m->xy;
+	r.max = m->xy;
+	do {
+		rc = rcanon(r);
+		border(&screen, rc, 2, F & ~D, _bgpixel);
+		*m = emouse();
+		border(&screen, rc, 2, F & ~D, _bgpixel);
+		r.max = m->xy;
+	} while (m->buttons & but);
 
 Return:
 	cursorswitch(DefaultCursor);

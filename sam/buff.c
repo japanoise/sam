@@ -58,7 +58,7 @@ static void flush(Buffer *b) {
 
 static void setcache(Buffer *b, uint q0) {
 	Block **blp, *bl;
-	uint	i, q;
+	uint    i, q;
 
 	if (q0 > b->nc) {
 		panic("internal error: setcache");

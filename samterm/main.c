@@ -8,50 +8,50 @@
 #include "samterm.h"
 
 extern uint64_t _bgpixel;
-extern void	hmoveto(int, int64_t, Flayer *);
+extern void     hmoveto(int, int64_t, Flayer *);
 
-Text		cmd;
-Rune	       *scratch;
-int64_t		nscralloc;
-extern Bitmap	screen;
-unsigned int	cursor;
-Mouse		mouse;
-Flayer	       *which = NULL;
-Flayer	       *flast = NULL;
-Flayer	       *work = NULL;
-int64_t		snarflen;
-int64_t		typestart = -1;
-int64_t		typeend = -1;
-int64_t		typeesc = -1;
-bool		modified = false; /* strange lookahead for menus */
-char		lock = 1;
-bool		hasunlocked = false;
-bool		expandtabs = false;
-bool		autoindent = false;
-char	       *machine = "localhost";
-int		exfd = -1;
-const char     *exname;
-bool		followfocus = false;
+Text          cmd;
+Rune         *scratch;
+int64_t       nscralloc;
+extern Bitmap screen;
+unsigned int  cursor;
+Mouse         mouse;
+Flayer       *which = NULL;
+Flayer       *flast = NULL;
+Flayer       *work = NULL;
+int64_t       snarflen;
+int64_t       typestart = -1;
+int64_t       typeend = -1;
+int64_t       typeesc = -1;
+bool          modified = false; /* strange lookahead for menus */
+char          lock = 1;
+bool          hasunlocked = false;
+bool          expandtabs = false;
+bool          autoindent = false;
+char         *machine = "localhost";
+int           exfd = -1;
+const char   *exname;
+bool          followfocus = false;
 
-void		removeext(void) {
-	   if (exname) {
-		   unlink(exname);
+void removeext(void) {
+	if (exname) {
+		unlink(exname);
 
-		   char	       lockpath[FILENAME_MAX + 1] = {0};
-		   const char *path = getenv("SAMSOCKPATH") ? getenv("SAMSOCKPATH")
-								    : getenv("HOME");
-		   snprintf(lockpath, PATH_MAX, "%s/.sam.%s.lock", path, machine);
-		   unlink(lockpath);
-	   }
+		char        lockpath[FILENAME_MAX + 1] = {0};
+		const char *path = getenv("SAMSOCKPATH") ? getenv("SAMSOCKPATH")
+							 : getenv("HOME");
+		snprintf(lockpath, PATH_MAX, "%s/.sam.%s.lock", path, machine);
+		unlink(lockpath);
+	}
 }
 
 int main(int argc, char *argv[]) {
-	int	  i, got, scr, opt;
-	Text	 *t;
+	int       i, got, scr, opt;
+	Text     *t;
 	Rectangle r;
-	Flayer	 *nwhich;
-	char	  rcpath[PATH_MAX + 1] = {0};
-	FILE	 *rc = NULL;
+	Flayer   *nwhich;
+	char      rcpath[PATH_MAX + 1] = {0};
+	FILE     *rc = NULL;
 
 	setlocale(LC_ALL, "");
 	installdefaultbindings();
@@ -260,9 +260,9 @@ Flayer *findl(Text *t) {
 }
 
 void duplicate(Flayer *l, Rectangle r, XftFont *f, int close) {
-	Text	*t = (Text *)l->user1;
-	Flayer	*nl = findl(t);
-	Rune	*rp;
+	Text    *t = (Text *)l->user1;
+	Flayer  *nl = findl(t);
+	Rune    *rp;
 	uint64_t n;
 
 	if (nl) {
@@ -293,7 +293,7 @@ void buttons(int updown) {
 }
 
 int getr(Rectangle *rp) {
-	Point	  p;
+	Point     p;
 	Rectangle r;
 
 	*rp = getrect(3, &mouse);
@@ -411,10 +411,10 @@ int64_t ctlu(Rasp *r, int64_t o, int64_t p) {
 }
 
 int64_t indent(Flayer *l, long p) {
-	Text	   *t = (Text *)l->user1;
+	Text       *t = (Text *)l->user1;
 	static Rune sbuf[7] = {' ', ' ', ' ', ' ', ' ', ' ', ' '};
 	static Rune tbuf[7] = {'\t', '\t', '\t', '\t', '\t', '\t', '\t'};
-	int	    i, is, it, q, c, space;
+	int         i, is, it, q, c, space;
 
 	q = p - 1;
 	is = 0;
@@ -470,9 +470,9 @@ int center(Flayer *l, int64_t a) {
 }
 
 int onethird(Flayer *l, int64_t a) {
-	Text	 *t;
+	Text     *t;
 	Rectangle s;
-	int64_t	  lines;
+	int64_t   lines;
 
 	t = l->user1;
 	if (!t->lock && (a < l->origin || l->origin + l->f.nchars < a)) {
@@ -490,36 +490,36 @@ int onethird(Flayer *l, int64_t a) {
 	return 0;
 }
 
-int		XDisplay(Display *);
+int XDisplay(Display *);
 
 extern Display *_dpy;
 
-void		flushtyping(bool clearesc) {
-	   Text	   *t;
-	   uint64_t n;
+void flushtyping(bool clearesc) {
+	Text    *t;
+	uint64_t n;
 
-	   if (clearesc) {
-		   typeesc = -1;
-	   }
-	   if (typestart == typeend) {
-		   modified = false;
-		   return;
-	   }
-	   t = which->user1;
-	   if (t != &cmd) {
-		   modified = true;
-	   }
-	   rload(&t->rasp, typestart, typeend, &n);
-	   scratch[n] = 0;
-	   if (t == &cmd && typeend == t->rasp.nrunes &&
-	       scratch[typeend - typestart - 1] == '\n') {
-		   setlock();
-		   outcmd();
-	   }
-	   outTslS(Ttype, t->tag, typestart, scratch);
-	   typestart = -1;
-	   typeend = -1;
-	   XFlush(_dpy);
+	if (clearesc) {
+		typeesc = -1;
+	}
+	if (typestart == typeend) {
+		modified = false;
+		return;
+	}
+	t = which->user1;
+	if (t != &cmd) {
+		modified = true;
+	}
+	rload(&t->rasp, typestart, typeend, &n);
+	scratch[n] = 0;
+	if (t == &cmd && typeend == t->rasp.nrunes &&
+	    scratch[typeend - typestart - 1] == '\n') {
+		setlock();
+		outcmd();
+	}
+	outTslS(Ttype, t->tag, typestart, scratch);
+	typestart = -1;
+	typeend = -1;
+	XFlush(_dpy);
 }
 
 static int64_t cmdscrolldown(Flayer *l, int64_t a, Text *t, const char *arg) {
@@ -924,46 +924,47 @@ typedef struct CommandEntry CommandEntry;
 
 struct CommandEntry {
 	Commandfunc f;
-	bool	    unlocked;
-	bool	    docut;
+	bool        unlocked;
+	bool        docut;
 };
 
 CommandEntry commands[Cmax] = {
-    [Cnone] = {cmdnone, false, false},
-    [Cscrolldown] = {cmdscrolldown, false, false},
-    [Cscrollup] = {cmdscrollup, false, false},
+    [Cnone] = {cmdnone,           false, false},
+    [Cscrolldown] = {cmdscrolldown,     false, false},
+    [Cscrollup] = {cmdscrollup,       false, false},
     [Cscrolldownline] = {cmdscrolldownline, false, false},
-    [Cscrollupline] = {cmdscrollupline, false, false},
-    [Ccharleft] = {cmdcharleft, false, false},
-    [Ccharright] = {cmdcharright, false, false},
-    [Clineup] = {cmdlineup, false, false},
-    [Clinedown] = {cmdlinedown, false, false},
-    [Cjump] = {cmdjump, false, false},
-    [Cescape] = {cmdescape, false, false},
-    [Csnarf] = {cmdsnarf, false, false},
-    [Ccut] = {cmdcut, false, false},
-    [Cpaste] = {cmdpaste, false, false},
-    [Cexchange] = {cmdexchange, false, false},
-    [Cdelword] = {cmddelword, true, false},
-    [Cdelbol] = {cmddelbol, true, false},
-    [Cdelbs] = {cmddelbs, true, true},
-    [Cdel] = {cmddel, true, true},
-    [Ceol] = {cmdeol, false, false},
-    [Cbol] = {cmdbol, false, false},
-    [Ctab] = {cmdtab, false, false},
-    [Csend] = {cmdsend, false, false},
-    [Clook] = {cmdlook, false, false},
-    [Csearch] = {cmdsearch, false, false},
-    [Cwrite] = {cmdwrite, false, false}};
+    [Cscrollupline] = {cmdscrollupline,   false, false},
+    [Ccharleft] = {cmdcharleft,       false, false},
+    [Ccharright] = {cmdcharright,      false, false},
+    [Clineup] = {cmdlineup,         false, false},
+    [Clinedown] = {cmdlinedown,       false, false},
+    [Cjump] = {cmdjump,           false, false},
+    [Cescape] = {cmdescape,         false, false},
+    [Csnarf] = {cmdsnarf,          false, false},
+    [Ccut] = {cmdcut,            false, false},
+    [Cpaste] = {cmdpaste,          false, false},
+    [Cexchange] = {cmdexchange,       false, false},
+    [Cdelword] = {cmddelword,        true,  false},
+    [Cdelbol] = {cmddelbol,         true,  false},
+    [Cdelbs] = {cmddelbs,          true,  true },
+    [Cdel] = {cmddel,            true,  true },
+    [Ceol] = {cmdeol,            false, false},
+    [Cbol] = {cmdbol,            false, false},
+    [Ctab] = {cmdtab,            false, false},
+    [Csend] = {cmdsend,           false, false},
+    [Clook] = {cmdlook,           false, false},
+    [Csearch] = {cmdsearch,         false, false},
+    [Cwrite] = {cmdwrite,          false, false}
+};
 
 void type(
     Flayer *l) /* what a bloody mess this is -- but it's getting better! */
 {
-	Text	 *t = (Text *)l->user1;
-	Rune	  buf[100];
+	Text     *t = (Text *)l->user1;
+	Rune      buf[100];
 	Keystroke k = {0};
-	Rune	 *p = buf;
-	int64_t	  a;
+	Rune     *p = buf;
+	int64_t   a;
 
 	if (lock || t->lock) {
 		kbdblock();
@@ -1074,13 +1075,13 @@ Rune *stgettext(Flayer *l, int64_t n, uint64_t *np) {
 
 int64_t scrtotal(Flayer *l) { return ((Text *)l->user1)->rasp.nrunes; }
 
-void   *alloc(uint64_t n) {
-	  void *p;
+void *alloc(uint64_t n) {
+	void *p;
 
-	  p = malloc(n);
-	  if (p == 0) {
-		  panic("alloc");
-	  }
-	  memset(p, 0, n);
-	  return p;
+	p = malloc(n);
+	if (p == 0) {
+		panic("alloc");
+	}
+	memset(p, 0, n);
+	return p;
 }

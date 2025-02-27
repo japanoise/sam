@@ -42,20 +42,20 @@ void freebufs(void) {
 
 static Merge merge;
 
-File	    *fileopen(void) {
-	       File *f;
+File *fileopen(void) {
+	File *f;
 
-	       f = emalloc(sizeof(File));
-	       f->dot.f = f;
-	       f->ndot.f = f;
-	       f->seq = 0;
-	       f->mod = false;
-	       f->unread = true;
-	       Strinit0(&f->name);
-	       return f;
+	f = emalloc(sizeof(File));
+	f->dot.f = f;
+	f->ndot.f = f;
+	f->seq = 0;
+	f->mod = false;
+	f->unread = true;
+	Strinit0(&f->name);
+	return f;
 }
 
-int	    fileisdirty(File *f) { return f->seq != f->cleanseq; }
+int fileisdirty(File *f) { return f->seq != f->cleanseq; }
 
 static void wrinsert(Buffer *delta, int seq, int mod, uint p0, Rune *s,
 		     uint ns) {
@@ -203,7 +203,7 @@ void logdelete(File *f, uint p0, uint p1) {
  * like fileunsetname, but get the data from arguments
  */
 void logsetname(File *f, String *s) {
-	Undo	u;
+	Undo    u;
 	Buffer *delta;
 
 	if (f->rescuing) {
@@ -447,10 +447,10 @@ long undoseq(File *f, int isundo) {
 
 void fileundo(File *f, int isundo, int canredo, uint *q0p, uint *q1p,
 	      int flag) {
-	Undo	u;
+	Undo    u;
 	Rune   *buf;
-	uint	i, n, up;
-	uint	stop;
+	uint    i, n, up;
+	uint    stop;
 	Buffer *delta, *epsilon;
 
 	if (isundo) {

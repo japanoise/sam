@@ -3,12 +3,12 @@
 
 static Block *blist;
 
-char	      buf[128];
-Disk	      d;
+char buf[128];
+Disk d;
 
-static void   diskcleanup() {
-	  close(d.fd);
-	  remove(buf);
+static void diskcleanup() {
+	close(d.fd);
+	remove(buf);
 }
 
 static int tempdisk(void) {

@@ -16,42 +16,42 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-Rune	    genbuf[BLOCKSIZE];
-FILE	   *io;
-bool	    panicking;
-bool	    rescuing;
-Mod	    modnum;
-String	    genstr;
-String	    rhs;
-String	    wd;
-String	    cmdstr;
-Rune	    empty[] = {0};
-char	   *genc;
-File	   *curfile;
-File	   *flist;
-File	   *cmd;
-jmp_buf	    mainloop;
-List	    tempfile;
-bool	    quitok = true;
-bool	    downloaded;
-bool	    expandtabs;
-bool	    dflag;
-char	   *machine;
-char	   *home;
-bool	    bpipeok;
-int	    termlocked;
-char	   *samterm = "samterm";
-char	   *rsamname = "sam";
-char	   *SH = "sh";
-char	   *SHPATH = "/bin/sh";
-char	   *rmsocketname = NULL;
-File	   *lastfile;
-Disk	   *disk;
-int64_t	    seq;
+Rune    genbuf[BLOCKSIZE];
+FILE   *io;
+bool    panicking;
+bool    rescuing;
+Mod     modnum;
+String  genstr;
+String  rhs;
+String  wd;
+String  cmdstr;
+Rune    empty[] = {0};
+char   *genc;
+File   *curfile;
+File   *flist;
+File   *cmd;
+jmp_buf mainloop;
+List    tempfile;
+bool    quitok = true;
+bool    downloaded;
+bool    expandtabs;
+bool    dflag;
+char   *machine;
+char   *home;
+bool    bpipeok;
+int     termlocked;
+char   *samterm = "samterm";
+char   *rsamname = "sam";
+char   *SH = "sh";
+char   *SHPATH = "/bin/sh";
+char   *rmsocketname = NULL;
+File   *lastfile;
+Disk   *disk;
+int64_t seq;
 
-Rune	    baddir[] = {'<', 'b', 'a', 'd', 'd', 'i', 'r', '>', '\n'};
+Rune baddir[] = {'<', 'b', 'a', 'd', 'd', 'i', 'r', '>', '\n'};
 
-void	    usage(void);
+void usage(void);
 
 static void hup(int sig) {
 	rescue();
@@ -103,10 +103,10 @@ const char *getbsocketname(const char *machine) {
 }
 
 int bmain(int argc, char *argv[]) {
-	int		   fd, o;
+	int                fd, o;
 	struct sockaddr_un un = {0};
-	char		   cmd[B_CMD_MAX + 1] = {0};
-	bool		   machineset = false;
+	char               cmd[B_CMD_MAX + 1] = {0};
+	bool               machineset = false;
 
 	machine = "localhost";
 	while ((o = getopt(argc, argv, "r:")) != -1) {
@@ -165,7 +165,7 @@ void rmsocket(void) {
 	if (rmsocketname) {
 		unlink(rmsocketname);
 
-		char	    lockpath[FILENAME_MAX + 1] = {0};
+		char        lockpath[FILENAME_MAX + 1] = {0};
 		const char *path = getenv("SAMSOCKPATH") ? getenv("SAMSOCKPATH")
 							 : getenv("HOME");
 		snprintf(lockpath, PATH_MAX, "%s/.sam.localhost.lock", path);
@@ -174,8 +174,8 @@ void rmsocket(void) {
 }
 
 int sammain(int argc, char *argv[]) {
-	bool	trylock = true;
-	int	i, o;
+	bool    trylock = true;
+	int     i, o;
 	String *t;
 	char   *arg[argc + 1], **ap;
 
@@ -532,47 +532,47 @@ void update(void) {
 
 File *current(File *f) { return curfile = f; }
 
-void  edit(File *f, int cmd) {
-	 int  empty = true;
-	 Posn p;
-	 bool nulls;
+void edit(File *f, int cmd) {
+	int  empty = true;
+	Posn p;
+	bool nulls;
 
-	 if (cmd == 'r') {
-		 logdelete(f, addr.r.p1, addr.r.p2);
-	 }
-	 if (cmd == 'e' || cmd == 'I') {
-		 logdelete(f, (Posn)0, f->buf.nc);
-		 addr.r.p2 = f->buf.nc;
-	 } else if (f->buf.nc != 0 ||
-		    (f->name.s[0] && Strcmp(&genstr, &f->name) != 0)) {
-		 empty = false;
-	 }
-	 if ((io = fopen(genc, "r")) == NULL) {
-		 if (curfile && curfile->unread) {
-			 curfile->unread = false;
-		 }
-		 error_r(Eopen, genc);
-	 }
-	 p = readio(f, &nulls, empty, true);
-	 closeio((cmd == 'e' || cmd == 'I') ? -1 : p);
-	 if (cmd == 'r') {
-		 f->ndot.r.p1 = addr.r.p2, f->ndot.r.p2 = addr.r.p2 + p;
-	 } else {
-		 f->ndot.r.p1 = f->ndot.r.p2 = 0;
-	 }
-	 f->closeok = empty;
-	 if (quitok) {
-		 quitok = empty;
-	 } else {
-		 quitok = false;
-	 }
-	 state(f, empty && !nulls ? Clean : Dirty);
-	 if (empty && !nulls) {
-		 f->cleanseq = f->seq;
-	 }
-	 if (cmd == 'e') {
-		 filename(f);
-	 }
+	if (cmd == 'r') {
+		logdelete(f, addr.r.p1, addr.r.p2);
+	}
+	if (cmd == 'e' || cmd == 'I') {
+		logdelete(f, (Posn)0, f->buf.nc);
+		addr.r.p2 = f->buf.nc;
+	} else if (f->buf.nc != 0 ||
+		   (f->name.s[0] && Strcmp(&genstr, &f->name) != 0)) {
+		empty = false;
+	}
+	if ((io = fopen(genc, "r")) == NULL) {
+		if (curfile && curfile->unread) {
+			curfile->unread = false;
+		}
+		error_r(Eopen, genc);
+	}
+	p = readio(f, &nulls, empty, true);
+	closeio((cmd == 'e' || cmd == 'I') ? -1 : p);
+	if (cmd == 'r') {
+		f->ndot.r.p1 = addr.r.p2, f->ndot.r.p2 = addr.r.p2 + p;
+	} else {
+		f->ndot.r.p1 = f->ndot.r.p2 = 0;
+	}
+	f->closeok = empty;
+	if (quitok) {
+		quitok = empty;
+	} else {
+		quitok = false;
+	}
+	state(f, empty && !nulls ? Clean : Dirty);
+	if (empty && !nulls) {
+		f->cleanseq = f->seq;
+	}
+	if (cmd == 'e') {
+		filename(f);
+	}
 }
 
 int getname(File *f, String *s, bool save) {
@@ -708,7 +708,7 @@ int readcmd(String *s) {
 
 void getcurwd(void) {
 	String *t;
-	char	buf[PATH_MAX + 1];
+	char    buf[PATH_MAX + 1];
 
 	buf[0] = 0;
 	getcwd(buf, sizeof(buf));
@@ -723,10 +723,10 @@ void getcurwd(void) {
 }
 
 void cd(String *str) {
-	int	i;
+	int     i;
 	File   *f;
 	String *t;
-	String	owd;
+	String  owd;
 
 	t = tmpcstr("/bin/pwd");
 	Straddc(t, '\0');

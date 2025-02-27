@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 Rangeset sel;
-String	 lastregexp;
+String   lastregexp;
 
 /*
  * Machine Information
@@ -43,15 +43,15 @@ Inst *bstartinst; /* same for backwards machine */
 typedef struct Ilist Ilist;
 
 struct Ilist {
-	Inst	*inst; /* Instruction of the thread */
+	Inst    *inst; /* Instruction of the thread */
 	Rangeset se;
-	Posn	 startp; /* first char of match */
+	Posn     startp; /* first char of match */
 };
 
 #define NLIST 128
 
-Ilist	       *tl, *nl; /* This list, next list */
-Ilist		list[2][NLIST];
+Ilist          *tl, *nl; /* This list, next list */
+Ilist           list[2][NLIST];
 static Rangeset sempty;
 
 /*
@@ -64,18 +64,18 @@ static Rangeset sempty;
 #define START 0x100000000    /* Start, used for marker on stack */
 #define RBRA 0x100000001     /* Right bracket, ) */
 #define LBRA 0x100000002     /* Left bracket, ( */
-#define OR 0x100000003	     /* Alternation, | */
-#define CAT 0x100000004	     /* Concatentation, implicit operator */
+#define OR 0x100000003       /* Alternation, | */
+#define CAT 0x100000004      /* Concatentation, implicit operator */
 #define STAR 0x100000005     /* Closure, * */
 #define PLUS 0x100000006     /* a+ == aa* */
 #define QUEST 0x100000007    /* a? == a|nothing, i.e. 0 or 1 a's */
-#define ANY 0x200000000	     /* Any character but newline, . */
-#define NOP 0x200000001	     /* No operation, internal use only */
-#define BOL 0x200000002	     /* Beginning of line, ^ */
-#define EOL 0x200000003	     /* End of line, $ */
+#define ANY 0x200000000      /* Any character but newline, . */
+#define NOP 0x200000001      /* No operation, internal use only */
+#define BOL 0x200000002      /* Beginning of line, ^ */
+#define EOL 0x200000003      /* End of line, $ */
 #define CCLASS 0x200000004   /* Character class, [] */
 #define NCCLASS 0x200000005  /* Negated character class, [^] */
-#define END 0x200000077	     /* Terminate: match found */
+#define END 0x200000077      /* Terminate: match found */
 
 #define ISATOR 0x100000000
 #define ISAND 0x200000000
@@ -91,41 +91,41 @@ struct Node {
 };
 
 #define NSTACK 20
-Node	 andstack[NSTACK];
-Node	*andp;
-int64_t	 atorstack[NSTACK];
+Node     andstack[NSTACK];
+Node    *andp;
+int64_t  atorstack[NSTACK];
 int64_t *atorp;
-bool	 lastwasand; /* Last token was operand */
-int	 cursubid;
-int	 subidstack[NSTACK];
-int	*subidp;
-bool	 backwards;
-int	 nbra;
-Rune	*exprp;	  /* pointer to next character in source expression */
+bool     lastwasand; /* Last token was operand */
+int      cursubid;
+int      subidstack[NSTACK];
+int     *subidp;
+bool     backwards;
+int      nbra;
+Rune    *exprp;   /* pointer to next character in source expression */
 #define DCLASS 10 /* allocation increment */
-int nclass;	  /* number active */
-int Nclass;	  /* high water mark */
+int nclass;       /* number active */
+int Nclass;       /* high water mark */
 Rune **class;
-bool	negateclass;
+bool negateclass;
 
-int	addinst(Ilist *l, Inst *inst, Rangeset *sep);
-void	newmatch(Rangeset *);
-void	bnewmatch(Rangeset *);
-void	pushand(Inst *, Inst *);
-void	pushator(int64_t);
+int     addinst(Ilist *l, Inst *inst, Rangeset *sep);
+void    newmatch(Rangeset *);
+void    bnewmatch(Rangeset *);
+void    pushand(Inst *, Inst *);
+void    pushator(int64_t);
 Node   *popand(int);
 int64_t popator(void);
-void	startlex(Rune *);
+void    startlex(Rune *);
 int64_t lex(void);
-void	operator(int64_t);
-void	operand(int64_t);
-void	evaluntil(int64_t);
-void	optimize(Inst *);
-void	bldcclass(void);
+void    operator(int64_t);
+void    operand(int64_t);
+void    evaluntil(int64_t);
+void    optimize(Inst *);
+void    bldcclass(void);
 
-void	regerror(Err e) {
-	   Strzero(&lastregexp);
-	   error(e);
+void regerror(Err e) {
+	Strzero(&lastregexp);
+	error(e);
 }
 
 void regerror_c(Err e, int c) {
@@ -364,7 +364,7 @@ void optimize(Inst *start) {
 
 #ifdef DEBUG
 void dumpstack(void) {
-	Node	*stk;
+	Node    *stk;
 	int64_t *ip;
 
 	dprint("operators\n");

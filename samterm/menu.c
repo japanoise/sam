@@ -5,17 +5,17 @@
 #include "flayer.h"
 #include "samterm.h"
 
-uint8_t	      **name = NULL; /* first byte is ' ' or '\'': modified state */
-Text	      **text = NULL; /* pointer to Text associated with file */
-uint16_t       *tag = NULL;  /* text[i].tag, even if text[i] not defined */
-int		nname;
-int		mw;
+uint8_t **name = NULL; /* first byte is ' ' or '\'': modified state */
+Text    **text = NULL; /* pointer to Text associated with file */
+uint16_t *tag = NULL;  /* text[i].tag, even if text[i] not defined */
+int       nname;
+int       mw;
 
-int		menucap;
+int menucap;
 
-char	       *genmenu3(int);
-char	       *genmenu2(int);
-char	       *genmenu2c(int);
+char *genmenu3(int);
+char *genmenu2(int);
+char *genmenu2c(int);
 
 extern uint64_t _bgpixel;
 
@@ -93,9 +93,9 @@ void menu2hit(void) {
 
 void menu3hit(void) {
 	Rectangle r;
-	Flayer	 *l;
-	int	  m, i;
-	Text	 *t;
+	Flayer   *l;
+	int       m, i;
+	Text     *t;
 
 	mw = -1;
 	switch (m = menuhit(3, &mouse, &menu3)) {
@@ -182,7 +182,7 @@ void menu3hit(void) {
 
 Text *sweeptext(int new, int tag) {
 	Rectangle r;
-	Text	 *t;
+	Text     *t;
 
 	if (getr(&r) && (t = malloc(sizeof(Text)))) {
 		memset((void *)t, 0, sizeof(Text));
@@ -276,16 +276,16 @@ bool haspat(void) { return (bool)(menu2str[Search]); }
 #define NBUF 64
 static uint8_t buf[NBUF * UTFmax] = {' ', ' ', ' ', ' '};
 
-char	      *paren(char *s) {
-	 uint8_t *t = buf;
+char *paren(char *s) {
+	uint8_t *t = buf;
 
-	 *t++ = '(';
-	 do
-		 ;
-	 while ((*t++ = *s++));
-	 t[-1] = ')';
-	 *t = 0;
-	 return (char *)buf;
+	*t++ = '(';
+	do
+		;
+	while ((*t++ = *s++));
+	t[-1] = ')';
+	*t = 0;
+	return (char *)buf;
 }
 
 char *genmenu2(int n) {

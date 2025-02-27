@@ -30,8 +30,8 @@ struct Cmd {
 		Addr   *addr; /* address for m, t */
 	} g;
 
-	Cmd	*next; /* pointer to next element in {} */
-	int16_t	 num;
+	Cmd     *next; /* pointer to next element in {} */
+	int16_t  num;
 	uint16_t flag; /* whatever */
 	uint16_t cmdc; /* command character; 'x' etc. */
 };
@@ -43,15 +43,15 @@ struct Cmd {
 typedef struct Cmdtab Cmdtab;
 
 extern struct Cmdtab {
-	uint16_t cmdc;		   /* command character */
-	uint8_t	 text;		   /* takes a textual argument? */
-	uint8_t	 regexp;	   /* takes a regular expression? */
-	uint8_t	 addr;		   /* takes an address (m or t)? */
-	uint8_t	 defcmd;	   /* default command; 0==>none */
-	uint8_t	 defaddr;	   /* default address */
-	uint8_t	 count;		   /* takes a count e.g. s2/// */
-	char	*token;		   /* takes text terminated by one of these */
-	bool	 keepslash;	   /* pass slashes in unchanged */
+	uint16_t cmdc;             /* command character */
+	uint8_t  text;             /* takes a textual argument? */
+	uint8_t  regexp;           /* takes a regular expression? */
+	uint8_t  addr;             /* takes an address (m or t)? */
+	uint8_t  defcmd;           /* default command; 0==>none */
+	uint8_t  defaddr;          /* default address */
+	uint8_t  count;            /* takes a count e.g. s2/// */
+	char    *token;            /* takes text terminated by one of these */
+	bool     keepslash;        /* pass slashes in unchanged */
 	bool (*fn)(File *, Cmd *); /* function to call with parse tree */
 } cmdtab[];
 
@@ -61,19 +61,19 @@ enum Defaddr { /* default addresses */
 	       aAll
 };
 
-bool	nl_cmd(File *, Cmd *), a_cmd(File *, Cmd *), b_cmd(File *, Cmd *);
-bool	c_cmd(File *, Cmd *), cd_cmd(File *, Cmd *), d_cmd(File *, Cmd *);
-bool	D_cmd(File *, Cmd *), e_cmd(File *, Cmd *);
-bool	f_cmd(File *, Cmd *), g_cmd(File *, Cmd *), i_cmd(File *, Cmd *);
-bool	k_cmd(File *, Cmd *), m_cmd(File *, Cmd *);
-bool	M_cmd(File *, Cmd *), n_cmd(File *, Cmd *);
-bool	p_cmd(File *, Cmd *), q_cmd(File *, Cmd *);
-bool	P_cmd(File *, Cmd *), P_cmd(File *, Cmd *);
-bool	s_cmd(File *, Cmd *), u_cmd(File *, Cmd *), w_cmd(File *, Cmd *);
-bool	x_cmd(File *, Cmd *), X_cmd(File *, Cmd *), plan9_cmd(File *, Cmd *);
-bool	eq_cmd(File *, Cmd *);
+bool nl_cmd(File *, Cmd *), a_cmd(File *, Cmd *), b_cmd(File *, Cmd *);
+bool c_cmd(File *, Cmd *), cd_cmd(File *, Cmd *), d_cmd(File *, Cmd *);
+bool D_cmd(File *, Cmd *), e_cmd(File *, Cmd *);
+bool f_cmd(File *, Cmd *), g_cmd(File *, Cmd *), i_cmd(File *, Cmd *);
+bool k_cmd(File *, Cmd *), m_cmd(File *, Cmd *);
+bool M_cmd(File *, Cmd *), n_cmd(File *, Cmd *);
+bool p_cmd(File *, Cmd *), q_cmd(File *, Cmd *);
+bool P_cmd(File *, Cmd *), P_cmd(File *, Cmd *);
+bool s_cmd(File *, Cmd *), u_cmd(File *, Cmd *), w_cmd(File *, Cmd *);
+bool x_cmd(File *, Cmd *), X_cmd(File *, Cmd *), plan9_cmd(File *, Cmd *);
+bool eq_cmd(File *, Cmd *);
 
 String *getregexp(int);
 Addr   *newaddr(void);
 Address address(Addr *, Address, int);
-int	cmdexec(File *, Cmd *);
+int     cmdexec(File *, Cmd *);

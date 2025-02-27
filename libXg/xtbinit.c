@@ -39,40 +39,40 @@
 #endif
 
 /* libg globals */
-XIM	 xim;
-XIC	 xic;
-Bitmap	 screen;
+XIM      xim;
+XIC      xic;
+Bitmap   screen;
 XftFont *font;
 XftColor fontcolor;
-char	 fontspec[1024] = {0};
-char	 foregroundspec[1024] = {0};
-char	 backgroundspec[1024] = {0};
-char	 borderspec[1024] = {0};
+char     fontspec[1024] = {0};
+char     foregroundspec[1024] = {0};
+char     backgroundspec[1024] = {0};
+char     borderspec[1024] = {0};
 
 /* implementation globals */
 extern char *machine;
-Display	    *_dpy;
-Widget	     _toplevel;
-Window	     _topwindow;
+Display     *_dpy;
+Widget       _toplevel;
+Window       _topwindow;
 uint64_t     _bgpixels[MAX_BACKGROUNDS];
-int	     _nbgs;
+int          _nbgs;
 uint64_t     _fgpixel, _bgpixel, _borderpixel;
-XColor	     _fgcolor, _bgcolor, _bordercolor;
-int	     _ld2d[6] = {1, 2, 4, 8, 16, 24};
+XColor       _fgcolor, _bgcolor, _bordercolor;
+int          _ld2d[6] = {1, 2, 4, 8, 16, 24};
 uint64_t     _ld2dmask[6] = {0x1, 0x3, 0xF, 0xFF, 0xFFFF, 0x00FFFFFF};
 Colormap     _libg_cmap;
-int	     _cmap_installed;
+int          _cmap_installed;
 
 /* xbinit implementation globals */
 static XtAppContext app;
-static Widget	    widg;
-static bool	    exposed = 0;
-static Atom	    wm_take_focus;
-static Mouse	    lastmouse;
+static Widget       widg;
+static bool         exposed = 0;
+static Atom         wm_take_focus;
+static Mouse        lastmouse;
 
 typedef struct Ebuf {
 	struct Ebuf  *next;
-	int	      n;
+	int           n;
 	unsigned char buf[4];
 } Ebuf;
 
@@ -88,37 +88,39 @@ typedef struct Esrc {
 #define MAXINPUT 1024 /* number of queued input events */
 #define MAXSRC 10
 
-static Esrc    esrc[MAXSRC];
-static int     nsrc;
+static Esrc esrc[MAXSRC];
+static int  nsrc;
 
-static int     einitcalled = 0;
-static int     Smouse = -1;
-static int     Skeyboard = -1;
+static int einitcalled = 0;
+static int Smouse = -1;
+static int Skeyboard = -1;
 
-static void    reshaped(int, int, int, int);
-static void    gotchar(int, int, int, int, int, const char *);
-static void    gotmouse(Gwinmouse *);
-static int     ilog2(int);
+static void reshaped(int, int, int, int);
+static void gotchar(int, int, int, int, int, const char *);
+static void gotmouse(Gwinmouse *);
+static int  ilog2(int);
 
-static Ebuf   *ebread(Esrc *);
-static Ebuf   *ebadd(Esrc *, bool);
-static void    focinit(Widget);
-static void    wmproto(Widget, XEvent *, String *, Cardinal *);
-static void    waitevent(void);
+static Ebuf *ebread(Esrc *);
+static Ebuf *ebadd(Esrc *, bool);
+static void  focinit(Widget);
+static void  wmproto(Widget, XEvent *, String *, Cardinal *);
+static void  waitevent(void);
 
 static Errfunc onerr;
 
-String	       _fallbacks[] = {"*gwin.width: 400", "*gwin.height: 400", NULL};
+String _fallbacks[] = {"*gwin.width: 400", "*gwin.height: 400", NULL};
 
-static char   *shelltrans = "<ClientMessage> WM_PROTOCOLS : WMProtocolAction()";
-static XtActionsRec wmpactions[] = {{"WMProtocolAction", wmproto}};
+static char *shelltrans = "<ClientMessage> WM_PROTOCOLS : WMProtocolAction()";
+static XtActionsRec wmpactions[] = {
+    {"WMProtocolAction", wmproto}
+};
 
-Bitmap		   *darkgrey;
+Bitmap *darkgrey;
 
-static uint8_t	    darkgreybits[] = {
-	 0xDD, 0xDD, 0x77, 0x77, 0xDD, 0xDD, 0x77, 0x77, 0xDD, 0xDD, 0x77,
-	 0x77, 0xDD, 0xDD, 0x77, 0x77, 0xDD, 0xDD, 0x77, 0x77, 0xDD, 0xDD,
-	 0x77, 0x77, 0xDD, 0xDD, 0x77, 0x77, 0xDD, 0xDD, 0x77, 0x77,
+static uint8_t darkgreybits[] = {
+    0xDD, 0xDD, 0x77, 0x77, 0xDD, 0xDD, 0x77, 0x77, 0xDD, 0xDD, 0x77,
+    0x77, 0xDD, 0xDD, 0x77, 0x77, 0xDD, 0xDD, 0x77, 0x77, 0xDD, 0xDD,
+    0x77, 0x77, 0xDD, 0xDD, 0x77, 0x77, 0xDD, 0xDD, 0x77, 0x77,
 };
 
 void freefont(void) {
@@ -152,8 +154,8 @@ void xtbinit(Errfunc f, char *class, int *pargc, char **argv,
 	char name[512] = {0};
 	snprintf(name, sizeof(name) - 1, "samterm on %s", machine);
 	Arg args[] = {
-	    {XtNinput, true},
-	    {XtNtitle, (XtArgVal)name},
+	    {XtNinput,    true          },
+	    {XtNtitle,    (XtArgVal)name},
 	    {XtNiconName, (XtArgVal)name},
 	};
 	_toplevel = XtAppInitialize(&app, class, NULL, 0, pargc, argv,
@@ -171,12 +173,12 @@ void xtbinit(Errfunc f, char *class, int *pargc, char **argv,
 
 	_dpy = XtDisplay(widg);
 	XAllocNamedColor(_dpy, DefaultColormap(_dpy, DefaultScreen(_dpy)),
-			 foregroundspec[0]	? foregroundspec
+			 foregroundspec[0]      ? foregroundspec
 			 : getenv("FOREGROUND") ? getenv("FOREGROUND")
 						: DEFAULT_FOREGROUND,
 			 &_fgcolor, &_fgcolor);
 	XAllocNamedColor(_dpy, DefaultColormap(_dpy, DefaultScreen(_dpy)),
-			 borderspec[0]	    ? borderspec
+			 borderspec[0]      ? borderspec
 			 : getenv("BORDER") ? getenv("BORDER")
 					    : DEFAULT_BORDER,
 			 &_bordercolor, &_bordercolor);
@@ -233,7 +235,7 @@ void xtbinit(Errfunc f, char *class, int *pargc, char **argv,
 	}
 
 	font = XftFontOpenName(_dpy, DefaultScreen(_dpy),
-			       fontspec[0]	? fontspec
+			       fontspec[0]      ? fontspec
 			       : getenv("FONT") ? getenv("FONT")
 						: "monospace");
 	screen.id = 0;
@@ -325,7 +327,7 @@ static void reshaped(int minx, int miny, int maxx, int maxy) {
 
 static void gotchar(int c, int kind, int target, int x, int y,
 		    const char *arg) {
-	Ebuf	 *eb;
+	Ebuf     *eb;
 	Keystroke k;
 
 	if (!einitcalled || Skeyboard == -1) {
@@ -384,8 +386,8 @@ static void gotinput(XtPointer cldata, int *pfd, XtInputId *id) {
 	if (es->size) {
 		if (es->issocket) {
 			struct sockaddr addr;
-			socklen_t	len;
-			int		fd = accept(*pfd, &addr, &len);
+			socklen_t       len;
+			int             fd = accept(*pfd, &addr, &len);
 			n = read(fd, (char *)eb->buf, es->size);
 			close(fd);
 		} else {
@@ -420,10 +422,10 @@ static int ilog2(int n) {
 }
 
 void rdcolmap(Bitmap *b, RGB *map) {
-	XColor	 cols[256];
-	int	 i, n, depth;
+	XColor   cols[256];
+	int      i, n, depth;
 	Colormap cmap;
-	Arg	 args[2];
+	Arg      args[2];
 
 	if (_cmap_installed) {
 		cmap = _libg_cmap;
@@ -457,12 +459,12 @@ void rdcolmap(Bitmap *b, RGB *map) {
 }
 
 void wrcolmap(Bitmap *b, RGB *map) {
-	int	    i, n, depth;
-	Screen	   *scr;
-	XColor	    cols[256];
-	Arg	    args[2];
+	int         i, n, depth;
+	Screen     *scr;
+	XColor      cols[256];
+	Arg         args[2];
 	XVisualInfo vi;
-	Window	    w;
+	Window      w;
 
 	scr = XtScreen(_toplevel);
 	depth = _ld2d[screen.ldepth];
@@ -596,7 +598,7 @@ Mouse emouse(void) {
 }
 
 Keystroke ekbd(void) {
-	Ebuf	 *eb;
+	Ebuf     *eb;
 	Keystroke k;
 
 	if (!esrc[Skeyboard].inuse) {
@@ -609,7 +611,7 @@ Keystroke ekbd(void) {
 }
 
 void pushkbd(int c) {
-	Ebuf	 *eb;
+	Ebuf     *eb;
 	Keystroke k;
 
 	if (!einitcalled || Skeyboard == -1) {

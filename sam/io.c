@@ -32,11 +32,11 @@ void checkqid(File *f) {
 }
 
 void writef(File *f) {
-	Posn	 n;
-	char	*name;
-	int	 i, samename, newfile;
+	Posn     n;
+	char    *name;
+	int      i, samename, newfile;
 	uint64_t dev, qid;
-	int64_t	 mtime, appendonly, length;
+	int64_t  mtime, appendonly, length;
 
 	newfile = 0;
 	samename = Strcmp(&genstr, &f->name) == 0;
@@ -92,12 +92,12 @@ void writef(File *f) {
 
 Posn readio(File *f, bool *nulls, bool setdate, bool toterm) {
 	uint64_t dev, qid;
-	int64_t	 mtime;
-	Posn	 nt = 0;
-	int	 n, b, w;
-	Rune	*r;
-	Posn	 p = addr.r.p2;
-	char	 buf[BLOCKSIZE + 1], *s;
+	int64_t  mtime;
+	Posn     nt = 0;
+	int      n, b, w;
+	Rune    *r;
+	Posn     p = addr.r.p2;
+	char     buf[BLOCKSIZE + 1], *s;
 
 	*nulls = false;
 	b = 0;
@@ -340,8 +340,8 @@ bool canlocksocket(const char *machine) {
 
 void opensocket(const char *machine) {
 	struct sockaddr_un un = {0};
-	const char	  *path =
-		   getenv("SAMSOCKPATH") ? getenv("SAMSOCKPATH") : getenv("HOME");
+	const char        *path =
+            getenv("SAMSOCKPATH") ? getenv("SAMSOCKPATH") : getenv("HOME");
 
 	if (!canlocksocket(machine)) {
 		fputs("could not lock socket\n", stderr);

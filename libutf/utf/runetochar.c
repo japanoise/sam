@@ -3,7 +3,7 @@
 
 int runetochar(char *s, const Rune *p) {
 	unsigned char i, n, x;
-	Rune	      r = *p;
+	Rune          r = *p;
 
 	n = runelen(r);
 

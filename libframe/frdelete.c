@@ -4,11 +4,11 @@
 #include <frame.h>
 
 int frdelete(Frame *f, uint64_t p0, uint64_t p1) {
-	Point	  pt0, pt1, ppt0;
-	Frbox	 *b;
-	int	  n0, n1, n;
+	Point     pt0, pt1, ppt0;
+	Frbox    *b;
+	int       n0, n1, n;
 	Rectangle r;
-	int	  nn0;
+	int       nn0;
 
 	if (p0 >= f->nchars || p0 == p1 || f->b == 0) {
 		return 0;
@@ -21,7 +21,7 @@ int frdelete(Frame *f, uint64_t p0, uint64_t p1) {
 	pt0 = _frptofcharnb(f, p0, n0);
 	pt1 = frptofchar(f, p1);
 	if (f->p0 != p0 || f->p1 != p1) { /* likely they ARE equal */
-		frselectp(f, F & ~D);	  /* can do better some day */
+		frselectp(f, F & ~D);     /* can do better some day */
 	}
 	frselectf(f, pt0, pt1, 0);
 	if (n0 == f->nbox) {

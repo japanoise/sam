@@ -150,7 +150,7 @@ String *tmprstr(Rune *r, int n) {
 String *tmpcstr(char *s) {
 	String *p;
 	Rune   *r;
-	int	i, n;
+	int     i, n;
 
 	n = utflen(s); /* don't include NUL */
 	p = emalloc(sizeof(String));
