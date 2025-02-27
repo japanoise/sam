@@ -5,9 +5,10 @@ ColumnLimit: 80
 # None of the objections to tabs have ever made sense to me.
 IndentWidth: 8
 TabWidth: 8
-UseTab: Always
+UseTab: ForContinuationAndIndentation
 
-AlignConsecutiveDeclarations: AcrossEmptyLines
+AlignConsecutiveDeclarations: Consecutive
+AlignArrayOfStructures: Left
 BreakBeforeBraces: Attach
 InsertBraces: true
 SeparateDefinitionBlocks: Always
