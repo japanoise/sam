@@ -44,27 +44,17 @@ char *hname[] = {
 };
 
 char *tname[] = {
-    [Tversion] = "Tversion",
-    [Tstartcmdfile] = "Tstartcmdfile",
-    [Tcheck] = "Tcheck",
-    [Trequest] = "Trequest",
-    [Torigin] = "Torigin",
-    [Tstartfile] = "Tstartfile",
-    [Tworkfile] = "Tworkfile",
-    [Ttype] = "Ttype",
-    [Tcut] = "Tcut",
-    [Tpaste] = "Tpaste",
-    [Tsnarf] = "Tsnarf",
-    [Tstartnewfile] = "Tstartnewfile",
-    [Twrite] = "Twrite",
-    [Tclose] = "Tclose",
-    [Tlook] = "Tlook",
-    [Tsearch] = "Tsearch",
-    [Tsend] = "Tsend",
-    [Tdclick] = "Tdclick",
-    [Tstartsnarf] = "Tstartsnarf",
-    [Tsetsnarf] = "Tsetsnarf",
-    [Tack] = "Tack",
+    [Tversion] = "Tversion",   [Tstartcmdfile] = "Tstartcmdfile",
+    [Tcheck] = "Tcheck",       [Trequest] = "Trequest",
+    [Torigin] = "Torigin",     [Tstartfile] = "Tstartfile",
+    [Tworkfile] = "Tworkfile", [Ttype] = "Ttype",
+    [Tcut] = "Tcut",           [Tpaste] = "Tpaste",
+    [Tsnarf] = "Tsnarf",       [Tstartnewfile] = "Tstartnewfile",
+    [Twrite] = "Twrite",       [Tclose] = "Tclose",
+    [Tlook] = "Tlook",         [Tsearch] = "Tsearch",
+    [Tsend] = "Tsend",         [Tcmd] = "Tcmd",
+    [Tdclick] = "Tdclick",     [Tstartsnarf] = "Tstartsnarf",
+    [Tsetsnarf] = "Tsetsnarf", [Tack] = "Tack",
     [Texit] = "Texit",
 };
 
@@ -444,6 +434,13 @@ int inmesg(Tmesg type) {
 		cmd->dot.r.p1 = cmd->dot.r.p2 = cmd->buf.nc;
 		telldot(cmd);
 		termcommand();
+		break;
+
+	case Tcmd:
+		journal(0, (char *)inp);
+		str = tmpcstr((char *)inp);
+		runCmdString(str);
+		freetmpstr(str);
 		break;
 
 	case Tdclick:

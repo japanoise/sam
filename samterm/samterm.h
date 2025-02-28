@@ -26,7 +26,8 @@ enum {
 	Ceol,                  /* move to beginning of line */
 	Cbol,                  /* move to end of line */
 	Ctab,                  /* insert a possibly expanded tab */
-	Csend,                 /* send a command to the editor */
+	Csend,                 /* send a string to the editor's cmd */
+	Ccmd,                  /* send a command to the editor */
 	Cwrite,                /* write the current file */
 	Clook,                 /* literal search */
 	Csearch,               /* search for regex again */
@@ -167,6 +168,7 @@ void outTslS(Tmesg, int, int64_t, Rune *);
 void outTslll(Tmesg, int, int64_t, int64_t, int64_t);
 void outTsll(Tmesg, int, int64_t, int64_t);
 void outTsl(Tmesg, int, int64_t);
+void outTutfS(Tmesg, const char *, bool);
 void outTv(Tmesg, void *);
 void outstart(Tmesg);
 void outcopy(int, uint8_t *);

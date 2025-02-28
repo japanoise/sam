@@ -284,6 +284,7 @@ void    resetcmd(void);
 void    resetsys(void);
 void    resetxec(void);
 void    rgrow(List *, Posn, Posn);
+void    runCmdString(String *);
 void    samerr(char *);
 void    samsave(char *);
 void    settempfile(void);

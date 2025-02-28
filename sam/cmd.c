@@ -663,3 +663,24 @@ Addr *compoundaddr(void) {
 	*ap = addr;
 	return ap;
 }
+
+void runCmdString(String *input) {
+	Cmd *cmdp;
+
+	linep = line;
+	*linep = 0;
+
+	memmove(linep, input->s, input->n * RUNESIZE);
+
+	if ((cmdp = parsecmd(0)) == NULL) {
+		return;
+	}
+
+	if (cmdexec(curfile, cmdp) == 0) {
+		resetcmd();
+		return;
+	}
+	resetcmd();
+	cmdupdate();
+	update();
+}

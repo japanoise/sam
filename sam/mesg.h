@@ -1,5 +1,8 @@
 /* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
-#define VERSION 16091
+/* Version is transmitted in a uint16, so the maximum is 65535 */
+/* thus YYMMr - Y = year, M = month, r = revision that month */
+/* Should keep us from needing to increase it, until 2065 :^) */
+#define VERSION 25021
 
 #define TBLOCKSIZE 512 /* largest piece of text sent to terminal */
 #define DATASIZE                                                               \
@@ -29,6 +32,7 @@ typedef enum Tmesg {
 	Tlook,         /* search for literal current text */
 	Tsearch,       /* search for last regular expression */
 	Tsend,         /* pretend he typed stuff */
+	Tcmd,          /* run a command */
 	Tdclick,       /* double click */
 	Tstartsnarf,   /* initiate snarf buffer exchange */
 	Tsetsnarf,     /* remember string in snarf buffer */

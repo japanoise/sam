@@ -1,4 +1,3 @@
-
 /* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
 #include <u.h>
 #include <libg.h>
@@ -915,6 +914,11 @@ static int64_t cmdsend(Flayer *l, int64_t a, Text *t, const char *arg) {
 	return a;
 }
 
+static int64_t cmdcmd(Flayer *l, int64_t a, Text *t, const char *arg) {
+	outTutfS(Tcmd, arg, true);
+	return a;
+}
+
 static int64_t cmdnone(Flayer *l, int64_t a, Text *t, const char *arg) {
 	return a;
 }
@@ -952,6 +956,7 @@ CommandEntry commands[Cmax] = {
     [Cbol] = {cmdbol,            false, false},
     [Ctab] = {cmdtab,            false, false},
     [Csend] = {cmdsend,           false, false},
+    [Ccmd] = {cmdcmd,            false, false},
     [Clook] = {cmdlook,           false, false},
     [Csearch] = {cmdsearch,         false, false},
     [Cwrite] = {cmdwrite,          false, false}

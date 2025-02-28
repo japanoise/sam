@@ -1,4 +1,5 @@
 /* Copyright (c) 1998 Lucent Technologies - All rights reserved. */
+#include <stdint.h>
 #include <string.h>
 #include <u.h>
 #include <libg.h>
@@ -425,6 +426,17 @@ void outTslS(Tmesg type, int s1, int64_t l1, Rune *s) {
 	}
 	*c++ = 0;
 	outcopy(c - buf, (uint8_t *)buf);
+	outsend();
+}
+
+void outTutfS(Tmesg type, const char *s, bool nl) {
+	char len = strlen(s);
+	outstart(type);
+	outcopy(len, (uint8_t *)s);
+	if (nl) {
+		outdata[HSIZE + outcount++] = '\n';
+	}
+	outdata[HSIZE + outcount++] = 0;
 	outsend();
 }
 
