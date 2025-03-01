@@ -437,10 +437,14 @@ int inmesg(Tmesg type) {
 		break;
 
 	case Tcmd:
+		r = curfile->dot.r;
 		journal(0, (char *)inp);
 		str = tmpcstr((char *)inp);
 		runCmdString(str);
 		freetmpstr(str);
+		if (r.p1 != curfile->dot.r.p1 || r.p2 != curfile->dot.r.p2) {
+			moveto(curfile, curfile->dot.r);
+		}
 		break;
 
 	case Tdclick:

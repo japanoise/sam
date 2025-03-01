@@ -617,6 +617,7 @@ static int64_t cmdlineup(Flayer *l, int64_t a, Text *t, const char *arg) {
 	flushtyping(true);
 	if (a > 0) {
 		int64_t n0, n1, count = 0;
+		int     raspCur;
 		while (a > 0 && raspc(&t->rasp, a - 1) != '\n') {
 			a--;
 			count++;
@@ -624,8 +625,20 @@ static int64_t cmdlineup(Flayer *l, int64_t a, Text *t, const char *arg) {
 		if (a > 0) {
 			n1 = a;
 			a--;
-			while (a > 0 && raspc(&t->rasp, a - 1) != '\n') {
+			while (a > 0 &&
+			       (raspCur = raspc(&t->rasp, a - 1)) != '\n') {
 				a--;
+				if (a < l->origin && !raspCur) {
+					/* This has the effect of
+					   loading in any lines that
+					   are missing from the
+					   rasp. It's not pretty, but
+					   it works to prevent lineup
+					   from jumping around after a
+					   big move. */
+					cmdscrollupline(l, a, t, arg);
+					return a;
+				}
 			}
 
 			n0 = a;
