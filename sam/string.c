@@ -17,7 +17,12 @@ void Strinit0(String *p) {
 	p->size = MINSIZE;
 }
 
-void Strclose(String *p) { free(p->s); }
+void Strclose(String *p) {
+	if (p->s) {
+		free(p->s);
+		p->s = NULL;
+	}
+}
 
 void Strzero(String *p) {
 	if (p->size > MAXSIZE) {

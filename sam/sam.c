@@ -726,7 +726,7 @@ void cd(String *str) {
 	int     i;
 	File   *f;
 	String *t;
-	String  owd;
+	String  owd = {0, 0, 0};
 
 	t = tmpcstr("/bin/pwd");
 	Straddc(t, '\0');
@@ -742,6 +742,7 @@ void cd(String *str) {
 	freetmpstr(t);
 
 	getcurwd();
+	Strduplstr(&owd, &wd);
 	if (chdir(getname((File *)0, str, false) ? genc : home)) {
 		syserror("chdir");
 	}
