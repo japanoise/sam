@@ -541,6 +541,9 @@ static int64_t cmdcharleft(Flayer *l, int64_t a, Text *t, const char *arg) {
 	}
 	flsetselect(l, a, a);
 	center(l, a);
+	if (t != &cmd) {
+		outcmd();
+	}
 
 	return a;
 }
@@ -553,6 +556,9 @@ static int64_t cmdcharright(Flayer *l, int64_t a, Text *t, const char *arg) {
 	}
 	flsetselect(l, a, a);
 	center(l, a);
+	if (t != &cmd) {
+		outcmd();
+	}
 
 	return a;
 }
@@ -569,6 +575,9 @@ static int64_t cmdeol(Flayer *l, int64_t a, Text *t, const char *arg) {
 
 	flsetselect(l, a, a);
 	center(l, a);
+	if (t != &cmd) {
+		outcmd();
+	}
 
 	return a;
 }
@@ -587,6 +596,9 @@ static int64_t cmdbol(Flayer *l, int64_t a, Text *t, const char *arg) {
 
 	flsetselect(l, a, a);
 	center(l, a);
+	if (t != &cmd) {
+		outcmd();
+	}
 
 	return a;
 }
@@ -651,6 +663,9 @@ static int64_t cmdlineup(Flayer *l, int64_t a, Text *t, const char *arg) {
 			a = (n0 + count >= n1) ? n1 - 1 : n0 + count;
 			flsetselect(l, a, a);
 			center(l, a);
+			if (t != &cmd) {
+				outcmd();
+			}
 		}
 	}
 
@@ -686,6 +701,10 @@ static int64_t cmdlinedown(Flayer *l, int64_t a, Text *t, const char *arg) {
 				center(l, a);
 			}
 		}
+	}
+
+	if (t != &cmd) {
+		outcmd();
 	}
 
 	return a;
@@ -934,6 +953,10 @@ static int64_t cmdsend(Flayer *l, int64_t a, Text *t, const char *arg) {
 }
 
 static int64_t cmdcmd(Flayer *l, int64_t a, Text *t, const char *arg) {
+	if (t != &cmd) {
+		outcmd();
+	}
+
 	outTutfS(Tcmd, arg, true);
 	return a;
 }
