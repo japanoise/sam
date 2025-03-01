@@ -574,10 +574,12 @@ static int64_t cmdeol(Flayer *l, int64_t a, Text *t, const char *arg) {
 }
 
 static int64_t cmdbol(Flayer *l, int64_t a, Text *t, const char *arg) {
+	int cur;
 	flsetselect(l, a, a);
 	flushtyping(true);
 	while (a > 0) {
-		if (raspc(&t->rasp, --a) == '\n') {
+		cur = raspc(&t->rasp, --a);
+		if (cur == '\n' || !cur) {
 			a++;
 			break;
 		}
@@ -618,9 +620,13 @@ static int64_t cmdlineup(Flayer *l, int64_t a, Text *t, const char *arg) {
 	if (a > 0) {
 		int64_t n0, n1, count = 0;
 		int     raspCur;
-		while (a > 0 && raspc(&t->rasp, a - 1) != '\n') {
+		while (a > 0 && (raspCur = raspc(&t->rasp, a - 1)) != '\n') {
 			a--;
 			count++;
+			if (a < l->origin && !raspCur) {
+				cmdscrollupline(l, a, t, arg);
+				return a;
+			}
 		}
 		if (a > 0) {
 			n1 = a;
