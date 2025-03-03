@@ -23,10 +23,10 @@ lframe:
 docdir:
 	cd doc; $(MAKE)
 
-samdir:
+samdir: lutf lXg lframe
 	cd sam; $(MAKE)
 
-samtermdir:
+samtermdir: lutf lXg lframe samdir
 	cd samterm; $(MAKE)
 
 install:
@@ -46,7 +46,7 @@ uninstall:
 	cd samterm; $(MAKE) uninstall
 	cd doc; $(MAKE) uninstall
 	cd ssam; $(MAKE) uninstall
-	
+
 clean:
 	cd libXg; $(MAKE) clean
 	cd libframe; $(MAKE) clean
