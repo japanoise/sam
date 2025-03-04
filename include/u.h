@@ -1,3 +1,5 @@
+#ifndef _U_H
+#define _U_H
 #include <fcntl.h>
 #include <inttypes.h>
 #include <limits.h>
@@ -12,4 +14,11 @@
 #include <unistd.h>
 #include "utf.h"
 
+typedef uint32_t u32int;
+typedef uint16_t ushort;
+typedef uint8_t  uchar;
+typedef int8_t   schar;
+
 #define UNICODE_REPLACEMENT_CHAR 0xfffd
+
+#endif

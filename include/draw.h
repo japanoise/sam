@@ -1,11 +1,11 @@
 #ifndef _DRAW_H_
 #define _DRAW_H_ 1
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
-AUTOLIB(draw)
+#include "u.h"
+#include "utf.h"
+
 #ifdef __APPLE__
+AUTOLIB(draw)
 AUTOFRAMEWORK(Carbon)
 #endif
 
@@ -25,8 +25,8 @@ typedef struct Subfont   Subfont;
 
 struct Mux;
 
-extern int Rfmt(Fmt *);
-extern int Pfmt(Fmt *);
+/* extern int Rfmt(Fmt *); */
+/* extern int Pfmt(Fmt *); */
 
 #define DOpaque 0xFFFFFFFF
 #define DTransparent 0x00000000 /* only useful for allocimage memfillcolor */
@@ -164,11 +164,11 @@ struct Screen {
 };
 
 struct Display {
-	QLock qlock;
-	int   locking; /*program is using lockdisplay */
-	int   dirno;
-	int   imageid;
-	int   local;
+	/* QLock qlock; */
+	int locking; /*program is using lockdisplay */
+	int dirno;
+	int imageid;
+	int local;
 	void (*error)(Display *, char *);
 	char       *devdir;
 	char       *windir;
@@ -583,7 +583,4 @@ int   _displaywrsnarf(Display *d, char *snarf);
 int   _displaytop(Display *d);
 int   _displayresize(Display *d, Rectangle rect);
 
-#if defined(__cplusplus)
-}
-#endif
 #endif

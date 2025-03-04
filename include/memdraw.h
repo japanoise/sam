@@ -1,11 +1,11 @@
 #ifndef _MEMDRAW_H_
 #define _MEMDRAW_H_ 1
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
-AUTOLIB(memdraw)
-AUTOLIB(memlayer)
+#include <u.h>
+#include <draw.h>
+
+/* AUTOLIB(memdraw) */
+/* AUTOLIB(memlayer) */
 
 typedef struct Memimage     Memimage;
 typedef struct Memdata      Memdata;
@@ -212,7 +212,4 @@ extern Memdrawparam *_memimagedrawsetup(Memimage *, Rectangle, Memimage *,
 					Point, Memimage *, Point, int);
 extern void          _memimagedraw(Memdrawparam *);
 
-#if defined(__cplusplus)
-}
-#endif
 #endif
