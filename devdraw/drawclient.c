@@ -41,7 +41,7 @@ int domsg(Wsysmsg *m) {
 	int n, nn;
 
 	n = convW2M(m, buf, sizeof buf);
-	fprint(2, "write %d to %d\n", n, fd);
+	fprintf(stderr, "write %d to %d\n", n, fd);
 	write(fd, buf, n);
 	n = readwsysmsg(fd, buf, sizeof buf);
 	nn = convM2W(buf, n, m);
@@ -72,8 +72,8 @@ void cmdmouse(int argc, char **argv) {
 	if (domsg(&m) < 0) {
 		sysfatal("domsg");
 	}
-	print("%c %d %d %d\n", m.resized ? 'r' : 'm', m.mouse.xy.x,
-	      m.mouse.xy.y, m.mouse.buttons);
+	printf("%c %d %d %d\n", m.resized ? 'r' : 'm', m.mouse.xy.x,
+	       m.mouse.xy.y, m.mouse.buttons);
 }
 
 void cmdkbd(int argc, char **argv) {
@@ -84,7 +84,7 @@ void cmdkbd(int argc, char **argv) {
 	if (domsg(&m) < 0) {
 		sysfatal("domsg");
 	}
-	print("%d\n", m.rune);
+	printf("%d\n", m.rune);
 }
 
 Cmd cmdtab[] = {
@@ -105,10 +105,10 @@ void main(int argc, char **argv) {
 
 	startsrv();
 
-	fprint(2, "started...\n");
+	fprintf(stderr, "started...\n");
 	Binit(&b, 0, OREAD);
 	while ((p = Brdstr(&b, '\n', 1)) != nil) {
-		fprint(2, "%s...\n", p);
+		fprintf(stderr, "%s...\n", p);
 		nf = tokenize(p, f, nelem(f));
 		for (i = 0; i < nelem(cmdtab); i++) {
 			if (strcmp(cmdtab[i].cmd, f[0]) == 0) {
@@ -117,7 +117,7 @@ void main(int argc, char **argv) {
 			}
 		}
 		if (i == nelem(cmdtab)) {
-			print("! unrecognized command %s\n", f[0]);
+			printf("! unrecognized command %s\n", f[0]);
 		}
 		free(p);
 	}

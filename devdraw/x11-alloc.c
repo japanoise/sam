@@ -5,7 +5,7 @@
 #include <memdraw.h>
 #include "x11-memdraw.h"
 
-AUTOLIB(X11);
+/* AUTOLIB(X11); */
 
 /*
  * Allocate a Memimage with an optional pixmap backing on the X server.

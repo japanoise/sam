@@ -28,7 +28,7 @@ static int   afd;
 static char  adir[40];
 
 static void usage(void) {
-	fprint(2, "usage: devdraw (don't run directly)\n");
+	fprintf(stderr, "usage: devdraw (don't run directly)\n");
 	threadexitsall("usage");
 }
 
@@ -60,8 +60,8 @@ void threadmain(int argc, char **argv) {
 	if (srvname == nil) {
 		client0 = mallocz(sizeof(Client), 1);
 		if (client0 == nil) {
-			fprint(2,
-			       "initdraw: allocating client0: out of memory");
+			fprintf(stderr,
+				"initdraw: allocating client0: out of memory");
 			abort();
 		}
 		client0->displaydpi = 100;
@@ -125,8 +125,8 @@ static void listenproc(void *v) {
 		}
 		c = mallocz(sizeof(Client), 1);
 		if (c == nil) {
-			fprint(2,
-			       "initdraw: allocating client0: out of memory");
+			fprintf(stderr,
+				"initdraw: allocating client0: out of memory");
 			abort();
 		}
 		c->displaydpi = 100;
@@ -158,18 +158,18 @@ static void serveproc(void *v) {
 		memmove(mbuf, buf, 4);
 		nn = readn(c->rfd, mbuf + 4, n - 4);
 		if (nn != n - 4) {
-			fprint(2, "serveproc: eof during message\n");
+			fprintf(stderr, "serveproc: eof during message\n");
 			break;
 		}
 
 		/* pick off messages one by one */
 		if (convM2W(mbuf, nn + 4, &m) <= 0) {
-			fprint(2, "serveproc: cannot convert message\n");
+			fprintf(stderr, "serveproc: cannot convert message\n");
 			break;
 		}
 		if (trace) {
-			fprint(2, "%ud [%d] <- %W\n", nsec() / 1000000,
-			       threadid(), &m);
+			fprintf(stderr, "%lu [%d] <- %p\n", nsec() / 1000000,
+				threadid(), &m);
 		}
 		runmsg(c, &m);
 	}
@@ -344,7 +344,8 @@ static void replymsg(Client *c, Wsysmsg *m) {
 	}
 
 	if (trace) {
-		fprint(2, "%ud [%d] -> %W\n", nsec() / 1000000, threadid(), m);
+		fprintf(stderr, "%lu [%d] -> %p\n", nsec() / 1000000,
+			threadid(), m);
 	}
 	/* copy to output buffer */
 	n = sizeW2M(m);
@@ -360,7 +361,7 @@ static void replymsg(Client *c, Wsysmsg *m) {
 	}
 	convW2M(m, c->mbuf, n);
 	if (write(c->wfd, c->mbuf, n) != n) {
-		fprint(2, "client write: %r\n");
+		fprintf(stderr, "client write\n");
 	}
 	qunlock(&c->wfdlk);
 }
@@ -399,7 +400,7 @@ static void matchmouse(Client *c) {
 	Wsysmsg m;
 
 	if (canqlock(&c->eventlk)) {
-		fprint(2, "misuse of matchmouse\n");
+		fprintf(stderr, "misuse of matchmouse\n");
 		abort();
 	}
 
@@ -489,7 +490,7 @@ void gfx_mousetrack(Client *c, int x, int y, int b, uint ms) {
 // It must be called with c->eventlk held.
 static void kputc(Client *c, int ch) {
 	if (canqlock(&c->eventlk)) {
-		fprint(2, "misuse of kputc\n");
+		fprintf(stderr, "misuse of kputc\n");
 		abort();
 	}
 

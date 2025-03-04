@@ -7,6 +7,7 @@
 #include <cursor.h>
 #include <keyboard.h>
 #include <drawfcall.h>
+#include <ctype.h>
 #include "devdraw.h"
 
 int parsewinsize(char *s, Rectangle *r, int *havemin) {

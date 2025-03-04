@@ -77,8 +77,8 @@ void insert(char *s, Rune r) {
 
 	t = mktrie(s);
 	if (t->r[lastc]) {
-		fprint(2, "warning: table duplicate: %s is %C and %C\n", s,
-		       t->r[lastc], r);
+		fprintf(stderr, "warning: table duplicate: %s is %C and %C\n",
+			s, t->r[lastc], r);
 		return;
 	}
 	t->r[lastc] = r;
@@ -223,7 +223,7 @@ void readfile(char *fname) {
 }
 
 void usage(void) {
-	fprint(2, "usage: mklatinkbd [-r] [/lib/keyboard]\n");
+	fprintf(stderr, "usage: mklatinkbd [-r] [/lib/keyboard]\n");
 	exits("usage");
 }
 

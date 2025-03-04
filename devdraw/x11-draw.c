@@ -90,7 +90,7 @@ static int xdraw(Memdrawparam *par) {
 
 		XCopyArea(_x.display, xsrc->pixmap, xdst->pixmap, gc,
 			sp.x, sp.y, Dx(r), Dy(r), dp.x, dp.y);
-	/*	xdirtyxdata(dst, r); * /
+	CommentMeOut:	xdirtyxdata(dst, r);
 		return 1;
 	}
 	 */

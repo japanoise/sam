@@ -156,7 +156,7 @@ static void dstflush(Client *c, int dstid, Memimage *dst, Rectangle r) {
 	}
 	/* how can this happen? -rsc, dec 12 2002 */
 	if (dst == 0) {
-		fprint(2, "nil dstflush\n");
+		fprintf(stderr, "nil dstflush\n");
 		return;
 	}
 	l = dst->layer;
@@ -310,7 +310,8 @@ static Memscreen *drawinstallscreen(Client *client, DScreen *d, int id,
 
 	c = mallocz(sizeof(CScreen), 1);
 	if (dimage && dimage->image && dimage->image->chan == 0) {
-		fprint(2, "bad image %p in drawinstallscreen", dimage->image);
+		fprintf(stderr, "bad image %p in drawinstallscreen",
+			dimage->image);
 		abort();
 	}
 
@@ -369,7 +370,7 @@ static void drawfreedscreen(Client *client, DScreen *this) {
 
 	this->ref--;
 	if (this->ref < 0) {
-		fprint(2, "negative ref in drawfreedscreen\n");
+		fprintf(stderr, "negative ref in drawfreedscreen\n");
 	}
 	if (this->ref > 0) {
 		return;
@@ -379,7 +380,7 @@ static void drawfreedscreen(Client *client, DScreen *this) {
 		client->dscreen = this->next;
 		goto Found;
 	}
-	while (next = ds->next) { /* assign = */
+	while ((next = ds->next)) { /* assign = */
 		if (next == this) {
 			ds->next = this->next;
 			goto Found;
@@ -409,7 +410,7 @@ static void drawfreedimage(Client *client, DImage *dimage) {
 
 	dimage->ref--;
 	if (dimage->ref < 0) {
-		fprint(2, "negative ref in drawfreedimage\n");
+		fprintf(stderr, "negative ref in drawfreedimage\n");
 	}
 	if (dimage->ref > 0) {
 		return;
@@ -468,7 +469,7 @@ static void drawuninstallscreen(Client *client, CScreen *this) {
 		free(this);
 		return;
 	}
-	while (next = cs->next) { /* assign = */
+	while ((next = cs->next)) { /* assign = */
 		if (next == this) {
 			cs->next = this->next;
 			drawfreedscreen(client, this->dscreen);
@@ -973,15 +974,15 @@ int draw_datawrite(Client *client, void *v, int n) {
 				}
 				i = di->image;
 			}
-			ni = sprint(ibuf,
-				    "%11d %11d %11s %11d %11d %11d %11d %11d"
-				    " %11d %11d %11d %11d ",
-				    client->clientid, client->infoid,
-				    chantostr(cbuf, i->chan),
-				    (i->flags & Frepl) == Frepl, i->r.min.x,
-				    i->r.min.y, i->r.max.x, i->r.max.y,
-				    i->clipr.min.x, i->clipr.min.y,
-				    i->clipr.max.x, i->clipr.max.y);
+			ni = sprintf(ibuf,
+				     "%11d %11d %11s %11d %11d %11d %11d %11d"
+				     " %11d %11d %11d %11d ",
+				     client->clientid, client->infoid,
+				     chantostr(cbuf, i->chan),
+				     (i->flags & Frepl) == Frepl, i->r.min.x,
+				     i->r.min.y, i->r.max.x, i->r.max.y,
+				     i->clipr.min.x, i->clipr.min.y,
+				     i->clipr.max.x, i->clipr.max.y);
 			free(client->readdata);
 			client->readdata = malloc(ni);
 			if (client->readdata == nil) {

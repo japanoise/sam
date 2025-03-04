@@ -1,3 +1,6 @@
+#ifndef _DEVDRAW_X11_INC_H
+#define _DEVDRAW_X11_INC_H
+
 #define Colormap XColormap
 #define Cursor XCursor
 #define Display XDisplay
@@ -32,3 +35,7 @@
 #undef Screen
 #undef Visual
 #undef Window
+
+int usleep(long);
+
+#endif

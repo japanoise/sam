@@ -40,11 +40,11 @@ static void initmap(void) {
 		}
 	}
 	if (debug) {
-		fprint(2, "mousemap: ");
+		fprintf(stderr, "mousemap: ");
 		for (i = 0; i < Nbutton; i++) {
-			fprint(2, " %d", 1 + map.b[i]);
+			fprintf(stderr, " %d", 1 + map.b[i]);
 		}
-		fprint(2, "\n");
+		fprintf(stderr, "\n");
 	}
 }
 
@@ -63,7 +63,7 @@ int mouseswap(int but) {
 		}
 	}
 	if (debug) {
-		fprint(2, "swap %#b -> %#b\n", but, nbut);
+		fprintf(stderr, "swap %#b -> %#b\n", but, nbut);
 	}
 	return nbut;
 }

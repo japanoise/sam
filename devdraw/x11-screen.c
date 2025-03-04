@@ -10,6 +10,7 @@
 #include <mouse.h>
 #include <cursor.h>
 #include <thread.h>
+#include <sys/select.h>
 #include "x11-memdraw.h"
 #include "devdraw.h"
 
@@ -100,10 +101,11 @@ static int xerror(XDisplay *d, XErrorEvent *e) {
 		return 0;
 	}
 
-	fprint(2, "X error: error_code=%d, request_code=%d, minor=%d disp=%p\n",
-	       e->error_code, e->request_code, e->minor_code, d);
+	fprintf(stderr,
+		"X error: error_code=%d, request_code=%d, minor=%d disp=%p\n",
+		e->error_code, e->request_code, e->minor_code, d);
 	XGetErrorText(d, e->error_code, buf, sizeof buf);
-	fprint(2, "%s\n", buf);
+	fprintf(stderr, "%s\n", buf);
 	return 0;
 }
 
@@ -578,7 +580,8 @@ static Memimage *xattach(Client *client, char *label, char *winsize) {
 		if (geom && XrmGetResource(database, geom, nil, &geomrestype,
 					   &geomres)) {
 			mask = XParseGeometry(geomres.addr, &x, &y,
-					      (uint *)&width, (uint *)&height);
+					      (unsigned int *)&width,
+					      (unsigned int *)&height);
 		}
 		XrmDestroyDatabase(database);
 		free(geom);
@@ -724,14 +727,14 @@ static Memimage *xattach(Client *client, char *label, char *winsize) {
 	XSync(_x.display, False);
 
 	if (!XGetWindowAttributes(_x.display, w->drawable, &wattr)) {
-		fprint(2, "XGetWindowAttributes failed\n");
+		fprintf(stderr, "XGetWindowAttributes failed\n");
 	} else if (wattr.width && wattr.height) {
 		if (wattr.width != Dx(r) || wattr.height != Dy(r)) {
 			r.max.x = wattr.width;
 			r.max.y = wattr.height;
 		}
 	} else {
-		fprint(2, "XGetWindowAttributes: bad attrs\n");
+		fprintf(stderr, "XGetWindowAttributes: bad attrs\n");
 	}
 	w->screenrect =
 	    Rect(0, 0, WidthOfScreen(xscreen), HeightOfScreen(xscreen));
@@ -1499,7 +1502,7 @@ static uchar *_xgetsnarffrom(Xwin *w, XWindow xw, Atom clipboard, Atom target,
 	timeout0 = (timeout0 + 9) / 10;
 	timeout = (timeout + 9) / 10;
 	for (i = 0; i < timeout0 || (lastlen != 0 && i < timeout); i++) {
-		usleep(10 * 1000);
+		usleep(10L * 1000L);
 		XGetWindowProperty(_x.display, w->drawable, prop, 0, 0, 0,
 				   AnyPropertyType, &type, &fmt, &dummy, &len,
 				   &xdata);
@@ -1631,11 +1634,11 @@ static int _xselect(XEvent *e) {
 	memset(&r, 0, sizeof r);
 	xe = (XSelectionRequestEvent *)e;
 	if (0) {
-		fprint(2,
-		       "xselect target=%d requestor=%d property=%d "
-		       "selection=%d (sizeof atom=%d)\n",
-		       xe->target, xe->requestor, xe->property, xe->selection,
-		       sizeof a[0]);
+		fprintf(stderr,
+			"xselect target=%d requestor=%d property=%d "
+			"selection=%d (sizeof atom=%d)\n",
+			xe->target, xe->requestor, xe->property, xe->selection,
+			sizeof a[0]);
 	}
 	r.xselection.property = xe->property;
 	if (xe->target == _x.targets) {
@@ -1661,10 +1664,10 @@ static int _xselect(XEvent *e) {
 		qunlock(&clip.lk);
 	} else {
 		if (strcmp(name, "TIMESTAMP") != 0) {
-			fprint(2,
-			       "%s: cannot handle selection request for '%s' "
-			       "(%d)\n",
-			       argv0, name, (int)xe->target);
+			fprintf(stderr,
+				"%s: cannot handle selection request for '%s' "
+				"(%d)\n",
+				argv0, name, (int)xe->target);
 		}
 		r.xselection.property = None;
 	}
@@ -1694,12 +1697,12 @@ char *_applegetsnarf(void) {
 	PasteboardSyncFlags flags;
 	UInt32              i;
 
-	/*	fprint(2, "applegetsnarf\n"); */
+	/*	fprintf(stderr, "applegetsnarf\n"); */
 	qlock(&clip.lk);
 	if (clip.apple == nil) {
 		if (PasteboardCreate(kPasteboardClipboard, &clip.apple) !=
 		    noErr) {
-			fprint(2, "apple pasteboard create failed\n");
+			fprintf(stderr, "apple pasteboard create failed\n");
 			qunlock(&clip.lk);
 			return nil;
 		}
@@ -1711,7 +1714,7 @@ char *_applegetsnarf(void) {
 		return s;
 	}
 	if (PasteboardGetItemCount(clip.apple, &nitem) != noErr) {
-		fprint(2, "apple pasteboard get item count failed\n");
+		fprintf(stderr, "apple pasteboard get item count failed\n");
 		qunlock(&clip.lk);
 		return nil;
 	}
@@ -1757,7 +1760,7 @@ void _appleputsnarf(char *s) {
 	CFDataRef           cfdata;
 	PasteboardSyncFlags flags;
 
-	/*	fprint(2, "appleputsnarf\n"); */
+	/*	fprintf(stderr, "appleputsnarf\n"); */
 
 	if (strlen(s) >= SnarfSize) {
 		return;
@@ -1768,34 +1771,34 @@ void _appleputsnarf(char *s) {
 	if (clip.apple == nil) {
 		if (PasteboardCreate(kPasteboardClipboard, &clip.apple) !=
 		    noErr) {
-			fprint(2, "apple pasteboard create failed\n");
+			fprintf(stderr, "apple pasteboard create failed\n");
 			qunlock(&clip.lk);
 			return;
 		}
 	}
 	if (PasteboardClear(clip.apple) != noErr) {
-		fprint(2, "apple pasteboard clear failed\n");
+		fprintf(stderr, "apple pasteboard clear failed\n");
 		qunlock(&clip.lk);
 		return;
 	}
 	flags = PasteboardSynchronize(clip.apple);
 	if ((flags & kPasteboardModified) ||
 	    !(flags & kPasteboardClientIsOwner)) {
-		fprint(2, "apple pasteboard cannot assert ownership\n");
+		fprintf(stderr, "apple pasteboard cannot assert ownership\n");
 		qunlock(&clip.lk);
 		return;
 	}
 	cfdata = CFDataCreate(kCFAllocatorDefault, (uchar *)clip.rbuf,
 			      runestrlen(clip.rbuf) * 2);
 	if (cfdata == nil) {
-		fprint(2, "apple pasteboard cfdatacreate failed\n");
+		fprintf(stderr, "apple pasteboard cfdatacreate failed\n");
 		qunlock(&clip.lk);
 		return;
 	}
 	if (PasteboardPutItemFlavor(clip.apple, (PasteboardItemID)1,
 				    CFSTR("public.utf16-plain-text"), cfdata,
 				    0) != noErr) {
-		fprint(2, "apple pasteboard putitem failed\n");
+		fprintf(stderr, "apple pasteboard putitem failed\n");
 		CFRelease(cfdata);
 		qunlock(&clip.lk);
 		return;

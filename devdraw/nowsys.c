@@ -6,7 +6,7 @@
 #include <drawfcall.h>
 
 void usage(void) {
-	fprint(2, "usage: devdraw (don't run  directly)\n");
+	fprintf(stderr, "usage: devdraw (don't run  directly)\n");
 	exits("usage");
 }
 

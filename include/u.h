@@ -1,5 +1,6 @@
 #ifndef _U_H
 #define _U_H
+#include <assert.h>
 #include <fcntl.h>
 #include <inttypes.h>
 #include <limits.h>

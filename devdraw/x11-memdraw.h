@@ -2,6 +2,11 @@
  * Structure pointed to by X field of Memimage
  */
 
+#include <u.h>
+#include <draw.h>
+#include <memdraw.h>
+#include "x11-inc.h"
+
 typedef struct Xmem     Xmem;
 typedef struct Xprivate Xprivate;
 typedef struct Xwin     Xwin;
