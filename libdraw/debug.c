@@ -6,7 +6,7 @@ void drawsetdebug(int v) {
 	uchar *a;
 	a = bufimage(display, 1 + 1);
 	if (a == 0) {
-		fprint(2, "drawsetdebug: %r\n");
+		fprintf(stderr, "drawsetdebug\n");
 		return;
 	}
 	a[0] = 'D';

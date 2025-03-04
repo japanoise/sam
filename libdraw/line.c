@@ -16,7 +16,7 @@ void lineop(Image *dst, Point p0, Point p1, int end0, int end1, int radius,
 	a = bufimage(dst->display,
 		     1 + 4 + 2 * 4 + 2 * 4 + 4 + 4 + 4 + 4 + 2 * 4);
 	if (a == 0) {
-		fprint(2, "image line: %r\n");
+		fprintf(stderr, "image line\n");
 		return;
 	}
 	a[0] = 'L';

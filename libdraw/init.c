@@ -50,7 +50,7 @@ int geninitdraw(char *devdir, void (*error)(Display *, char *), char *fontname,
 	 * Set up default font
 	 */
 	if (openfont(display, "*default*") == 0) {
-		fprint(2, "imageinit: can't open default subfont: %r\n");
+		fprintf(stderr, "imageinit: can't open default subfont\n");
 	Error:
 		closedisplay(display);
 		display = nil;
@@ -70,7 +70,7 @@ int geninitdraw(char *devdir, void (*error)(Display *, char *), char *fontname,
 
 	font = openfont(display, fontname);
 	if (font == nil) {
-		fprint(2, "imageinit: can't open font %s: %r\n", fontname);
+		fprintf(stderr, "imageinit: can't open font %s\n", fontname);
 		goto Error;
 	}
 	display->defaultfont = font;
@@ -80,7 +80,7 @@ int geninitdraw(char *devdir, void (*error)(Display *, char *), char *fontname,
 	    display->image; /* _allocwindow wants screenimage->chan */
 	screen = _allocwindow(nil, _screen, display->image->r, Refnone, DWhite);
 	if (screen == nil) {
-		fprint(2, "_allocwindow: %r\n");
+		fprintf(stderr, "_allocwindow\n");
 		goto Error;
 	}
 	display->screenimage = screen;
@@ -150,20 +150,20 @@ static Image *getimage0(Display *d, Image *image) {
 	a[0] = 'J';
 	a[1] = 'I';
 	if (flushimage(d, 0) < 0) {
-		fprint(2, "cannot read screen info: %r\n");
+		fprintf(stderr, "cannot read screen info\n");
 		return nil;
 	}
 
 	n = _displayrddraw(d, info, sizeof info);
 	if (n != 12 * 12) {
-		fprint(2, "short screen info\n");
+		fprintf(stderr, "short screen info\n");
 		return nil;
 	}
 
 	if (image == nil) {
 		image = mallocz(sizeof(Image), 1);
 		if (image == nil) {
-			fprint(2, "cannot allocate image: %r\n");
+			fprintf(stderr, "cannot allocate image\n");
 			return nil;
 		}
 	}
@@ -215,7 +215,7 @@ int getwindow(Display *d, int ref) {
 		sysfatal("getwindow failed");
 	}
 	d->image = i;
-	/* fprint(2, "getwindow %p -> %p\n", oi, i); */
+	/* fprintf(stderr, "getwindow %p -> %p\n", oi, i); */
 
 	freescreen(_screen);
 	_screen = allocscreen(i, d->white, 0);
@@ -318,7 +318,7 @@ void closedisplay(Display *disp) {
 		display = nil;
 	}
 	if (disp->oldlabel[0]) {
-		snprint(buf, sizeof buf, "%s/label", disp->windir);
+		snprintf(buf, sizeof buf, "%s/label", disp->windir);
 		fd = open(buf, OWRITE);
 		if (fd >= 0) {
 			write(fd, disp->oldlabel, strlen(disp->oldlabel));
@@ -344,8 +344,8 @@ void lockdisplay(Display *disp) {
 	if (debuglockdisplay) {
 		/* avoid busy looping; it's rare we collide anyway */
 		while (!canqlock(&disp->qlock)) {
-			fprint(1, "proc %d waiting for display lock...\n",
-			       getpid());
+			fprintf(stdout, "proc %d waiting for display lock...\n",
+				getpid());
 			sleep(1000);
 		}
 	} else {
@@ -362,7 +362,7 @@ void drawerror(Display *d, char *s) {
 		d->error(d, s);
 	} else {
 		errstr(err, sizeof err);
-		fprint(2, "draw: %s: %s\n", s, err);
+		fprintf(stderr, "draw: %s: %s\n", s, err);
 		exits(s);
 	}
 }
@@ -377,7 +377,7 @@ static int doflush(Display *d) {
 
 	if (_displaywrdraw(d, d->buf, n) != n) {
 		if (_drawdebug) {
-			fprint(2, "flushimage fail: d=%p: %r\n", d); /**/
+			fprintf(stderr, "flushimage fail: d=%p\n", d); /**/
 		}
 		d->bufp = d->buf; /* might as well; chance of continuing */
 		return -1;

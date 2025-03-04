@@ -9,7 +9,7 @@ Point stringsubfont(Image *b, Point p, Image *color, Subfont *f, char *cs) {
 	Fontchar *i;
 
 	s = (uchar *)cs;
-	for (; c = *s; p.x += width) {
+	for (; (c = *s); p.x += width) {
 		width = 0;
 		if (c < Runeself) {
 			s++;
@@ -43,7 +43,7 @@ Point strsubfontwidth(Subfont *f, char *cs) {
 
 	p = Pt(0, f->height);
 	s = (uchar *)cs;
-	for (; c = *s; p.x += width) {
+	for (; (c = *s); p.x += width) {
 		width = 0;
 		if (c < Runeself) {
 			s++;

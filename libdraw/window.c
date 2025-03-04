@@ -126,7 +126,7 @@ static void topbottom(Image **w, int n, int top) {
 
 	if (n < 0) {
 	Ridiculous:
-		fprint(2, "top/bottom: ridiculous number of windows\n");
+		fprintf(stderr, "top/bottom: ridiculous number of windows\n");
 		return;
 	}
 	if (n == 0) {
@@ -144,7 +144,8 @@ static void topbottom(Image **w, int n, int top) {
 	d = w[0]->display;
 	for (i = 1; i < n; i++) {
 		if (w[i]->display != d) {
-			fprint(2, "top/bottom: windows not on same screen\n");
+			fprintf(stderr,
+				"top/bottom: windows not on same screen\n");
 			return;
 		}
 	}

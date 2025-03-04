@@ -1,7 +1,8 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
-#include <event.h>
+#include <9event.h>
+#include <mouse.h>
 
 enum {
 	Margin = 4,       /* outside to text */
@@ -171,7 +172,7 @@ int emenuhit(int but, Mouse *m, Menu *menu) {
 	replclipr(screen, 0, screen->r);
 	maxwid = 0;
 	for (nitem = 0;
-	     item = menu->item ? menu->item[nitem] : (*menu->gen)(nitem);
+	     (item = menu->item ? menu->item[nitem] : (*menu->gen)(nitem));
 	     nitem++) {
 		i = stringwidth(font, item);
 		if (i > maxwid) {

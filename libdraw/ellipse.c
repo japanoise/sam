@@ -11,7 +11,7 @@ static void doellipse(int cmd, Image *dst, Point *c, int xr, int yr, int thick,
 	a = bufimage(dst->display,
 		     1 + 4 + 4 + 2 * 4 + 4 + 4 + 4 + 2 * 4 + 2 * 4);
 	if (a == 0) {
-		fprint(2, "image ellipse: %r\n");
+		fprintf(stderr, "image ellipse\n");
 		return;
 	}
 	a[0] = cmd;

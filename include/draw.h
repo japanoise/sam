@@ -2,6 +2,7 @@
 #define _DRAW_H_ 1
 
 #include "u.h"
+#include "libc.h"
 #include "utf.h"
 
 #ifdef __APPLE__
@@ -164,11 +165,11 @@ struct Screen {
 };
 
 struct Display {
-	/* QLock qlock; */
-	int locking; /*program is using lockdisplay */
-	int dirno;
-	int imageid;
-	int local;
+	QLock qlock;
+	int   locking; /*program is using lockdisplay */
+	int   dirno;
+	int   imageid;
+	int   local;
 	void (*error)(Display *, char *);
 	char       *devdir;
 	char       *windir;

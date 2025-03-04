@@ -390,7 +390,7 @@ static int fontresize(Font *f, int wid, int ncache, int depth) {
 	new = allocimage(d, Rect(0, 0, ncache * wid, f->height),
 			 CHAN1(CGrey, depth), 0, 0);
 	if (new == nil) {
-		fprint(2, "font cache resize failed: %r\n");
+		fprintf(stderr, "font cache resize failed\n");
 		abort();
 		goto Return;
 	}
@@ -405,7 +405,7 @@ static int fontresize(Font *f, int wid, int ncache, int depth) {
 	BPLONG(b + 5, ncache);
 	b[9] = f->ascent;
 	if (flushimage(d, 0) < 0) {
-		fprint(2, "resize: init failed: %r\n");
+		fprintf(stderr, "resize: init failed\n");
 		freeimage(new);
 		goto Return;
 	}

@@ -98,7 +98,7 @@ Point _string(Image *dst, Point pt, Image *src, Point sp, Font *f, char *s,
 			}
 			b = bufimage(dst->display, m);
 			if (b == 0) {
-				fprint(2, "string: %r\n");
+				fprintf(stderr, "string\n");
 				break;
 			}
 			if (bg) {

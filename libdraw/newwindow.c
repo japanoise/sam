@@ -19,7 +19,7 @@ int newwindow(char *str) {
 	}
 	rfork(RFNAMEG);
 	if (str) {
-		snprint(buf, sizeof buf, "new %s", str);
+		snprintf(buf, sizeof buf, "new %s", str);
 	} else {
 		strcpy(buf, "new");
 	}

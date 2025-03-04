@@ -30,7 +30,7 @@ int readmouse(Mousectl *mc) {
 		flushimage(mc->display, 1);
 	}
 	if (recv(mc->c, &mc->m) < 0) {
-		fprint(2, "readmouse: %r\n");
+		fprintf(stderr, "readmouse: %r\n");
 		return -1;
 	}
 	return 0;
@@ -49,7 +49,7 @@ static void _ioproc(void *arg) {
 	for (;;) {
 		if (_displayrdmouse(mc->display, &m, &resized) < 0) {
 			if (postnote(PNPROC, getpid(), "hangup") < 0) {
-				fprint(2, "postnote: %r\n");
+				fprintf(stderr, "postnote\n");
 			}
 			sleep(10 * 1000);
 			threadexitsall("mouse read error");

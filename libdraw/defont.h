@@ -1,4 +1,4 @@
-
+#include <u.h>
 /*
  * lucm/latin1.9
  */

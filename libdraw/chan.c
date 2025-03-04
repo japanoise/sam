@@ -1,6 +1,7 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
+#include <ctype.h>
 
 static char channames[] = "rgbkamx";
 
@@ -37,11 +38,11 @@ u32int strtochan(char *s) {
 
 	c = 0;
 	p = s;
-	while (*p && isspace((uchar)*p)) {
+	while (*p && isspace(*p)) {
 		p++;
 	}
 
-	while (*p && !isspace((uchar)*p)) {
+	while (*p && !isspace(*p)) {
 		if ((q = strchr(channames, p[0])) == nil) {
 			return 0;
 		}
