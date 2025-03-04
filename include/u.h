@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include "utf.h"
 
+typedef uint64_t ulong;
 typedef uint32_t u32int;
 typedef uint16_t ushort;
 typedef uint8_t  uchar;

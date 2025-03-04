@@ -1,3 +1,8 @@
+#include <u.h>
+#include <draw.h>
+#include <memdraw.h>
+#include <mouse.h>
+#include <cursor.h>
 
 #define NHASH (1 << 5)
 #define HASHMASK (NHASH - 1)

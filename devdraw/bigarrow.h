@@ -1,3 +1,6 @@
+#include <draw.h>
+#include <cursor.h>
+
 Cursor bigarrow = {
     {-1, -1},
     {
