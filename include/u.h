@@ -14,7 +14,10 @@
 #include <unistd.h>
 #include "utf.h"
 
+typedef int64_t  vlong;
 typedef uint64_t ulong;
+typedef uint64_t uvlong;
+typedef uint64_t uint;
 typedef uint32_t u32int;
 typedef uint16_t ushort;
 typedef uint8_t  uchar;
