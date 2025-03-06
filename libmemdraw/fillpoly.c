@@ -241,9 +241,10 @@ static void xscan(Memimage *dst, Seg **seg, Seg *segtab, int nseg, int wind,
 				s->z++;
 				s->zerr -= s->den;
 				if (s->zerr < 0 || s->zerr >= s->den) {
-					print("bad ratzerr1: %ld den %ld dzrem "
-					      "%ld\n",
-					      s->zerr, s->den, s->dzrem);
+					printf(
+					    "bad ratzerr1: %ld den %ld dzrem "
+					    "%ld\n",
+					    s->zerr, s->den, s->dzrem);
 				}
 			}
 			*q++ = s;
@@ -261,7 +262,7 @@ static void xscan(Memimage *dst, Seg **seg, Seg *segtab, int nseg, int wind,
 			s->z +=
 			    smuldivmod(y - s->p0.y, s->num, s->den, &s->zerr);
 			if (s->zerr < 0 || s->zerr >= s->den) {
-				print(
+				printf(
 				    "bad ratzerr2: %ld den %ld ratdzrem %ld\n",
 				    s->zerr, s->den, s->dzrem);
 			}
@@ -297,7 +298,7 @@ static void xscan(Memimage *dst, Seg **seg, Seg *segtab, int nseg, int wind,
 			p++;
 			for (;;) {
 				if (p == ep) {
-					print("xscan: fill to infinity");
+					printf("xscan: fill to infinity");
 					return;
 				}
 				cnt += p[0]->d;
@@ -392,9 +393,9 @@ static void yscan(Memimage *dst, Seg **seg, Seg *segtab, int nseg, int wind,
 				s->z++;
 				s->zerr -= s->den;
 				if (s->zerr < 0 || s->zerr >= s->den) {
-					print("bad ratzerr1: %ld den %ld "
-					      "ratdzrem %ld\n",
-					      s->zerr, s->den, s->dzrem);
+					printf("bad ratzerr1: %ld den %ld "
+					       "ratdzrem %ld\n",
+					       s->zerr, s->den, s->dzrem);
 				}
 			}
 			*q++ = s;
@@ -412,7 +413,7 @@ static void yscan(Memimage *dst, Seg **seg, Seg *segtab, int nseg, int wind,
 			s->z +=
 			    smuldivmod(x - s->p0.x, s->num, s->den, &s->zerr);
 			if (s->zerr < 0 || s->zerr >= s->den) {
-				print(
+				printf(
 				    "bad ratzerr2: %ld den %ld ratdzrem %ld\n",
 				    s->zerr, s->den, s->dzrem);
 			}
@@ -448,7 +449,7 @@ static void yscan(Memimage *dst, Seg **seg, Seg *segtab, int nseg, int wind,
 			p++;
 			for (;;) {
 				if (p == ep) {
-					print("yscan: fill to infinity");
+					printf("yscan: fill to infinity");
 					return;
 				}
 				cnt += p[0]->d;

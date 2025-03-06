@@ -51,33 +51,33 @@ void main(int argc, char **argv) {
 	memimageinit();
 	c = mkcmap();
 	if (!inferno) {
-		print("#include <u.h>\n#include <libc.h>\n");
+		printf("#include <u.h>\n#include <libc.h>\n");
 	} else {
-		print("#include \"lib9.h\"\n");
+		printf("#include \"lib9.h\"\n");
 	}
-	print("#include <draw.h>\n");
-	print("#include <memdraw.h>\n\n");
-	print("static Memcmap def = {\n");
-	print("/* cmap2rgb */ {\n");
+	printf("#include <draw.h>\n");
+	printf("#include <memdraw.h>\n\n");
+	printf("static Memcmap def = {\n");
+	printf("/* cmap2rgb */ {\n");
 	for (i = 0; i < sizeof(c->cmap2rgb);) {
-		print("\t");
+		printf("\t");
 		for (j = 0; j < 16; j++, i++) {
-			print("0x%2.2ux,", c->cmap2rgb[i]);
+			printf("0x%2.2ux,", c->cmap2rgb[i]);
 		}
-		print("\n");
+		printf("\n");
 	}
-	print("},\n");
-	print("/* rgb2cmap */ {\n");
+	printf("},\n");
+	printf("/* rgb2cmap */ {\n");
 	for (i = 0; i < sizeof(c->rgb2cmap);) {
-		print("\t");
+		printf("\t");
 		for (j = 0; j < 16; j++, i++) {
-			print("0x%2.2ux,", c->rgb2cmap[i]);
+			printf("0x%2.2ux,", c->rgb2cmap[i]);
 		}
-		print("\n");
+		printf("\n");
 	}
-	print("}\n");
-	print("};\n");
-	print("Memcmap *memdefcmap = &def;\n");
-	print("void _memmkcmap(void){}\n");
+	printf("}\n");
+	printf("};\n");
+	printf("Memcmap *memdefcmap = &def;\n");
+	printf("void _memmkcmap(void){}\n");
 	exits(0);
 }

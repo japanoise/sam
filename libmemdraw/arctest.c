@@ -2,6 +2,7 @@
 #include <libc.h>
 #include <draw.h>
 #include <memdraw.h>
+#include <stdarg.h>
 
 extern int drawdebug;
 
@@ -34,7 +35,7 @@ void main(int argc, char **argv) {
 		memarc(x, c, a, b, thick, memblack, sp, alpha, phi, SoverD);
 	}
 	t1 = nsec();
-	print("%lld %lld\n", t1 - t0 - del, del);
+	printf("%lu %lu\n", t1 - t0 - del, del);
 }
 
 int drawdebug = 0;

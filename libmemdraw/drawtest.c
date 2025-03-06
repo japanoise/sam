@@ -3,6 +3,7 @@
 #include <bio.h>
 #include <draw.h>
 #include <memdraw.h>
+#include <stdarg.h>
 
 #define DBG if (0)
 #define RGB2K(r, g, b)                                                         \
@@ -101,12 +102,12 @@ void main(int argc, char *argv[]) {
 	default:
 		goto Usage;
 	Usage:
-		fprint(2, "usage: dtest [dchan [schan [mchan]]]\n");
+		fprintf(stderr, "usage: dtest [dchan [schan [mchan]]]\n");
 		exits("usage");
 	}
 
-	fprint(2, "%s -x %d -y %d -s 0x%x %s %s %s\n", argv0, Xrange, Yrange,
-	       seed, dchan, schan, mchan);
+	fprintf(stderr, "%s -x %d -y %d -s 0x%x %s %s %s\n", argv0, Xrange,
+		Yrange, seed, dchan, schan, mchan);
 	srand(seed);
 
 	dst = allocmemimage(Rect(0, 0, Xrange, Yrange), strtochan(dchan));
@@ -119,7 +120,7 @@ void main(int argc, char *argv[]) {
 	 * src->chan, mask->chan, stmp->chan, mtmp->chan, ones->chan); */
 	if (dst == 0 || src == 0 || mask == 0 || mtmp == 0 || ones == 0) {
 	Alloc:
-		fprint(2, "dtest: allocation failed: %r\n");
+		fprintf(stderr, "dtest: allocation failed\n");
 		exits("alloc");
 	}
 	nbytes = (4 * Xrange + 4) * Yrange;
@@ -136,22 +137,23 @@ void main(int argc, char *argv[]) {
 	dpm = 0xFF ^ (0xFF >> dbpp);
 	memset(ones->data->bdata, 0xFF, ones->width * sizeof(u32int) * Yrange);
 
-	fprint(2, "dtest: verify single pixel operation\n");
+	fprintf(stderr, "dtest: verify single pixel operation\n");
 	verifyone();
 
-	fprint(2, "dtest: verify full line non-replicated\n");
+	fprintf(stderr, "dtest: verify full line non-replicated\n");
 	verifyline();
 
-	fprint(2, "dtest: verify full rectangle non-replicated\n");
+	fprintf(stderr, "dtest: verify full rectangle non-replicated\n");
 	verifyrect();
 
-	fprint(2, "dtest: verify full rectangle source replicated\n");
+	fprintf(stderr, "dtest: verify full rectangle source replicated\n");
 	verifyrectrepl(1, 0);
 
-	fprint(2, "dtest: verify full rectangle mask replicated\n");
+	fprintf(stderr, "dtest: verify full rectangle mask replicated\n");
 	verifyrectrepl(0, 1);
 
-	fprint(2, "dtest: verify full rectangle source and mask replicated\n");
+	fprintf(stderr,
+		"dtest: verify full rectangle source and mask replicated\n");
 	verifyrectrepl(1, 1);
 
 	exits(0);
@@ -220,7 +222,7 @@ void dumpimage(char *name, Memimage *img, void *vdata, Point labelpt) {
 		break;
 	}
 	if (fmt == nil) {
-		fprint(2, "bad format\n");
+		fprintf(stderr, "bad format\n");
 		abort();
 	}
 
@@ -286,17 +288,17 @@ void checkone(Point p, Point sp, Point mp) {
 	sdp = (uchar *)savedstbits + delta;
 
 	if (memcmp(dp, sdp, (dst->depth + 7) / 8) != 0) {
-		fprint(2,
-		       "dtest: one bad pixel drawing at dst %P from source %P "
-		       "mask %P\n",
-		       p, sp, mp);
-		fprint(2,
-		       " %.2ux %.2ux %.2ux %.2ux should be %.2ux %.2ux %.2ux "
-		       "%.2ux\n",
-		       dp[0], dp[1], dp[2], dp[3], sdp[0], sdp[1], sdp[2],
-		       sdp[3]);
-		fprint(2, "addresses dst %p src %p mask %p\n", dp,
-		       byteaddr(src, sp), byteaddr(mask, mp));
+		fprintf(stderr,
+			"dtest: one bad pixel drawing at dst %P from source %P "
+			"mask %P\n",
+			p, sp, mp);
+		fprintf(stderr,
+			" %.2ux %.2ux %.2ux %.2ux should be %.2ux %.2ux %.2ux "
+			"%.2ux\n",
+			dp[0], dp[1], dp[2], dp[3], sdp[0], sdp[1], sdp[2],
+			sdp[3]);
+		fprintf(stderr, "addresses dst %p src %p mask %p\n", dp,
+			byteaddr(src, sp), byteaddr(mask, mp));
 		dumpimage("src", src, src->data->bdata, sp);
 		dumpimage("mask", mask, mask->data->bdata, mp);
 		dumpimage("origdst", dst, dstbits, p);
@@ -325,9 +327,9 @@ void checkline(Rectangle r, Point sp, Point mp, int y, Memimage *stmp,
 		nb = Xrange * (dst->depth / 8);
 	}
 	if (memcmp(dp, saved, nb) != 0) {
-		fprint(2, "dtest: bad line at y=%d; saved %p dp %p\n", y, saved,
-		       dp);
-		fprint(2, "draw dst %R src %P mask %P\n", r, sp, mp);
+		fprintf(stderr, "dtest: bad line at y=%d; saved %p dp %p\n", y,
+			saved, dp);
+		fprintf(stderr, "draw dst %R src %P mask %P\n", r, sp, mp);
 		dumpimage("src", src, src->data->bdata, sp);
 		if (stmp) {
 			dumpimage("stmp", stmp, stmp->data->bdata, sp);
@@ -669,8 +671,8 @@ void replicate(Memimage *i, Memimage *tmp) {
 	i->flags |= Frepl;
 	i->r = r;
 	i->clipr = randrect();
-	/*	fprint(2, "replicate [[%d %d] [%d %d]] [[%d %d][%d %d]]\n",
-	 * r.min.x, r.min.y, r.max.x, r.max.y, */
+	/*	fprintf(stderr, "replicate [[%d %d] [%d %d]] [[%d %d][%d
+	 * %d]]\n", r.min.x, r.min.y, r.max.x, r.max.y, */
 	/*		i->clipr.min.x, i->clipr.min.y, i->clipr.max.x,
 	 * i->clipr.max.y); */
 	tmp->clipr = i->clipr;
@@ -880,8 +882,8 @@ u32int getpixel(Memimage *img, Point pt) {
 			case CIgnore:
 				break;
 			default:
-				fprint(2, "unknown channel type %lud\n",
-				       TYPE(c));
+				fprintf(stderr, "unknown channel type %lud\n",
+					TYPE(c));
 				abort();
 			}
 		}
@@ -988,8 +990,8 @@ void putpixel(Memimage *img, Point pt, u32int nv) {
 				break;
 			default:
 				SET(bits);
-				fprint(2, "unknown channel type %lud\n",
-				       TYPE(c));
+				fprintf(stderr, "unknown channel type %lud\n",
+					TYPE(c));
 				abort();
 			}
 
