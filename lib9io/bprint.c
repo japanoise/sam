@@ -1,4 +1,4 @@
-#include "lib9.h"
+#include <u.h>
 #include <bio.h>
 
 int Bprint(Biobuf *bp, char *fmt, ...) {

@@ -1,5 +1,6 @@
-#include "lib9.h"
+#include <u.h>
 #include <bio.h>
+#include <fmt.h>
 
 static int fmtBflush(Fmt *f) {
 	Biobuf *bp;
@@ -26,7 +27,7 @@ int Bvprint(Biobuf *bp, char *fmt, va_list arg) {
 	f.flush = fmtBflush;
 	f.farg = bp;
 	f.nfmt = 0;
-	fmtlocaleinit(&f, nil, nil, nil);
+	fmtlocaleinit(&f, NULL, NULL, NULL);
 	n = fmtvprint(&f, fmt, arg);
 	bp->ocount = (char *)f.to - (char *)f.stop;
 	if (n == 0) {

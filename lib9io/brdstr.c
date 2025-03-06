@@ -1,4 +1,4 @@
-#include "lib9.h"
+#include <u.h>
 #include <bio.h>
 
 static char *badd(char *p, int *np, char *data, int ndata, int delim,
@@ -35,7 +35,7 @@ char *Brdstr(Biobuf *bp, int delim, int nulldelim) {
 				bp->state = Bractive;
 			}
 			bp->gbuf = bp->ebuf;
-			return nil;
+			return NULL;
 		}
 	}
 
@@ -47,7 +47,7 @@ char *Brdstr(Biobuf *bp, int delim, int nulldelim) {
 	if (ep) {
 		j = (ep - ip) + 1;
 		bp->icount += j;
-		return badd(nil, &bp->rdline, ip, j, delim, nulldelim);
+		return badd(NULL, &bp->rdline, ip, j, delim, nulldelim);
 	}
 
 	/*
@@ -61,7 +61,7 @@ char *Brdstr(Biobuf *bp, int delim, int nulldelim) {
 	/*
 	 * append to buffer looking for the delim
 	 */
-	p = nil;
+	p = NULL;
 	for (;;) {
 		ip = (char *)bp->bbuf + i;
 		while (i < bp->bsize) {
