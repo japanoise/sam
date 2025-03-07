@@ -29,7 +29,7 @@ void startsrv(void) {
 		close(p[0]);
 		dup(p[1], 0);
 		dup(p[1], 1);
-		execl("./o.devdraw", "o.devdraw", "-D", nil);
+		execl("./o.devdraw", "o.devdraw", "-D", NULL);
 		sysfatal("exec: %r");
 	}
 	close(p[1]);
@@ -106,7 +106,7 @@ void main(int argc, char **argv) {
 
 	fprintf(stderr, "started...\n");
 	Binit(&b, 0, OREAD);
-	while ((p = Brdstr(&b, '\n', 1)) != nil) {
+	while ((p = Brdstr(&b, '\n', 1)) != NULL) {
 		fprintf(stderr, "%s...\n", p);
 		nf = tokenize(p, f, nelem(f));
 		for (i = 0; i < nelem(cmdtab); i++) {

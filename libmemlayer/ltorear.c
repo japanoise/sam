@@ -23,12 +23,12 @@ void _memltorear(Memimage *i, Memimage *rear) {
 		/* swap l and r in screen's list */
 		rr = r->layer->rear;
 		f = l->front;
-		if (rr == nil) {
+		if (rr == NULL) {
 			s->rearmost = i;
 		} else {
 			rr->layer->front = i;
 		}
-		if (f == nil) {
+		if (f == NULL) {
 			s->frontmost = r;
 		} else {
 			f->layer->rear = r;
@@ -44,7 +44,7 @@ void _memltorear(Memimage *i, Memimage *rear) {
 }
 
 void memltorear(Memimage *i) {
-	_memltorear(i, nil);
+	_memltorear(i, NULL);
 	_memlsetclear(i->layer->screen);
 }
 
@@ -55,7 +55,7 @@ void memltorearn(Memimage **ip, int n) {
 	if (n == 0) {
 		return;
 	}
-	rear = nil;
+	rear = NULL;
 	while (--n >= 0) {
 		i = *ip++;
 		_memltorear(i, rear);

@@ -28,21 +28,21 @@ int _displayconnect(Display *d) {
 	fmtinstall('H', encodefmt);
 
 	wsysid = getenv("wsysid");
-	if (wsysid != nil) {
+	if (wsysid != NULL) {
 		// Connect to running devdraw service.
 		// wsysid=devdrawname/id
 		id = strchr(wsysid, '/');
-		if (id == nil) {
+		if (id == NULL) {
 			werrstr("invalid $wsysid");
 			return -1;
 		}
 		*id++ = '\0';
-		if ((ns = getns()) == nil) {
+		if ((ns = getns()) == NULL) {
 			return -1;
 		}
 		addr = smprint("unix!%s/%s", ns, wsysid);
 		free(ns);
-		if (addr == nil) {
+		if (addr == NULL) {
 			return -1;
 		}
 		fd = dial(addr, 0, 0, 0);
@@ -52,7 +52,7 @@ int _displayconnect(Display *d) {
 		}
 		nbuf = strlen(id) + 500;
 		buf = malloc(nbuf);
-		if (buf == nil) {
+		if (buf == NULL) {
 			close(fd);
 			return -1;
 		}
@@ -101,14 +101,14 @@ int _displayconnect(Display *d) {
 		char *devdraw;
 
 		devdraw = getenv("DEVDRAW");
-		if (devdraw == nil) {
+		if (devdraw == NULL) {
 			devdraw = "devdraw";
 		}
 		close(p[0]);
 		dup(p[1], 0);
 		dup(p[1], 1);
 		/* execl("strace", "strace", "-o", "drawsrv.out", "drawsrv",
-		 * nil); */
+		 * NULL); */
 		/*
 		 * The argv0 has no meaning to devdraw.
 		 * Pass it along only so that the various
@@ -117,22 +117,22 @@ int _displayconnect(Display *d) {
 		 * forking before threadmain. OS X hates it when
 		 * guis fork.
 		 *
-		 * If client didn't use ARGBEGIN, argv0 == nil.
-		 * Can't send nil through because OS X expects
-		 * argv[0] to be non-nil.  Also, OS X apparently
+		 * If client didn't use ARGBEGIN, argv0 == NULL.
+		 * Can't send NULL through because OS X expects
+		 * argv[0] to be non-NULL.  Also, OS X apparently
 		 * expects argv[0] to be a valid executable name,
 		 * so "(argv0)" is not okay.  Use "devdraw"
 		 * instead.
 		 */
 		putenv("NOLIBTHREADDAEMONIZE", "1");
 		devdraw = getenv("DEVDRAW");
-		if (devdraw == nil) {
+		if (devdraw == NULL) {
 			devdraw = "devdraw";
 		}
-		if (argv0 == nil) {
+		if (argv0 == NULL) {
 			argv0 = devdraw;
 		}
-		execl(devdraw, argv0, argv0, "(devdraw)", nil);
+		execl(devdraw, argv0, argv0, "(devdraw)", NULL);
 		sysfatal("exec devdraw: %r");
 	}
 	close(p[1]);
@@ -141,7 +141,7 @@ int _displayconnect(Display *d) {
 }
 
 int _displaymux(Display *d) {
-	if ((d->mux = mallocz(sizeof(*d->mux), 1)) == nil) {
+	if ((d->mux = mallocz(sizeof(*d->mux), 1)) == NULL) {
 		return -1;
 	}
 
@@ -175,7 +175,7 @@ static int _drawrecv(Mux *mux, int canblock, void **vp) {
 	Display *d;
 
 	d = mux->aux;
-	*vp = nil;
+	*vp = NULL;
 	if (!canblock && !canreadfd(d->srvfd)) {
 		return 0;
 	}
@@ -184,7 +184,7 @@ static int _drawrecv(Mux *mux, int canblock, void **vp) {
 	}
 	GET(buf, n);
 	p = malloc(n);
-	if (p == nil) {
+	if (p == NULL) {
 		fprint(2, "out of memory allocating %d in drawrecv\n", n);
 		return 1;
 	}
@@ -229,9 +229,9 @@ static int displayrpc(Display *d, Wsysmsg *tx, Wsysmsg *rx, void **freep) {
 	n = sizeW2M(tx);
 	tpkt = malloc(n);
 	if (freep) {
-		*freep = nil;
+		*freep = NULL;
 	}
-	if (tpkt == nil) {
+	if (tpkt == NULL) {
 		return -1;
 	}
 	tx->tag = 0;
@@ -268,7 +268,7 @@ static int displayrpc(Display *d, Wsysmsg *tx, Wsysmsg *rx, void **freep) {
 	rpkt = muxrpc(d->mux, tpkt);
 	_unpin();
 	free(tpkt);
-	if (rpkt == nil) {
+	if (rpkt == NULL) {
 		werrstr("muxrpc: %r");
 		return -1;
 	}
@@ -309,14 +309,14 @@ int _displayinit(Display *d, char *label, char *winsize) {
 	tx.type = Tinit;
 	tx.label = label;
 	tx.winsize = winsize;
-	return displayrpc(d, &tx, &rx, nil);
+	return displayrpc(d, &tx, &rx, NULL);
 }
 
 int _displayrdmouse(Display *d, Mouse *m, int *resized) {
 	Wsysmsg tx, rx;
 
 	tx.type = Trdmouse;
-	if (displayrpc(d, &tx, &rx, nil) < 0) {
+	if (displayrpc(d, &tx, &rx, NULL) < 0) {
 		return -1;
 	}
 	_drawmouse = rx.mouse;
@@ -329,7 +329,7 @@ int _displayrdkbd(Display *d, Rune *r) {
 	Wsysmsg tx, rx;
 
 	tx.type = Trdkbd4;
-	if (displayrpc(d, &tx, &rx, nil) < 0) {
+	if (displayrpc(d, &tx, &rx, NULL) < 0) {
 		return -1;
 	}
 	*r = rx.rune;
@@ -341,7 +341,7 @@ int _displaymoveto(Display *d, Point p) {
 
 	tx.type = Tmoveto;
 	tx.mouse.xy = p;
-	if (displayrpc(d, &tx, &rx, nil) < 0) {
+	if (displayrpc(d, &tx, &rx, NULL) < 0) {
 		return -1;
 	}
 	_drawmouse.xy = p;
@@ -352,20 +352,20 @@ int _displaycursor(Display *d, Cursor *c, Cursor2 *c2) {
 	Wsysmsg tx, rx;
 
 	tx.type = Tcursor2;
-	if (c == nil) {
+	if (c == NULL) {
 		memset(&tx.cursor, 0, sizeof tx.cursor);
 		memset(&tx.cursor2, 0, sizeof tx.cursor2);
 		tx.arrowcursor = 1;
 	} else {
 		tx.arrowcursor = 0;
 		tx.cursor = *c;
-		if (c2 != nil) {
+		if (c2 != NULL) {
 			tx.cursor2 = *c2;
 		} else {
 			scalecursor(&tx.cursor2, c);
 		}
 	}
-	return displayrpc(d, &tx, &rx, nil);
+	return displayrpc(d, &tx, &rx, NULL);
 }
 
 int _displaybouncemouse(Display *d, Mouse *m) {
@@ -373,7 +373,7 @@ int _displaybouncemouse(Display *d, Mouse *m) {
 
 	tx.type = Tbouncemouse;
 	tx.mouse = *m;
-	return displayrpc(d, &tx, &rx, nil);
+	return displayrpc(d, &tx, &rx, NULL);
 }
 
 int _displaylabel(Display *d, char *label) {
@@ -381,7 +381,7 @@ int _displaylabel(Display *d, char *label) {
 
 	tx.type = Tlabel;
 	tx.label = label;
-	return displayrpc(d, &tx, &rx, nil);
+	return displayrpc(d, &tx, &rx, NULL);
 }
 
 char *_displayrdsnarf(Display *d) {
@@ -391,7 +391,7 @@ char *_displayrdsnarf(Display *d) {
 
 	tx.type = Trdsnarf;
 	if (displayrpc(d, &tx, &rx, &p) < 0) {
-		return nil;
+		return NULL;
 	}
 	s = strdup(rx.snarf);
 	free(p);
@@ -403,7 +403,7 @@ int _displaywrsnarf(Display *d, char *snarf) {
 
 	tx.type = Twrsnarf;
 	tx.snarf = snarf;
-	return displayrpc(d, &tx, &rx, nil);
+	return displayrpc(d, &tx, &rx, NULL);
 }
 
 int _displayrddraw(Display *d, void *v, int n) {
@@ -426,7 +426,7 @@ int _displaywrdraw(Display *d, void *v, int n) {
 	tx.type = Twrdraw;
 	tx.count = n;
 	tx.data = v;
-	if (displayrpc(d, &tx, &rx, nil) < 0) {
+	if (displayrpc(d, &tx, &rx, NULL) < 0) {
 		return -1;
 	}
 	return rx.count;
@@ -436,7 +436,7 @@ int _displaytop(Display *d) {
 	Wsysmsg tx, rx;
 
 	tx.type = Ttop;
-	return displayrpc(d, &tx, &rx, nil);
+	return displayrpc(d, &tx, &rx, NULL);
 }
 
 int _displayresize(Display *d, Rectangle r) {
@@ -444,7 +444,7 @@ int _displayresize(Display *d, Rectangle r) {
 
 	tx.type = Tresize;
 	tx.rect = r;
-	return displayrpc(d, &tx, &rx, nil);
+	return displayrpc(d, &tx, &rx, NULL);
 }
 
 static int canreadfd(int fd) {

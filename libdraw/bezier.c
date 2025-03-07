@@ -134,7 +134,7 @@ static void _bezsplinepts(Plist *l, Point *pt, int npt) {
 int bezsplinepts(Point *pt, int npt, Point **pp) {
 	Plist l;
 	l.np = 0;
-	l.p = nil;
+	l.p = NULL;
 	_bezsplinepts(&l, pt, npt);
 	*pp = l.p;
 	return l.np;

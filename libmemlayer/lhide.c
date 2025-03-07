@@ -24,12 +24,12 @@ static void lhideop(Memimage *src, Rectangle screenr, Rectangle clipr,
 	l = etc;
 	if (src != l->save) { /* do nothing if src is already in save area */
 		r = rectsubpt(screenr, l->delta);
-		memdraw(l->save, r, src, screenr.min, nil, screenr.min, S);
+		memdraw(l->save, r, src, screenr.min, NULL, screenr.min, S);
 	}
 }
 
 void memlhide(Memimage *i, Rectangle screenr) {
-	if (i->layer->save == nil) {
+	if (i->layer->save == NULL) {
 		return;
 	}
 	if (rectclip(&screenr, i->layer->screen->image->r) == 0) {
@@ -50,7 +50,7 @@ static void lexposeop(Memimage *dst, Rectangle screenr, Rectangle clipr,
 	l = etc;
 	r = rectsubpt(screenr, l->delta);
 	if (l->save) {
-		memdraw(dst, screenr, l->save, r.min, nil, r.min, S);
+		memdraw(dst, screenr, l->save, r.min, NULL, r.min, S);
 	} else {
 		l->refreshfn(dst, r, l->refreshptr);
 	}

@@ -19,7 +19,7 @@ Channel *chancreate(int elemsize, int bufsize) {
 	Channel *c;
 
 	c = malloc(sizeof *c + bufsize * elemsize);
-	if (c == nil) {
+	if (c == NULL) {
 		sysfatal("chancreate malloc: %r");
 	}
 	memset(c, 0, sizeof *c);
@@ -43,7 +43,7 @@ void chansetname(Channel *c, char *fmt, ...) {
 
 /* bug - work out races */
 void chanfree(Channel *c) {
-	if (c == nil) {
+	if (c == NULL) {
 		return;
 	}
 	free(c->name);
@@ -74,7 +74,7 @@ static void delarray(_Altarray *a, int i) {
 static _Altarray *chanarray(Channel *c, uint op) {
 	switch (op) {
 	default:
-		return nil;
+		return NULL;
 	case CHANSND:
 		return &c->asend;
 	case CHANRCV:
@@ -86,7 +86,7 @@ static int altcanexec(Alt *a) {
 	_Altarray *ar;
 	Channel   *c;
 
-	if (a->op == CHANNOP || (c = a->c) == nil) {
+	if (a->op == CHANNOP || (c = a->c) == NULL) {
 		return 0;
 	}
 	if (c->bufsize == 0) {
@@ -107,7 +107,7 @@ static int altcanexec(Alt *a) {
 static void altqueue(Alt *a) {
 	_Altarray *ar;
 
-	if (a->c == nil) {
+	if (a->c == NULL) {
 		return;
 	}
 	ar = chanarray(a->c, a->op);
@@ -119,7 +119,7 @@ static void altdequeue(Alt *a) {
 	_Altarray *ar;
 
 	ar = chanarray(a->c, a->op);
-	if (ar == nil) {
+	if (ar == NULL) {
 		fprint(2, "bad use of altdequeue op=%d\n", a->op);
 		abort();
 	}
@@ -146,7 +146,7 @@ static void altalldequeue(Alt *a) {
 
 static void amove(void *dst, void *src, uint n) {
 	if (dst) {
-		if (src == nil) {
+		if (src == NULL) {
 			memset(dst, 0, n);
 		} else {
 			memmove(dst, src, n);
@@ -170,18 +170,18 @@ static void altcopy(Alt *s, Alt *r) {
 	/*
 	 * Work out who is sender and who is receiver
 	 */
-	if (s == nil && r == nil) {
+	if (s == NULL && r == NULL) {
 		return;
 	}
-	assert(s != nil);
+	assert(s != NULL);
 	c = s->c;
 	if (s->op == CHANRCV) {
 		t = s;
 		s = r;
 		r = t;
 	}
-	assert(s == nil || s->op == CHANSND);
-	assert(r == nil || r->op == CHANRCV);
+	assert(s == NULL || s->op == CHANSND);
+	assert(r == NULL || r->op == CHANRCV);
 
 	/*
 	 * Channel is empty (or unbuffered) - copy directly.
@@ -225,7 +225,7 @@ static void altexec(Alt *a) {
 		other->thread->alt = other;
 		_threadready(other->thread);
 	} else {
-		altcopy(a, nil);
+		altcopy(a, NULL);
 	}
 }
 
@@ -353,7 +353,7 @@ void *chanrecvp(Channel *c) {
 	if (_chanop(c, CHANRCV, (void *)&v, 1) > 0) {
 		return v;
 	}
-	return nil;
+	return NULL;
 }
 
 int channbsendp(Channel *c, void *v) {
@@ -366,7 +366,7 @@ void *channbrecvp(Channel *c) {
 	if (_chanop(c, CHANRCV, (void *)&v, 0) > 0) {
 		return v;
 	}
-	return nil;
+	return NULL;
 }
 
 int chansendul(Channel *c, ulong val) { return _chanop(c, CHANSND, &val, 1); }

@@ -94,22 +94,22 @@ void memarc(Memimage *dst, Point c, int a, int b, int t, Memimage *src,
 	icossin(beta, &p.x, &p.y);
 	bnd[i++] = mulpt(p, m1);
 
-	figure = nil;
-	mask = nil;
+	figure = NULL;
+	mask = NULL;
 	wedge = allocmemimage(rect, GREY1);
-	if (wedge == nil) {
+	if (wedge == NULL) {
 		goto Return;
 	}
 	memfillcolor(wedge, DTransparent);
 	memfillpoly(wedge, bnd, i, ~0, memopaque, p00, S);
 	figure = allocmemimage(rect, GREY1);
-	if (figure == nil) {
+	if (figure == NULL) {
 		goto Return;
 	}
 	memfillcolor(figure, DTransparent);
 	memellipse(figure, p00, a, b, t, memopaque, p00, S);
 	mask = allocmemimage(rect, GREY1);
-	if (mask == nil) {
+	if (mask == NULL) {
 		goto Return;
 	}
 	memfillcolor(mask, DTransparent);

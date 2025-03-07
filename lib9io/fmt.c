@@ -150,7 +150,7 @@ void *__fmtdispatch(Fmt *f, void *fmt, int isrunes) {
 		f->r = r;
 		switch (r) {
 		case '\0':
-			return nil;
+			return NULL;
 		case '.':
 			f->flags |= FmtWidth | FmtPrec;
 			continue;
@@ -213,7 +213,7 @@ void *__fmtdispatch(Fmt *f, void *fmt, int isrunes) {
 		}
 		n = (*fmtfmt(r))(f);
 		if (n < 0) {
-			return nil;
+			return NULL;
 		}
 		if (n == 0) {
 			return fmt;

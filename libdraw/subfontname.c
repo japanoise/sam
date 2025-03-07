@@ -65,5 +65,5 @@ char *subfontname(char *cfname, char *fname, int maxdepth) {
 		return t;
 	}
 
-	return nil;
+	return NULL;
 }

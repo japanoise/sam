@@ -53,7 +53,7 @@ Ioproc *ioproc(void) {
 	Ioproc *io;
 
 	io = mallocz(sizeof(*io), 1);
-	if (io == nil) {
+	if (io == NULL) {
 		sysfatal("ioproc malloc: %r");
 	}
 	io->c = chancreate(sizeof(void *), 0);
@@ -65,7 +65,7 @@ Ioproc *ioproc(void) {
 }
 
 void closeioproc(Ioproc *io) {
-	if (io == nil) {
+	if (io == NULL) {
 		return;
 	}
 	iointerrupt(io);
@@ -92,7 +92,7 @@ long iocall(Ioproc *io, long (*op)(va_list *), ...) {
 	msg = io;
 	inted = 0;
 	while (send(io->creply, &msg) == -1) {
-		msg = nil;
+		msg = NULL;
 		inted = 1;
 	}
 	if (inted) {
@@ -106,7 +106,7 @@ long iocall(Ioproc *io, long (*op)(va_list *), ...) {
 	 * and try again.
 	 */
 	inted = 0;
-	while (recv(io->creply, nil) == -1) {
+	while (recv(io->creply, NULL) == -1) {
 		inted = 1;
 		iointerrupt(io);
 	}

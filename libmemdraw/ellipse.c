@@ -113,7 +113,7 @@ void memellipse(Memimage *dst, Point c, int a, int b, int t, Memimage *src,
 	p.c = c;
 	p.t = t;
 	p.sp = subpt(sp, c);
-	p.disc = nil;
+	p.disc = NULL;
 	p.op = op;
 
 	u = (t << 1) * (a - b);
@@ -174,7 +174,7 @@ static void bellipse(int y, State *s, Param *p) {
 
 	t = p->t;
 	p->disc = allocmemimage(Rect(-t, -t, t + 1, t + 1), GREY1);
-	if (p->disc == nil) {
+	if (p->disc == NULL) {
 		return;
 	}
 	memfillcolor(p->disc, DTransparent);

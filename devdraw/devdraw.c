@@ -56,10 +56,10 @@ void gfx_replacescreenimage(Client *c, Memimage *m) {
 }
 
 static void drawrefreshscreen(DImage *l, Client *client) {
-	while (l != nil && l->dscreen == nil) {
+	while (l != NULL && l->dscreen == NULL) {
 		l = l->fromname;
 	}
-	if (l != nil && l->dscreen->owner != client) {
+	if (l != NULL && l->dscreen->owner != client) {
 		l->dscreen->owner->refreshme = 1;
 	}
 }
@@ -155,11 +155,11 @@ static void dstflush(Client *c, int dstid, Memimage *dst, Rectangle r) {
 	}
 	/* how can this happen? -rsc, dec 12 2002 */
 	if (dst == 0) {
-		fprintf(stderr, "nil dstflush\n");
+		fprintf(stderr, "NULL dstflush\n");
 		return;
 	}
 	l = dst->layer;
-	if (l == nil) {
+	if (l == NULL) {
 		return;
 	}
 	do {
@@ -219,11 +219,11 @@ static int drawgoodname(Client *client, DImage *d) {
 			return 0;
 		}
 	}
-	if (d->name == nil) {
+	if (d->name == NULL) {
 		return 1;
 	}
 	n = drawlookupname(client, strlen(d->name), d->name);
-	if (n == nil || n->vers != d->vers) {
+	if (n == NULL || n->vers != d->vers) {
 		return 0;
 	}
 	return 1;
@@ -429,8 +429,8 @@ static void drawfreedimage(Client *client, DImage *dimage) {
 	}
 	ds = dimage->dscreen;
 	l = dimage->image;
-	dimage->dscreen = nil; /* paranoia */
-	dimage->image = nil;
+	dimage->dscreen = NULL; /* paranoia */
+	dimage->image = NULL;
 	if (ds) {
 		if (l->data == client->screenimage->data) {
 			addflush(client, l->layer->screenr);
@@ -439,7 +439,7 @@ static void drawfreedimage(Client *client, DImage *dimage) {
 		    drawrefresh) { /* else true owner will clean up */
 			free(l->layer->refreshptr);
 		}
-		l->layer->refreshptr = nil;
+		l->layer->refreshptr = NULL;
 		if (drawgoodname(client, dimage)) {
 			memldelete(l);
 		} else {
@@ -482,7 +482,7 @@ static void drawuninstallscreen(Client *client, CScreen *this) {
 static int drawuninstall(Client *client, int id) {
 	DImage *d, **l;
 
-	for (l = &client->dimage[id & HASHMASK]; (d = *l) != nil;
+	for (l = &client->dimage[id & HASHMASK]; (d = *l) != NULL;
 	     l = &d->next) {
 		if (d->id == id) {
 			*l = d->next;
@@ -508,7 +508,7 @@ static int drawaddname(Client *client, DImage *di, int n, char *str,
 	}
 	t = mallocz((client->nname + 1) * sizeof(DName), 1);
 	ns = malloc(n + 1);
-	if (t == nil || ns == nil) {
+	if (t == NULL || ns == NULL) {
 		free(t);
 		free(ns);
 		*err = "out of memory";
@@ -539,8 +539,8 @@ static Memimage *drawimage(Client *client, uchar *a) {
 	DImage *d;
 
 	d = drawlookup(client, BGLONG(a), 1);
-	if (d == nil) {
-		return nil; /* caller must check! */
+	if (d == NULL) {
+		return NULL; /* caller must check! */
 	}
 	return d->image;
 }
@@ -580,13 +580,13 @@ static uchar *drawcoord(uchar *p, uchar *maxp, int oldx, int *newx) {
 	int b, x;
 
 	if (p >= maxp) {
-		return nil;
+		return NULL;
 	}
 	b = *p++;
 	x = b & 0x7F;
 	if (b & 0x80) {
 		if (p + 1 >= maxp) {
-			return nil;
+			return NULL;
 		}
 		x |= *p++ << 7;
 		x |= *p++ << 15;
@@ -605,7 +605,7 @@ static uchar *drawcoord(uchar *p, uchar *maxp, int oldx, int *newx) {
 
 int draw_dataread(Client *cl, void *a, int n) {
 	qlock(&drawlk);
-	if (cl->readdata == nil) {
+	if (cl->readdata == NULL) {
 		werrstr("no draw data");
 		goto err;
 	}
@@ -616,7 +616,7 @@ int draw_dataread(Client *cl, void *a, int n) {
 	n = cl->nreaddata;
 	memmove(a, cl->readdata, cl->nreaddata);
 	free(cl->readdata);
-	cl->readdata = nil;
+	cl->readdata = NULL;
 	qunlock(&drawlk);
 	return n;
 
@@ -716,7 +716,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 				}
 				dscrn->ref++;
 				if (reffn) {
-					refx = nil;
+					refx = NULL;
 					if (reffn == drawrefresh) {
 						refx = mallocz(sizeof(Refx), 1);
 						if (refx == 0) {
@@ -784,7 +784,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 				goto Eshortdraw;
 			}
 			ddst = drawlookup(client, BGLONG(a + 1), 1);
-			if (ddst == nil) {
+			if (ddst == NULL) {
 				goto Enodrawimage;
 			}
 			if (ddst->name) {
@@ -963,12 +963,12 @@ int draw_datawrite(Client *client, void *v, int n) {
 			}
 			if (client->infoid == 0) {
 				i = client->screenimage;
-				if (i == nil) {
+				if (i == NULL) {
 					goto Enodrawimage;
 				}
 			} else {
 				di = drawlookup(client, client->infoid, 1);
-				if (di == nil) {
+				if (di == NULL) {
 					goto Enodrawimage;
 				}
 				i = di->image;
@@ -984,7 +984,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 				     i->clipr.max.x, i->clipr.max.y);
 			free(client->readdata);
 			client->readdata = malloc(ni);
-			if (client->readdata == nil) {
+			if (client->readdata == NULL) {
 				goto Enomem;
 			}
 			memmove(client->readdata, ibuf, ni);
@@ -1019,7 +1019,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 				}
 			}
 			client->readdata = (uchar *)fmtstrflush(&fmt);
-			if (client->readdata == nil) {
+			if (client->readdata == NULL) {
 				goto Enomem;
 			}
 			client->nreaddata = strlen((char *)client->readdata);
@@ -1085,7 +1085,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 			op = drawclientop(client);
 			memline(dst, p, q, e0, e1, j, src, sp, op);
 			/* avoid memlinebbox if possible */
-			if (dstid == 0 || dst->layer != nil) {
+			if (dstid == 0 || dst->layer != NULL) {
 				/* BUG: this is terribly inefficient: update
 				 * maximal containing rect*/
 				r = memlinebbox(p, q, e0, e1, j);
@@ -1124,11 +1124,11 @@ int draw_datawrite(Client *client, void *v, int n) {
 				goto Eimageexists;
 			}
 			dn = drawlookupname(client, j, (char *)a + 6);
-			if (dn == nil) {
+			if (dn == NULL) {
 				goto Enoname;
 			}
 			s = malloc(j + 1);
-			if (s == nil) {
+			if (s == NULL) {
 				goto Enomem;
 			}
 			if (drawinstall(client, dstid, dn->dimage->image, 0) ==
@@ -1177,7 +1177,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 				} else {
 					dn = drawlookupname(client, j,
 							    (char *)a + 7);
-					if (dn == nil) {
+					if (dn == NULL) {
 						goto Enoname;
 					}
 					if (dn->dimage != di) {
@@ -1261,7 +1261,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 			drawpoint(&p, a + 31);
 			ni++;
 			pp = mallocz(ni * sizeof(Point), 1);
-			if (pp == nil) {
+			if (pp == NULL) {
 				goto Enomem;
 			}
 			doflush = 0;
@@ -1359,7 +1359,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 			c *= Dy(r);
 			free(client->readdata);
 			client->readdata = mallocz(c, 0);
-			if (client->readdata == nil) {
+			if (client->readdata == NULL) {
 				err = "readimage malloc failed";
 				goto error;
 			}
@@ -1367,7 +1367,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 			    memunload(i, r, client->readdata, c);
 			if (client->nreaddata < 0) {
 				free(client->readdata);
-				client->readdata = nil;
+				client->readdata = NULL;
 				err = "bad readimage call";
 				goto error;
 			}
@@ -1500,7 +1500,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 			for (j = 0; j < nw; j++) {
 				lp[j] =
 				    drawimage(client, a + 1 + 1 + 2 + j * 4);
-				if (lp[j] == nil) {
+				if (lp[j] == NULL) {
 					free(lp);
 					goto Enodrawimage;
 				}

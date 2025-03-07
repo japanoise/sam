@@ -40,12 +40,12 @@ Waitmsg *procwait(int pid) {
 		}
 	}
 	me.next = waiting.head;
-	me.prev = nil;
+	me.prev = NULL;
 	if (me.next) {
 		me.next->prev = &me;
 	}
 	waiting.head = &me;
-	while (waiting.muxer && me.msg == nil) {
+	while (waiting.muxer && me.msg == NULL) {
 		rsleep(&me.r);
 	}
 
@@ -58,7 +58,7 @@ Waitmsg *procwait(int pid) {
 			qunlock(&waiting.lk);
 			msg = recvp(threadwaitchan());
 			qlock(&waiting.lk);
-			if (msg == nil) { /* shouldn't happen */
+			if (msg == NULL) { /* shouldn't happen */
 				break;
 			}
 			for (w = waiting.head; w; w = w->next) {
@@ -81,7 +81,7 @@ Waitmsg *procwait(int pid) {
 				waiting.msg = realloc(
 				    waiting.msg,
 				    (waiting.nmsg + 1) * sizeof waiting.msg[0]);
-				if (waiting.msg == nil) {
+				if (waiting.msg == NULL) {
 					sysfatal("out of memory");
 				}
 				waiting.msg[waiting.nmsg++] = msg;

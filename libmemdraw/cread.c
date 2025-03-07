@@ -12,7 +12,7 @@ Memimage *creadmemimage(int fd) {
 
 	if (readn(fd, hdr, 5 * 12) != 5 * 12) {
 		werrstr("readmemimage: short header (2)");
-		return nil;
+		return NULL;
 	}
 
 	/*
@@ -29,19 +29,19 @@ Memimage *creadmemimage(int fd) {
 	}
 	if (hdr[11] != ' ') {
 		werrstr("creadimage: bad format");
-		return nil;
+		return NULL;
 	}
 	if (new) {
 		hdr[11] = '\0';
 		if ((chan = strtochan(hdr)) == 0) {
 			werrstr("creadimage: bad channel string %s", hdr);
-			return nil;
+			return NULL;
 		}
 	} else {
 		ldepth = ((int)hdr[10]) - '0';
 		if (ldepth < 0 || ldepth > 3) {
 			werrstr("creadimage: bad ldepth %d", ldepth);
-			return nil;
+			return NULL;
 		}
 		chan = drawld2chan[ldepth];
 	}
@@ -51,16 +51,16 @@ Memimage *creadmemimage(int fd) {
 	r.max.y = atoi(hdr + 4 * 12);
 	if (r.min.x > r.max.x || r.min.y > r.max.y) {
 		werrstr("creadimage: bad rectangle");
-		return nil;
+		return NULL;
 	}
 
 	i = allocmemimage(r, chan);
-	if (i == nil) {
-		return nil;
+	if (i == NULL) {
+		return NULL;
 	}
 	ncblock = _compblocksize(r, i->depth);
 	buf = malloc(ncblock);
-	if (buf == nil) {
+	if (buf == NULL) {
 		goto Errout;
 	}
 	miny = r.min.y;
@@ -71,7 +71,7 @@ Memimage *creadmemimage(int fd) {
 		Errout:
 			freememimage(i);
 			free(buf);
-			return nil;
+			return NULL;
 		}
 		maxy = atoi(hdr + 0 * 12);
 		nb = atoi(hdr + 1 * 12);

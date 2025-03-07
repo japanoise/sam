@@ -11,7 +11,7 @@ int memunload(Memimage *src, Rectangle r, uchar *data, int n) {
 
 Top:
 	dl = src->layer;
-	if (dl == nil) {
+	if (dl == NULL) {
 		return unloadmemimage(src, r, data, n);
 	}
 
@@ -44,10 +44,10 @@ Top:
 		return n;
 	}
 	tmp = allocmemimage(lr, src->chan);
-	if (tmp == nil) {
+	if (tmp == NULL) {
 		return -1;
 	}
-	memdraw(tmp, lr, src, lr.min, nil, lr.min, S);
+	memdraw(tmp, lr, src, lr.min, NULL, lr.min, S);
 	n = unloadmemimage(tmp, lr, data, n);
 	freememimage(tmp);
 	return n;

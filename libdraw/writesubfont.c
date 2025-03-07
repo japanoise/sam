@@ -29,7 +29,7 @@ int writesubfont(int fd, Subfont *f) {
 	}
 	nb = 6 * (f->n + 1);
 	data = malloc(nb);
-	if (data == nil) {
+	if (data == NULL) {
 		return -1;
 	}
 	packinfo(f->info, data, f->n);

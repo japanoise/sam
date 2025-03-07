@@ -6,7 +6,7 @@
 
 void memfillcolor(Memimage *m, u32int val) {
 	_memfillcolor(m, val);
-	if (m->X == nil) {
+	if (m->X == NULL) {
 		return;
 	}
 	if ((val & 0xFF) == 0xFF) { /* full alpha */
@@ -22,7 +22,7 @@ void _xfillcolor(Memimage *m, Rectangle r, u32int v) {
 	XGC   gc;
 
 	xm = m->X;
-	assert(xm != nil);
+	assert(xm != NULL);
 
 	/*
 	 * Set up fill context appropriately.

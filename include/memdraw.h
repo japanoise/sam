@@ -50,7 +50,7 @@ struct Memimage {
 	Memdata  *data;  /* pointer to data; shared by windows in this image */
 	int       zero;  /* data->bdata+zero==&byte containing (0,0) */
 	u32int    width; /* width in words of a single scan line */
-	Memlayer *layer; /* nil if not a layer*/
+	Memlayer *layer; /* NULL if not a layer*/
 	u32int    flags;
 	void     *X;
 	int       screenref; /* reference count if this is a screen */

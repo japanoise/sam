@@ -24,10 +24,10 @@ static void draw1(Image *dst, Rectangle *r, Image *src, Point *p0, Image *mask,
 	if (a == 0) {
 		return;
 	}
-	if (src == nil) {
+	if (src == NULL) {
 		src = dst->display->black;
 	}
-	if (mask == nil) {
+	if (mask == NULL) {
 		mask = dst->display->opaque;
 	}
 	a[0] = 'd';

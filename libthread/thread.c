@@ -54,7 +54,7 @@ static void _threaddebug(_Thread *t, char *fmt, ...) {
 	va_start(arg, fmt);
 	vsnprint(buf, sizeof buf, fmt, arg);
 	va_end(arg);
-	if (t == nil) {
+	if (t == NULL) {
 		t = proc()->thread;
 	}
 	if (t) {
@@ -72,7 +72,7 @@ static Proc *procalloc(void) {
 	Proc *p;
 
 	p = malloc(sizeof *p);
-	if (p == nil) {
+	if (p == NULL) {
 		sysfatal("procalloc malloc: %r");
 	}
 	memset(p, 0, sizeof *p);
@@ -88,7 +88,7 @@ _Thread *_threadcreate(Proc *p, void (*fn)(void *), void *arg, uint stack) {
 
 	USED(stack);
 	t = malloc(sizeof *t);
-	if (t == nil) {
+	if (t == NULL) {
 		sysfatal("threadcreate malloc: %r");
 	}
 	memset(t, 0, sizeof *t);
@@ -111,7 +111,7 @@ int threadcreate(void (*fn)(void *), void *arg, uint stack) {
 	_Thread *t;
 
 	t = _threadcreate(proc(), fn, arg, stack);
-	_threaddebug(nil, "threadcreate %d", t->id);
+	_threaddebug(NULL, "threadcreate %d", t->id);
 	return t->id;
 }
 
@@ -181,7 +181,7 @@ void threadexits(char *msg) {
 	Proc *p;
 
 	p = proc();
-	if (msg == nil) {
+	if (msg == NULL) {
 		msg = "";
 	}
 	utfecpy(p->msg, p->msg + sizeof p->msg, msg);
@@ -209,7 +209,7 @@ void threadunpin(void) {
 		fprint(2, "wrong pinthread - %p %p\n", p->pinthread, p->thread);
 		assert(0);
 	}
-	p->pinthread = nil;
+	p->pinthread = NULL;
 }
 
 void threadsysfatal(char *fmt, va_list arg) {
@@ -234,7 +234,7 @@ static void procmain(Proc *p) {
 	p->thread = t;
 	t->startfn(t->startarg);
 	if (p->nthread != 0) {
-		threadexits(nil);
+		threadexits(NULL);
 	}
 }
 
@@ -243,9 +243,9 @@ void _threadpthreadmain(Proc *p, _Thread *t) {
 	lock(&p->lock);
 	pthreadsleepschedlocked(p, t);
 	unlock(&p->lock);
-	_threaddebug(nil, "startfn");
+	_threaddebug(NULL, "startfn");
 	t->startfn(t->startarg);
-	threadexits(nil);
+	threadexits(NULL);
 }
 
 static void pthreadsleepschedlocked(Proc *p, _Thread *t) {
@@ -268,10 +268,10 @@ static void pthreadwakeupschedlocked(Proc *p, _Thread *self, _Thread *t) {
 static void pthreadscheduler(Proc *p) {
 	_Thread *self, *t;
 
-	_threaddebug(nil, "scheduler");
+	_threaddebug(NULL, "scheduler");
 	lock(&p->lock);
 	self = p->thread;
-	p->thread = nil;
+	p->thread = NULL;
 	_threaddebug(self, "pausing");
 
 	if (self->exiting) {
@@ -281,17 +281,17 @@ static void pthreadscheduler(Proc *p) {
 	}
 
 	t = procnext(p, self);
-	if (t != nil) {
+	if (t != NULL) {
 		pthreadwakeupschedlocked(p, self, t);
 		if (!self->exiting) {
 			pthreadsleepschedlocked(p, self);
-			_threaddebug(nil, "resume %d", self->id);
+			_threaddebug(NULL, "resume %d", self->id);
 			unlock(&p->lock);
 			return;
 		}
 	}
 
-	if (t == nil) {
+	if (t == NULL) {
 		/* Tear down proc bookkeeping. Wait to free p. */
 		delproc(p);
 		lock(&threadnproclock);
@@ -317,10 +317,10 @@ static void pthreadscheduler(Proc *p) {
 			sleep(60 * 60 * 1000);
 		}
 	}
-	_threadsetproc(nil);
+	_threadsetproc(NULL);
 	free(self);
 	unlock(&p->lock);
-	if (t == nil) {
+	if (t == NULL) {
 		free(p);
 	}
 	_threadpexit();
@@ -329,7 +329,7 @@ static void pthreadscheduler(Proc *p) {
 static _Thread *procnext(Proc *p, _Thread *self) {
 	_Thread *t;
 
-	if ((t = p->pinthread) != nil) {
+	if ((t = p->pinthread) != NULL) {
 		while (!onlist(&p->runqueue, t)) {
 			p->runrend.l = &p->lock;
 			_threaddebug(self, "scheduler sleep (pin)");
@@ -337,15 +337,15 @@ static _Thread *procnext(Proc *p, _Thread *self) {
 			_threaddebug(self, "scheduler wake (pin)");
 		}
 	} else {
-		while ((t = p->runqueue.head) == nil) {
+		while ((t = p->runqueue.head) == NULL) {
 			if (p->nthread == 0) {
-				return nil;
+				return NULL;
 			}
-			if ((t = p->idlequeue.head) != nil) {
+			if ((t = p->idlequeue.head) != NULL) {
 				/*
 				 * Run all the idling threads once.
 				 */
-				while ((t = p->idlequeue.head) != nil) {
+				while ((t = p->idlequeue.head) != NULL) {
 					delthread(&p->idlequeue, t);
 					addthread(&p->runqueue, t);
 				}
@@ -361,7 +361,7 @@ static _Thread *procnext(Proc *p, _Thread *self) {
 	if (p->pinthread && p->pinthread != t) {
 		fprint(2, "p->pinthread %p t %p\n", p->pinthread, t);
 	}
-	assert(p->pinthread == nil || p->pinthread == t);
+	assert(p->pinthread == NULL || p->pinthread == t);
 	delthread(&p->runqueue, t);
 
 	p->thread = t;
@@ -372,7 +372,7 @@ static _Thread *procnext(Proc *p, _Thread *self) {
 void _threadsetsysproc(void) {
 	lock(&threadnproclock);
 	if (++threadnsysproc == threadnproc) {
-		threadexitsall(nil);
+		threadexitsall(NULL);
 	}
 	unlock(&threadnproclock);
 	proc()->sysproc = 1;
@@ -422,7 +422,7 @@ void needstack(int n) {
 	_Thread *t;
 
 	t = proc()->thread;
-	if (t->stk == nil) {
+	if (t->stk == NULL) {
 		return;
 	}
 
@@ -444,11 +444,11 @@ static int singlethreaded(void) {
 static int threadqlock(QLock *l, int block, ulong pc) {
 	/*print("threadqlock %p\n", l); */
 	lock(&l->l);
-	if (l->owner == nil) {
+	if (l->owner == NULL) {
 		l->owner = (*threadnow)();
 		/*print("qlock %p @%#x by %p\n", l, pc, l->owner); */
-		if (l->owner == nil) {
-			fprint(2, "%s: qlock uncontended owner=nil oops\n",
+		if (l->owner == NULL) {
+			fprint(2, "%s: qlock uncontended owner=NULL oops\n",
 			       argv0);
 			abort();
 		}
@@ -476,8 +476,8 @@ static int threadqlock(QLock *l, int block, ulong pc) {
 		       pc, l->owner, (*threadnow)());
 		abort();
 	}
-	if (l->owner == nil) {
-		fprint(2, "%s: qlock threadswitch owner=nil oops\n", argv0);
+	if (l->owner == NULL) {
+		fprint(2, "%s: qlock threadswitch owner=NULL oops\n", argv0);
 		abort();
 	}
 
@@ -496,7 +496,7 @@ static void threadqunlock(QLock *l, ulong pc) {
 		       argv0, pc, l->owner, (*threadnow)());
 		abort();
 	}
-	if ((l->owner = ready = l->waiting.head) != nil) {
+	if ((l->owner = ready = l->waiting.head) != NULL) {
 		delthread(&l->waiting, l->owner);
 	}
 	/*
@@ -516,7 +516,7 @@ static int threadrlock(RWLock *l, int block, ulong pc) {
 	USED(pc);
 
 	lock(&l->l);
-	if (l->writer == nil && l->wwaiting.head == nil) {
+	if (l->writer == NULL && l->wwaiting.head == NULL) {
 		l->readers++;
 		unlock(&l->l);
 		return 1;
@@ -539,7 +539,7 @@ static int threadwlock(RWLock *l, int block, ulong pc) {
 	USED(pc);
 
 	lock(&l->l);
-	if (l->writer == nil && l->readers == 0) {
+	if (l->writer == NULL && l->readers == 0) {
 		l->writer = (*threadnow)();
 		unlock(&l->l);
 		return 1;
@@ -562,10 +562,10 @@ static void threadrunlock(RWLock *l, ulong pc) {
 	_Thread *t;
 
 	USED(pc);
-	t = nil;
+	t = NULL;
 	lock(&l->l);
 	--l->readers;
-	if (l->readers == 0 && (t = l->wwaiting.head) != nil) {
+	if (l->readers == 0 && (t = l->wwaiting.head) != NULL) {
 		delthread(&l->wwaiting, t);
 		l->writer = t;
 	}
@@ -580,15 +580,15 @@ static void threadwunlock(RWLock *l, ulong pc) {
 
 	USED(pc);
 	lock(&l->l);
-	l->writer = nil;
+	l->writer = NULL;
 	assert(l->readers == 0);
-	while ((t = l->rwaiting.head) != nil) {
+	while ((t = l->rwaiting.head) != NULL) {
 		delthread(&l->rwaiting, t);
 		l->readers++;
 		_threadready(t);
 	}
-	t = nil;
-	if (l->readers == 0 && (t = l->wwaiting.head) != nil) {
+	t = NULL;
+	if (l->readers == 0 && (t = l->wwaiting.head) != NULL) {
 		delthread(&l->wwaiting, t);
 		l->writer = t;
 	}
@@ -616,20 +616,20 @@ static int threadrwakeup(Rendez *r, int all, ulong pc) {
 	int      i;
 	_Thread *t;
 
-	_threaddebug(nil, "rwakeup %p %d", r, all);
+	_threaddebug(NULL, "rwakeup %p %d", r, all);
 	for (i = 0;; i++) {
 		if (i == 1 && !all) {
 			break;
 		}
-		if ((t = r->waiting.head) == nil) {
+		if ((t = r->waiting.head) == NULL) {
 			break;
 		}
-		_threaddebug(nil, "rwakeup %p %d -> wake %d", r, all, t->id);
+		_threaddebug(NULL, "rwakeup %p %d -> wake %d", r, all, t->id);
 		delthread(&r->waiting, t);
 		_threadready(t);
-		_threaddebug(nil, "rwakeup %p %d -> loop", r, all);
+		_threaddebug(NULL, "rwakeup %p %d -> loop", r, all);
 	}
-	_threaddebug(nil, "rwakeup %p %d -> total %d", r, all, i);
+	_threaddebug(NULL, "rwakeup %p %d -> total %d", r, all, i);
 	return i;
 }
 
@@ -669,12 +669,12 @@ int main(int argc, char **argv) {
 	argv0 = argv[0];
 
 	opts = getenv("LIBTHREAD");
-	if (opts == nil) {
+	if (opts == NULL) {
 		opts = "";
 	}
 
-	if (threadmaybackground() && strstr(opts, "nodaemon") == nil &&
-	    getenv("NOLIBTHREADDAEMONIZE") == nil) {
+	if (threadmaybackground() && strstr(opts, "nodaemon") == NULL &&
+	    getenv("NOLIBTHREADDAEMONIZE") == NULL) {
 		_threadsetupdaemonize();
 	}
 
@@ -707,7 +707,7 @@ int main(int argc, char **argv) {
 		mainstacksize = 256 * 1024;
 	}
 	atnotify(threadinfo, 1);
-	t = _threadcreate(p, threadmainstart, nil, mainstacksize);
+	t = _threadcreate(p, threadmainstart, NULL, mainstacksize);
 	t->mainthread = 1;
 	procmain(p);
 	sysfatal("procmain returned in libthread");
@@ -724,10 +724,10 @@ static void addthread(_Threadlist *l, _Thread *t) {
 		t->prev = l->tail;
 	} else {
 		l->head = t;
-		t->prev = nil;
+		t->prev = NULL;
 	}
 	l->tail = t;
-	t->next = nil;
+	t->next = NULL;
 }
 
 static void delthread(_Threadlist *l, _Thread *t) {
@@ -764,10 +764,10 @@ static void addthreadinproc(Proc *p, _Thread *t) {
 		t->allprev = l->tail;
 	} else {
 		l->head = t;
-		t->allprev = nil;
+		t->allprev = NULL;
 	}
 	l->tail = t;
-	t->allnext = nil;
+	t->allnext = NULL;
 }
 
 static void delthreadinproc(Proc *p, _Thread *t) {
@@ -797,10 +797,10 @@ static void addproc(Proc *p) {
 		p->prev = _threadprocstail;
 	} else {
 		_threadprocs = p;
-		p->prev = nil;
+		p->prev = NULL;
 	}
 	_threadprocstail = p;
-	p->next = nil;
+	p->next = NULL;
 	unlock(&_threadprocslock);
 }
 

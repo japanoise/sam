@@ -28,7 +28,7 @@ drawshutdown(void)
 
 	d = display;
 	if(d){
-		display = nil;
+		display = NULL;
 		closedisplay(d);
 	}
 }
@@ -38,11 +38,11 @@ int geninitdraw(char *devdir, void (*error)(Display *, char *), char *fontname,
 		char *label, char *windir, int ref) {
 	char *p;
 
-	if (label == nil) {
+	if (label == NULL) {
 		label = argv0;
 	}
 	display = _initdisplay(error, label);
-	if (display == nil) {
+	if (display == NULL) {
 		return -1;
 	}
 
@@ -53,10 +53,10 @@ int geninitdraw(char *devdir, void (*error)(Display *, char *), char *fontname,
 		fprint(2, "imageinit: can't open default subfont: %r\n");
 	Error:
 		closedisplay(display);
-		display = nil;
+		display = NULL;
 		return -1;
 	}
-	if (fontname == nil) {
+	if (fontname == NULL) {
 		fontname = getenv("font");
 	}
 
@@ -64,12 +64,12 @@ int geninitdraw(char *devdir, void (*error)(Display *, char *), char *fontname,
 	 * Build fonts with caches==depth of screen, for speed.
 	 * If conversion were faster, we'd use 0 and save memory.
 	 */
-	if (fontname == nil) {
+	if (fontname == NULL) {
 		fontname = strdup("*default*");
 	}
 
 	font = openfont(display, fontname);
-	if (font == nil) {
+	if (font == NULL) {
 		fprint(2, "imageinit: can't open font %s: %r\n", fontname);
 		goto Error;
 	}
@@ -78,17 +78,18 @@ int geninitdraw(char *devdir, void (*error)(Display *, char *), char *fontname,
 	_screen = allocscreen(display->image, display->white, 0);
 	display->screenimage =
 	    display->image; /* _allocwindow wants screenimage->chan */
-	screen = _allocwindow(nil, _screen, display->image->r, Refnone, DWhite);
-	if (screen == nil) {
+	screen =
+	    _allocwindow(NULL, _screen, display->image->r, Refnone, DWhite);
+	if (screen == NULL) {
 		fprint(stderr, "_allocwindow: %r\n");
 		goto Error;
 	}
 	display->screenimage = screen;
-	draw(screen, screen->r, display->white, nil, ZP);
+	draw(screen, screen->r, display->white, NULL, ZP);
 	flushimage(display, 1);
 
 	p = getenv("visibleclicks");
-	visibleclicks = p != nil && *p == '1';
+	visibleclicks = p != NULL && *p == '1';
 	if (visibleclicks) {
 		Font *f;
 
@@ -151,20 +152,20 @@ static Image *getimage0(Display *d, Image *image) {
 	a[1] = 'I';
 	if (flushimage(d, 0) < 0) {
 		fprint(2, "cannot read screen info: %r\n");
-		return nil;
+		return NULL;
 	}
 
 	n = _displayrddraw(d, info, sizeof info);
 	if (n != 12 * 12) {
 		fprint(2, "short screen info: %r\n");
-		return nil;
+		return NULL;
 	}
 
-	if (image == nil) {
+	if (image == NULL) {
 		image = mallocz(sizeof(Image), 1);
-		if (image == nil) {
+		if (image == NULL) {
 			fprint(2, "cannot allocate image: %r\n");
-			return nil;
+			return NULL;
 		}
 	}
 
@@ -211,7 +212,7 @@ int getwindow(Display *d, int ref) {
 	 */
 	oi = d->image;
 	i = getimage0(d, oi);
-	if (i == nil) {
+	if (i == NULL) {
 		sysfatal("getwindow failed");
 	}
 	d->image = i;
@@ -224,12 +225,12 @@ int getwindow(Display *d, int ref) {
 	d->screenimage = screen;
 
 	if (d->dpi >= DefaultDPI * 3 / 2) {
-		for (f = d->firstfont; f != nil; f = f->next) {
+		for (f = d->firstfont; f != NULL; f = f->next) {
 			loadhidpi(f);
 		}
 	} else {
-		for (f = d->firstfont; f != nil; f = f->next) {
-			if (f->lodpi != nil && f->lodpi != f) {
+		for (f = d->firstfont; f != NULL; f = f->next) {
+			if (f->lodpi != NULL && f->lodpi != f) {
 				swapfont(f, &f->hidpi, &f->lodpi);
 			}
 		}
@@ -246,12 +247,12 @@ Display *_initdisplay(void (*error)(Display *, char *), char *label) {
 	fmtinstall('R', Rfmt);
 
 	disp = mallocz(sizeof(Display), 1);
-	if (disp == nil) {
+	if (disp == NULL) {
 	Error1:
-		return nil;
+		return NULL;
 	}
 	disp->srvfd = -1;
-	image = nil;
+	image = NULL;
 	if (0) {
 	Error2:
 		free(image);
@@ -264,7 +265,7 @@ Display *_initdisplay(void (*error)(Display *, char *), char *label) {
 	disp->error = error;
 	qlock(&disp->qlock);
 
-	if (disp->buf == nil) {
+	if (disp->buf == NULL) {
 		goto Error2;
 	}
 	if (0) {
@@ -283,15 +284,15 @@ Display *_initdisplay(void (*error)(Display *, char *), char *label) {
 		goto Error3;
 	}
 
-	image = getimage0(disp, nil);
-	if (image == nil) {
+	image = getimage0(disp, NULL);
+	if (image == NULL) {
 		goto Error4;
 	}
 
 	disp->image = image;
 	disp->white = allocimage(disp, Rect(0, 0, 1, 1), GREY1, 1, DWhite);
 	disp->black = allocimage(disp, Rect(0, 0, 1, 1), GREY1, 1, DBlack);
-	if (disp->white == nil || disp->black == nil) {
+	if (disp->white == NULL || disp->black == NULL) {
 		free(disp->white);
 		free(disp->black);
 		goto Error4;
@@ -311,11 +312,11 @@ void closedisplay(Display *disp) {
 	int  fd;
 	char buf[128];
 
-	if (disp == nil) {
+	if (disp == NULL) {
 		return;
 	}
 	if (disp == display) {
-		display = nil;
+		display = NULL;
 	}
 	if (disp->oldlabel[0]) {
 		snprintf(buf, sizeof buf, "%s/label", disp->windir);
@@ -396,22 +397,22 @@ int flushimage(Display *d, int visible) {
 		r = rectaddpt(r, _drawmouse.xy);
 		r = rectaddpt(
 		    r, Pt(-Dx(mousebuttons->r) / 2, -Dy(mousebuttons->r) - 3));
-		drawop(mousesave, mousesave->r, screen, nil, r.min, S);
+		drawop(mousesave, mousesave->r, screen, NULL, r.min, S);
 
 		r1 = rectaddpt(Rect(0, 0, 22, 22), r.min);
 		if (_drawmouse.buttons & 1) {
-			drawop(screen, r1, mousebuttons, nil, ZP, S);
+			drawop(screen, r1, mousebuttons, NULL, ZP, S);
 		}
 		r1 = rectaddpt(r1, Pt(21, 0));
 		if (_drawmouse.buttons & 2) {
-			drawop(screen, r1, mousebuttons, nil, Pt(21, 0), S);
+			drawop(screen, r1, mousebuttons, NULL, Pt(21, 0), S);
 		}
 		r1 = rectaddpt(r1, Pt(21, 0));
 		if (_drawmouse.buttons & 4) {
-			drawop(screen, r1, mousebuttons, nil, Pt(42, 0), S);
+			drawop(screen, r1, mousebuttons, NULL, Pt(42, 0), S);
 		}
 		ret = flushimage(d, 2);
-		drawop(screen, r, mousesave, nil, ZP, S);
+		drawop(screen, r, mousesave, NULL, ZP, S);
 		return ret;
 	}
 
@@ -428,7 +429,7 @@ int flushimage(Display *d, int visible) {
 uchar *bufimage(Display *d, int n) {
 	uchar *p;
 
-	if (n < 0 || d == nil || n > d->bufsize) {
+	if (n < 0 || d == NULL || n > d->bufsize) {
 		abort();
 		werrstr("bad count in bufimage");
 		return 0;
@@ -444,7 +445,7 @@ uchar *bufimage(Display *d, int n) {
 }
 
 int scalesize(Display *d, int n) {
-	if (d == nil || d->dpi <= DefaultDPI) {
+	if (d == NULL || d->dpi <= DefaultDPI) {
 		return n;
 	}
 	return (n * d->dpi + DefaultDPI / 2) / DefaultDPI;

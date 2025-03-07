@@ -8,7 +8,7 @@ int newwindow(char *str) {
 	char  buf[256];
 
 	wsys = getenv("wsys");
-	if (wsys == nil) {
+	if (wsys == NULL) {
 		return -1;
 	}
 	fd = open(wsys, ORDWR);

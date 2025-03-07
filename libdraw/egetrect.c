@@ -77,14 +77,14 @@ static void freetmp(void) {
 	freeimage(tmp[2]);
 	freeimage(tmp[3]);
 	freeimage(red);
-	tmp[0] = tmp[1] = tmp[2] = tmp[3] = red = nil;
+	tmp[0] = tmp[1] = tmp[2] = tmp[3] = red = NULL;
 }
 
 void edrawgetrect(Rectangle rc, int up) {
 	int       i;
 	Rectangle r, rects[4];
 
-	if (up && tmp[0] != nil) {
+	if (up && tmp[0] != NULL) {
 		if (Dx(tmp[0]->r) < Dx(rc) || Dy(tmp[2]->r) < Dy(rc)) {
 			freetmp();
 		}
@@ -107,13 +107,13 @@ void edrawgetrect(Rectangle rc, int up) {
 	brects(rc, rects);
 	if (!up) {
 		for (i = 0; i < 4; i++) {
-			draw(screen, rects[i], tmp[i], nil, ZP);
+			draw(screen, rects[i], tmp[i], NULL, ZP);
 		}
 		return;
 	}
 	for (i = 0; i < 4; i++) {
 		draw(tmp[i], Rect(0, 0, Dx(rects[i]), Dy(rects[i])), screen,
-		     nil, rects[i].min);
-		draw(screen, rects[i], red, nil, ZP);
+		     NULL, rects[i].min);
+		draw(screen, rects[i], red, NULL, ZP);
 	}
 }

@@ -4,6 +4,6 @@
 void f(void *v) { recvp(chancreate(sizeof(void *), 0)); }
 
 void threadmain(int argc, char **argv) {
-	proccreate(f, nil, 32000);
+	proccreate(f, NULL, 32000);
 	exit(1);
 }

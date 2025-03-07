@@ -15,7 +15,7 @@ void memimagedraw(Memimage *dst, Rectangle r, Memimage *src, Point sp,
 		  Memimage *mask, Point mp, int op) {
 	Memdrawparam *par;
 
-	if ((par = _memimagedrawsetup(dst, r, src, sp, mask, mp, op)) == nil) {
+	if ((par = _memimagedrawsetup(dst, r, src, sp, mask, mp, op)) == NULL) {
 		return;
 	}
 
@@ -48,7 +48,7 @@ static int xdraw(Memdrawparam *par) {
 	Xmem     *xdst, *xmask;
 	XGC       gc;
 
-	if (par->dst->X == nil) {
+	if (par->dst->X == NULL) {
 		return 0;
 	}
 

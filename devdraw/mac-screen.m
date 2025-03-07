@@ -113,7 +113,7 @@ rpc_shutdown(void)
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication {
-	return client0 != nil;
+	return client0 != NULL;
 }
 @end
 
@@ -152,7 +152,7 @@ rpc_shutdown(void)
 		[blit endEncoding];
 
 		[cbuf presentDrawable:drawable];
-		drawable = nil;
+		drawable = NULL;
 		[cbuf addCompletedHandler:^(id<MTLCommandBuffer> cmdBuff){
 			if(cmdBuff.error){
 				NSLog(@"command buffer finished with error: %@",
@@ -242,7 +242,7 @@ rpc_attach(Client *c, char *label, char *winsize)
 		| NSWindowStyleMaskMiniaturizable
 		| NSWindowStyleMaskResizable;
 
-	if(label == nil || *label == '\0')
+	if(label == NULL || *label == '\0')
 		Winstyle &= ~NSWindowStyleMaskTitled;
 
 	s = winsize;
@@ -250,7 +250,7 @@ rpc_attach(Client *c, char *label, char *winsize)
 	r = [[NSScreen mainScreen] visibleFrame];
 
 	LOG(@"makewin(%s)", s);
-	if(s == nil || *s == '\0' || parsewinsize(s, &wr, &set) < 0) {
+	if(s == NULL || *s == '\0' || parsewinsize(s, &wr, &set) < 0) {
 		wr = Rect(0, 0, sr.size.width*2/3, sr.size.height*2/3);
 		set = 0;
 	}
@@ -278,13 +278,13 @@ rpc_attach(Client *c, char *label, char *winsize)
 	client->view = CFBridgingRetain(self);
 	self.client = client;
 	self.win = win;
-	self.currentCursor = nil;
+	self.currentCursor = NULL;
 	[win setContentView:self];
 	[win setDelegate:self];
 	[self setWantsLayer:YES];
 	[self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawOnSetNeedsDisplay];
 
-	id<MTLDevice> device = nil;
+	id<MTLDevice> device = NULL;
 	allDevices = MTLCopyAllDevices();
 	for(id mtlDevice in allDevices) {
 		if ([mtlDevice isLowPower] && ![mtlDevice isRemovable]) {
@@ -318,7 +318,7 @@ rpc_attach(Client *c, char *label, char *winsize)
 
 	[self topwin];
 	[self setlabel:label];
-	[self setcursor:nil cursor2:nil];
+	[self setcursor:NULL cursor2:NULL];
 
 	return self;
 }
@@ -335,12 +335,12 @@ rpc_topwin(Client *c)
 }
 
 - (void)topwin {
-	[self.win makeKeyAndOrderFront:nil];
+	[self.win makeKeyAndOrderFront:NULL];
 	[NSApp activateIgnoringOtherApps:YES];
 }
 
 // rpc_setlabel updates the client window's label.
-// If label == nil, the call is a no-op.
+// If label == NULL, the call is a no-op.
 // Called from an RPC thread with no client lock held.
 static void
 rpc_setlabel(Client *client, char *label)
@@ -353,7 +353,7 @@ rpc_setlabel(Client *client, char *label)
 
 - (void)setlabel:(char*)label {
 	LOG(@"setlabel(%s)", label);
-	if(label == nil)
+	if(label == NULL)
 		return;
 
 	@autoreleasepool{
@@ -365,7 +365,7 @@ rpc_setlabel(Client *client, char *label)
 }
 
 // rpc_setcursor updates the client window's cursor image.
-// Either c and c2 are both non-nil, or they are both nil to use the default arrow.
+// Either c and c2 are both non-NULL, or they are both NULL to use the default arrow.
 // Called from an RPC thread with no client lock held.
 static void
 rpc_setcursor(Client *client, Cursor *c, Cursor2 *c2)
@@ -389,7 +389,7 @@ rpc_setcursor(Client *client, Cursor *c, Cursor2 *c2)
 	uint b;
 
 	r = [[NSBitmapImageRep alloc]
-		initWithBitmapDataPlanes:nil
+		initWithBitmapDataPlanes:NULL
 		pixelsWide:16
 		pixelsHigh:16
 		bitsPerSample:1
@@ -406,7 +406,7 @@ rpc_setcursor(Client *client, Cursor *c, Cursor2 *c2)
 	}
 
 	r2 = [[NSBitmapImageRep alloc]
-		initWithBitmapDataPlanes:nil
+		initWithBitmapDataPlanes:NULL
 		pixelsWide:32
 		pixelsHigh:32
 		bitsPerSample:1
@@ -452,10 +452,10 @@ rpc_setcursor(Client *client, Cursor *c, Cursor2 *c2)
 		LOG(@"initimg %.0f %.0f", size.width, size.height);
 
 		self.img = allocmemimage(self.client->mouserect, XRGB32);
-		if(self.img == nil)
+		if(self.img == NULL)
 			panic("allocmemimage: %r");
-		if(self.img->data == nil)
-			panic("img->data == nil");
+		if(self.img->data == NULL)
+			panic("img->data == NULL");
 
 		textureDesc = [MTLTextureDescriptor
 			texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
@@ -651,13 +651,13 @@ rpc_resizewindow(Client *c, Rectangle r)
 - (void)magnifyWithEvent:(NSEvent*)e
 {
 	if(fabs([e magnification]) > 0.02)
-		[[self window] toggleFullScreen:nil];
+		[[self window] toggleFullScreen:NULL];
 }
 
 - (void)touchesBeganWithEvent:(NSEvent*)e
 {
 	_tapping = YES;
-	_tapFingers = [e touchesMatchingPhase:NSTouchPhaseTouching inView:nil].count;
+	_tapFingers = [e touchesMatchingPhase:NSTouchPhaseTouching inView:NULL].count;
 	_tapTime = msec();
 }
 - (void)touchesMovedWithEvent:(NSEvent*)e
@@ -667,7 +667,7 @@ rpc_resizewindow(Client *c, Rectangle r)
 - (void)touchesEndedWithEvent:(NSEvent*)e
 {
 	if(_tapping
-		&& [e touchesMatchingPhase:NSTouchPhaseTouching inView:nil].count == 0
+		&& [e touchesMatchingPhase:NSTouchPhaseTouching inView:NULL].count == 0
 		&& msec() - _tapTime < 250){
 		switch(_tapFingers){
 		case 3:
@@ -742,7 +742,7 @@ rpc_setmouse(Client *c, Point p)
 		LOG(@"setmouse(%d,%d)", p.x, p.y);
 		q = [self.win convertPointFromBacking:NSMakePoint(p.x, p.y)];
 		LOG(@"(%g, %g) <- fromBacking", q.x, q.y);
-		q = [self convertPoint:q toView:nil];
+		q = [self convertPoint:q toView:NULL];
 		LOG(@"(%g, %g) <- toWindow", q.x, q.y);
 		q = [self.win convertPointToScreen:q];
 		LOG(@"(%g, %g) <- toScreen", q.x, q.y);
@@ -867,7 +867,7 @@ rpc_setmouse(Client *c, Point p)
 	if(actualRange)
 		*actualRange = sr;
 	LOG(@"use range: %ld, %ld", sr.location, sr.length);
-	s = nil;
+	s = NULL;
 	if(sr.length)
 		s = [[NSAttributedString alloc]
 			initWithString:[_tmpText substringWithRange:sr]];
@@ -1091,7 +1091,7 @@ rpc_getsnarf(void)
 {
 	char __block *ret;
 
-	ret = nil;
+	ret = NULL;
 	dispatch_sync(dispatch_get_main_queue(), ^(void) {
 		@autoreleasepool {
 			NSPasteboard *pb = [NSPasteboard generalPasteboard];
@@ -1108,7 +1108,7 @@ rpc_getsnarf(void)
 void
 rpc_putsnarf(char *s)
 {
-	if(s == nil || strlen(s) >= SnarfSize)
+	if(s == NULL || strlen(s) >= SnarfSize)
 		return;
 
 	dispatch_sync(dispatch_get_main_queue(), ^(void) {
@@ -1116,7 +1116,7 @@ rpc_putsnarf(char *s)
 			NSArray *t = [NSArray arrayWithObject:NSPasteboardTypeString];
 			NSPasteboard *pb = [NSPasteboard generalPasteboard];
 			NSString *str = [[NSString alloc] initWithUTF8String:s];
-			[pb declareTypes:t owner:nil];
+			[pb declareTypes:t owner:NULL];
 			[pb setString:str forType:NSPasteboardTypeString];
 		}
 	});
@@ -1147,7 +1147,7 @@ setprocname(const char *s)
 {
   CFStringRef process_name;
 
-  process_name = CFStringCreateWithBytes(nil, (uchar*)s, strlen(s), kCFStringEncodingUTF8, false);
+  process_name = CFStringCreateWithBytes(NULL, (uchar*)s, strlen(s), kCFStringEncodingUTF8, false);
 
   // Adapted from Chrome's mac_util.mm.
   // http://src.chromium.org/viewvc/chrome/trunk/src/base/mac/mac_util.mm

@@ -9,35 +9,35 @@ Memimage *memlalloc(Memscreen *s, Rectangle screenr, Refreshfn refreshfn,
 	Memimage        *n;
 	static Memimage *paint;
 
-	if (paint == nil) {
+	if (paint == NULL) {
 		paint = allocmemimage(Rect(0, 0, 1, 1), RGBA32);
-		if (paint == nil) {
-			return nil;
+		if (paint == NULL) {
+			return NULL;
 		}
 		paint->flags |= Frepl;
 		paint->clipr =
 		    Rect(-0x3FFFFFF, -0x3FFFFFF, 0x3FFFFFF, 0x3FFFFFF);
 	}
 
-	n = allocmemimaged(screenr, s->image->chan, s->image->data, nil);
-	if (n == nil) {
-		return nil;
+	n = allocmemimaged(screenr, s->image->chan, s->image->data, NULL);
+	if (n == NULL) {
+		return NULL;
 	}
 	l = malloc(sizeof(Memlayer));
-	if (l == nil) {
+	if (l == NULL) {
 		free(n);
-		return nil;
+		return NULL;
 	}
 
 	l->screen = s;
 	if (refreshfn) {
-		l->save = nil;
+		l->save = NULL;
 	} else {
 		l->save = allocmemimage(screenr, s->image->chan);
-		if (l->save == nil) {
+		if (l->save == NULL) {
 			free(l);
 			free(n);
-			return nil;
+			return NULL;
 		}
 		/* allocmemimage doesn't initialize memory; this paints save
 		 * area */
@@ -46,7 +46,7 @@ Memimage *memlalloc(Memscreen *s, Rectangle screenr, Refreshfn refreshfn,
 		}
 	}
 	l->refreshfn = refreshfn;
-	l->refreshptr = nil; /* don't set it until we're done */
+	l->refreshptr = NULL; /* don't set it until we're done */
 	l->screenr = screenr;
 	l->delta = Pt(0, 0);
 
@@ -57,12 +57,12 @@ Memimage *memlalloc(Memscreen *s, Rectangle screenr, Refreshfn refreshfn,
 
 	/* start with new window behind all existing ones */
 	l->front = s->rearmost;
-	l->rear = nil;
+	l->rear = NULL;
 	if (s->rearmost) {
 		s->rearmost->layer->rear = n;
 	}
 	s->rearmost = n;
-	if (s->frontmost == nil) {
+	if (s->frontmost == NULL) {
 		s->frontmost = n;
 	}
 	l->clear = 0;
@@ -79,7 +79,7 @@ Memimage *memlalloc(Memscreen *s, Rectangle screenr, Refreshfn refreshfn,
 	if (val != DNofill) {
 		memsetchan(paint, n->chan);
 		memfillcolor(paint, val);
-		memdraw(n, n->r, paint, n->r.min, nil, n->r.min, S);
+		memdraw(n, n->r, paint, n->r.min, NULL, n->r.min, S);
 	}
 	return n;
 }

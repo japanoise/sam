@@ -8,14 +8,14 @@ void borderop(Image *im, Rectangle r, int i, Image *color, Point sp,
 		sp = addpt(sp, Pt(i, i));
 		i = -i;
 	}
-	drawop(im, Rect(r.min.x, r.min.y, r.max.x, r.min.y + i), color, nil, sp,
-	       op);
-	drawop(im, Rect(r.min.x, r.max.y - i, r.max.x, r.max.y), color, nil,
+	drawop(im, Rect(r.min.x, r.min.y, r.max.x, r.min.y + i), color, NULL,
+	       sp, op);
+	drawop(im, Rect(r.min.x, r.max.y - i, r.max.x, r.max.y), color, NULL,
 	       Pt(sp.x, sp.y + Dy(r) - i), op);
 	drawop(im, Rect(r.min.x, r.min.y + i, r.min.x + i, r.max.y - i), color,
-	       nil, Pt(sp.x, sp.y + i), op);
+	       NULL, Pt(sp.x, sp.y + i), op);
 	drawop(im, Rect(r.max.x - i, r.min.y + i, r.max.x, r.max.y - i), color,
-	       nil, Pt(sp.x + Dx(r) - i, sp.y + i), op);
+	       NULL, Pt(sp.x + Dx(r) - i, sp.y + i), op);
 }
 
 void border(Image *im, Rectangle r, int i, Image *color, Point sp) {

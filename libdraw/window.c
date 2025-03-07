@@ -101,7 +101,7 @@ int freescreen(Screen *s) {
 }
 
 Image *allocwindow(Screen *s, Rectangle r, int ref, u32int val) {
-	return _allocwindow(nil, s, r, ref, val);
+	return _allocwindow(NULL, s, r, ref, val);
 }
 
 Image *_allocwindow(Image *i, Screen *s, Rectangle r, int ref, u32int val) {
@@ -185,7 +185,7 @@ int originwindow(Image *w, Point log, Point scr) {
 
 	flushimage(w->display, 0);
 	b = bufimage(w->display, 1 + 4 + 2 * 4 + 2 * 4);
-	if (b == nil) {
+	if (b == NULL) {
 		return 0;
 	}
 	b[0] = 'o';

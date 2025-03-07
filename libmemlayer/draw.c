@@ -20,7 +20,7 @@ static void ldrawop(Memimage *dst, Rectangle screenr, Rectangle clipr,
 	int          ok;
 
 	d = etc;
-	if (insave && d->dstlayer->save == nil) {
+	if (insave && d->dstlayer->save == NULL) {
 		return;
 	}
 
@@ -61,19 +61,19 @@ void memdraw(Memimage *dst, Rectangle r, Memimage *src, Point p0,
 		       p1);
 	}
 
-	if (mask == nil) {
+	if (mask == NULL) {
 		mask = memopaque;
 	}
 
 	if (mask->layer) {
 		if (drawdebug) {
-			iprint("mask->layer != nil\n");
+			iprint("mask->layer != NULL\n");
 		}
 		return; /* too hard, at least for now */
 	}
 
 Top:
-	if (dst->layer == nil && src->layer == nil) {
+	if (dst->layer == NULL && src->layer == NULL) {
 		memimagedraw(dst, r, src, p0, mask, p1, op);
 		return;
 	}
@@ -90,14 +90,14 @@ Top:
 	 * Convert to screen coordinates.
 	 */
 	dl = dst->layer;
-	if (dl != nil) {
+	if (dl != NULL) {
 		r.min.x += dl->delta.x;
 		r.min.y += dl->delta.y;
 		r.max.x += dl->delta.x;
 		r.max.y += dl->delta.y;
 	}
 Clearlayer:
-	if (dl != nil && dl->clear) {
+	if (dl != NULL && dl->clear) {
 		if (src == dst) {
 			p0.x += dl->delta.x;
 			p0.y += dl->delta.y;
@@ -108,7 +108,7 @@ Clearlayer:
 	}
 
 	sl = src->layer;
-	if (sl != nil) {
+	if (sl != NULL) {
 		p0.x += sl->delta.x;
 		p0.y += sl->delta.y;
 		srcr.min.x += sl->delta.x;
@@ -125,8 +125,8 @@ Clearlayer:
 	/*
 	 * if dst and src are the same layer, just draw in save area and expose.
 	 */
-	if (dl != nil && dst == src) {
-		if (dl->save == nil) {
+	if (dl != NULL && dst == src) {
+		if (dl->save == NULL) {
 			return; /* refresh function makes this case unworkable
 				 */
 		}
@@ -160,7 +160,7 @@ Clearlayer:
 	if (sl) {
 		if (sl->clear) {
 			src = sl->screen->image;
-			if (dl != nil) {
+			if (dl != NULL) {
 				r.min.x -= dl->delta.x;
 				r.min.y -= dl->delta.y;
 				r.max.x -= dl->delta.x;
@@ -169,7 +169,7 @@ Clearlayer:
 			goto Top;
 		}
 		/* relatively rare case; use save area */
-		if (sl->save == nil) {
+		if (sl->save == NULL) {
 			return; /* refresh function makes this case unworkable
 				 */
 		}
@@ -187,7 +187,7 @@ Clearlayer:
 	/*
 	 * src is now an image.  dst may be an image or a clear layer
 	 */
-	if (dst->layer == nil) {
+	if (dst->layer == NULL) {
 		goto Top;
 	}
 	if (dst->layer->clear) {

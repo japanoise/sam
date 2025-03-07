@@ -28,7 +28,7 @@ static void menucolors(void) {
 			  DDarkgreen); /* dark green */
 	bord = allocimage(display, Rect(0, 0, 1, 1), screen->chan, 1,
 			  DMedgreen); /* not as dark green */
-	if (back == nil || high == nil || bord == nil) {
+	if (back == NULL || high == NULL || bord == NULL) {
 		goto Error;
 	}
 	text = display->black;
@@ -82,16 +82,16 @@ static void paintitem(Image *m, Menu *menu, Rectangle textr, int off, int i,
 	}
 	r = menurect(textr, i);
 	if (restore) {
-		draw(m, r, restore, nil, restore->r.min);
+		draw(m, r, restore, NULL, restore->r.min);
 		return;
 	}
 	if (save) {
-		draw(save, save->r, m, nil, r.min);
+		draw(save, save->r, m, NULL, r.min);
 	}
 	item = menu->item ? menu->item[i + off] : (*menu->gen)(i + off);
 	pt.x = (textr.min.x + textr.max.x - stringwidth(font, item)) / 2;
 	pt.y = textr.min.y + i * (font->height + Vspacing);
-	draw(m, r, highlight ? high : back, nil, pt);
+	draw(m, r, highlight ? high : back, NULL, pt);
 	string(m, pt, highlight ? htext : text, pt, font, item);
 }
 
@@ -105,18 +105,18 @@ static int menuscan(Image *m, Menu *menu, int but, Mousectl *mc,
 		    Rectangle textr, int off, int lasti, Image *save) {
 	int i;
 
-	paintitem(m, menu, textr, off, lasti, 1, save, nil);
+	paintitem(m, menu, textr, off, lasti, 1, save, NULL);
 	for (readmouse(mc); mc->m.buttons & (1 << (but - 1)); readmouse(mc)) {
 		i = menusel(textr, mc->m.xy);
 		if (i != -1 && i == lasti) {
 			continue;
 		}
-		paintitem(m, menu, textr, off, lasti, 0, nil, save);
+		paintitem(m, menu, textr, off, lasti, 0, NULL, save);
 		if (i == -1) {
 			return i;
 		}
 		lasti = i;
-		paintitem(m, menu, textr, off, lasti, 1, save, nil);
+		paintitem(m, menu, textr, off, lasti, 1, save, NULL);
 	}
 	return lasti;
 }
@@ -125,9 +125,9 @@ static void menupaint(Image *m, Menu *menu, Rectangle textr, int off,
 		      int nitemdrawn) {
 	int i;
 
-	draw(m, insetrect(textr, Border - Margin), back, nil, ZP);
+	draw(m, insetrect(textr, Border - Margin), back, NULL, ZP);
 	for (i = 0; i < nitemdrawn; i++) {
-		paintitem(m, menu, textr, off, i, 0, nil, nil);
+		paintitem(m, menu, textr, off, i, 0, NULL, NULL);
 	}
 }
 
@@ -135,7 +135,7 @@ static void menuscrollpaint(Image *m, Rectangle scrollr, int off, int nitem,
 			    int nitemdrawn) {
 	Rectangle r;
 
-	draw(m, scrollr, back, nil, ZP);
+	draw(m, scrollr, back, NULL, ZP);
 	r.min.x = scrollr.min.x;
 	r.max.x = scrollr.max.x;
 	r.min.y = scrollr.min.y + (Dy(scrollr) * off) / nitem;
@@ -149,7 +149,7 @@ static void menuscrollpaint(Image *m, Rectangle scrollr, int off, int nitem,
 				     DDarkgreen); /* border color; BUG? */
 	}
 	if (menutxt) {
-		draw(m, insetrect(r, 1), menutxt, nil, ZP);
+		draw(m, insetrect(r, 1), menutxt, NULL, ZP);
 	}
 }
 
@@ -161,7 +161,7 @@ int menuhit(int but, Mousectl *mc, Menu *menu, Screen *scr) {
 	Point     pt;
 	char     *item;
 
-	if (back == nil) {
+	if (back == NULL) {
 		menucolors();
 	}
 	sc = screen->clipr;
@@ -233,18 +233,18 @@ int menuhit(int but, Mousectl *mc, Menu *menu, Screen *scr) {
 
 	if (scr) {
 		b = allocwindow(scr, menur, Refbackup, DWhite);
-		if (b == nil) {
+		if (b == NULL) {
 			b = screen;
 		}
-		backup = nil;
+		backup = NULL;
 	} else {
 		b = screen;
 		backup = allocimage(display, menur, screen->chan, 0, -1);
 		if (backup) {
-			draw(backup, menur, screen, nil, menur.min);
+			draw(backup, menur, screen, NULL, menur.min);
 		}
 	}
-	draw(b, menur, back, nil, ZP);
+	draw(b, menur, back, NULL, ZP);
 	border(b, menur, Blackborder, bord, ZP);
 	save = allocimage(display, menurect(textr, 0), screen->chan, 0, -1);
 	r = menurect(textr, lasti);
@@ -285,7 +285,7 @@ int menuhit(int but, Mousectl *mc, Menu *menu, Screen *scr) {
 		freeimage(b);
 	}
 	if (backup) {
-		draw(screen, menur, backup, nil, menur.min);
+		draw(screen, menur, backup, NULL, menur.min);
 		freeimage(backup);
 	}
 	freeimage(save);

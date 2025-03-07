@@ -9,7 +9,7 @@ char *chantostr(char *buf, u32int cc) {
 	char  *p;
 
 	if (chantodepth(cc) == 0) {
-		return nil;
+		return NULL;
 	}
 
 	/* reverse the channel descriptor so we can easily generate the string
@@ -42,7 +42,7 @@ u32int strtochan(char *s) {
 	}
 
 	while (*p && !isspace(*p)) {
-		if ((q = strchr(channames, p[0])) == nil) {
+		if ((q = strchr(channames, p[0])) == NULL) {
 			return 0;
 		}
 		t = q - channames;

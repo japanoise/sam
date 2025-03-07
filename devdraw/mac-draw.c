@@ -19,7 +19,7 @@ void memimagedraw(Memimage *dst, Rectangle r, Memimage *src, Point sp,
 	Memdrawparam *par;
 
 	par = _memimagedrawsetup(dst, r, src, sp, mask, mp, op);
-	if (par == nil) {
+	if (par == NULL) {
 		return;
 	}
 	_memimagedraw(par);

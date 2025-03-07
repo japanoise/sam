@@ -53,13 +53,13 @@ void threadmain(int argc, char **argv) {
 
 	memimageinit();
 	fmtinstall('H', encodefmt);
-	if ((p = getenv("DEVDRAWTRACE")) != nil) {
+	if ((p = getenv("DEVDRAWTRACE")) != NULL) {
 		trace = atoi(p);
 	}
 
-	if (srvname == nil) {
+	if (srvname == NULL) {
 		client0 = mallocz(sizeof(Client), 1);
-		if (client0 == nil) {
+		if (client0 == NULL) {
 			fprintf(stderr,
 				"initdraw: allocating client0: out of memory");
 			abort();
@@ -87,20 +87,20 @@ void threadmain(int argc, char **argv) {
 void gfx_started(void) {
 	char *ns, *addr;
 
-	if (srvname == nil) {
+	if (srvname == NULL) {
 		// Legacy mode: serving single client on pipes.
 		proccreate(serveproc, client0, 0);
 		return;
 	}
 
 	// Server mode.
-	if ((ns = getns()) == nil) {
+	if ((ns = getns()) == NULL) {
 		sysfatal("out of memory");
 	}
 
 	addr = smprint("unix!%s/%s", ns, srvname);
 	free(ns);
-	if (addr == nil) {
+	if (addr == NULL) {
 		sysfatal("out of memory");
 	}
 
@@ -108,7 +108,7 @@ void gfx_started(void) {
 		sysfatal("announce %s: %r", addr);
 	}
 
-	proccreate(listenproc, nil, 0);
+	proccreate(listenproc, NULL, 0);
 }
 
 static void listenproc(void *v) {
@@ -124,7 +124,7 @@ static void listenproc(void *v) {
 			sysfatal("listen: %r");
 		}
 		c = mallocz(sizeof(Client), 1);
-		if (c == nil) {
+		if (c == NULL) {
 			fprintf(stderr,
 				"initdraw: allocating client0: out of memory");
 			abort();
@@ -143,14 +143,14 @@ static void serveproc(void *v) {
 	Wsysmsg m;
 
 	c = v;
-	mbuf = nil;
+	mbuf = NULL;
 	nmbuf = 0;
 	while ((n = read(c->rfd, buf, 4)) == 4) {
 		GET(buf, n);
 		if (n > nmbuf) {
 			free(mbuf);
 			mbuf = malloc(4 + n);
-			if (mbuf == nil) {
+			if (mbuf == NULL) {
 				sysfatal("out of memory");
 			}
 			nmbuf = n;
@@ -176,7 +176,7 @@ static void serveproc(void *v) {
 
 	if (c == client0) {
 		rpc_shutdown();
-		threadexitsall(nil);
+		threadexitsall(NULL);
 	}
 }
 
@@ -206,7 +206,7 @@ static void runmsg(Client *c, Wsysmsg *m) {
 
 	case Tinit:
 		i = rpc_attach(c, m->label, m->winsize);
-		if (i == nil) {
+		if (i == NULL) {
 			replyerror(c, m);
 			break;
 		}
@@ -259,7 +259,7 @@ static void runmsg(Client *c, Wsysmsg *m) {
 
 	case Tcursor:
 		if (m->arrowcursor) {
-			c->impl->rpc_setcursor(c, nil, nil);
+			c->impl->rpc_setcursor(c, NULL, NULL);
 		} else {
 			scalecursor(&m->cursor2, &m->cursor);
 			c->impl->rpc_setcursor(c, &m->cursor, &m->cursor2);
@@ -269,7 +269,7 @@ static void runmsg(Client *c, Wsysmsg *m) {
 
 	case Tcursor2:
 		if (m->arrowcursor) {
-			c->impl->rpc_setcursor(c, nil, nil);
+			c->impl->rpc_setcursor(c, NULL, NULL);
 		} else {
 			c->impl->rpc_setcursor(c, &m->cursor, &m->cursor2);
 		}
@@ -354,7 +354,7 @@ static void replymsg(Client *c, Wsysmsg *m) {
 	if (n > c->nmbuf) {
 		free(c->mbuf);
 		c->mbuf = malloc(n);
-		if (c->mbuf == nil) {
+		if (c->mbuf == NULL) {
 			sysfatal("out of memory");
 		}
 		c->nmbuf = n;

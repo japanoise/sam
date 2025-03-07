@@ -80,7 +80,7 @@ void memimageinit(void) {
 	memzeros->clipr = Rect(-0x3FFFFFF, -0x3FFFFFF, 0x3FFFFFF, 0x3FFFFFF);
 	*byteaddr(memzeros, ZP) = 0;
 
-	if (memones == nil || memzeros == nil) {
+	if (memones == NULL || memzeros == NULL) {
 		assert(0 /*cannot initialize memimage library */); /* RSC BUG */
 	}
 
@@ -99,7 +99,7 @@ static Memdrawparam par;
 
 Memdrawparam *_memimagedrawsetup(Memimage *dst, Rectangle r, Memimage *src,
 				 Point p0, Memimage *mask, Point p1, int op) {
-	if (mask == nil) {
+	if (mask == NULL) {
 		mask = memopaque;
 	}
 
@@ -110,13 +110,13 @@ Memdrawparam *_memimagedrawsetup(Memimage *dst, Rectangle r, Memimage *src,
 	if (drawclip(dst, &r, src, &p0, mask, &p1, &par.sr, &par.mr) == 0) {
 		/*		if(drawdebug) */
 		/*			iprint("empty clipped rectangle\n"); */
-		return nil;
+		return NULL;
 	}
 
 	if (op < Clear || op > SoverD) {
 		/*		if(drawdebug) */
 		/*			iprint("op out of range: %d\n", op); */
-		return nil;
+		return NULL;
 	}
 
 	par.op = op;
@@ -138,7 +138,7 @@ Memdrawparam *_memimagedrawsetup(Memimage *dst, Rectangle r, Memimage *src,
 			if ((par.srgba & 0xFF) == 0 && (op & DoutS)) {
 				/*				if (drawdebug)
 				 * iprint("fill with transparent source\n"); */
-				return nil; /* no-op successfully handled */
+				return NULL; /* no-op successfully handled */
 			}
 			if ((par.srgba & 0xFF) == 0xFF) {
 				par.state |= Fullsrc;
@@ -153,7 +153,7 @@ Memdrawparam *_memimagedrawsetup(Memimage *dst, Rectangle r, Memimage *src,
 			if (par.mval == 0 && (op & DoutS)) {
 				/*				if(drawdebug)
 				 * iprint("fill with zero mask\n"); */
-				return nil; /* no-op successfully handled */
+				return NULL; /* no-op successfully handled */
 			}
 			par.state |= Simplemask;
 			if (par.mval == ~0) {
@@ -526,7 +526,7 @@ static int allocdrawbuf(void) {
 
 	if (ndrawbuf > mdrawbuf) {
 		p = realloc(drawbuf, ndrawbuf);
-		if (p == nil) {
+		if (p == NULL) {
 			werrstr("memimagedraw out of memory");
 			return -1;
 		}
@@ -1461,7 +1461,7 @@ static void writenbit(Param *p, uchar *w, Buffer src) {
 	u32int bits;
 	int    i, sh, depth, npack, nbits, x, ex;
 
-	assert(src.grey != nil && src.delta == 1);
+	assert(src.grey != NULL && src.delta == 1);
 
 	x = p->r.min.x;
 	ex = x + p->dx;
@@ -1558,7 +1558,7 @@ static Buffer readcmap(Param *p, uchar *buf, int y) {
 		b.blu = buf;
 		b.grn = buf + 1;
 		b.red = buf + 2;
-		b.grey = nil;
+		b.grey = NULL;
 		b.delta = 3 + copyalpha;
 	}
 	return b;
@@ -1672,9 +1672,9 @@ static Buffer readbyte(Param *p, uchar *buf, int y) {
 	b.alpha = copyalpha ? buf : &ones;
 	b.rgba = (u32int *)buf;
 	if (alphaonly) {
-		b.red = b.grn = b.blu = b.grey = nil;
+		b.red = b.grn = b.blu = b.grey = NULL;
 		if (!copyalpha) {
-			b.rgba = nil;
+			b.rgba = NULL;
 		}
 		b.delta = 1;
 	} else if (isgrey || convgrey) {
@@ -1684,7 +1684,7 @@ static Buffer readbyte(Param *p, uchar *buf, int y) {
 	} else {
 		b.blu = buf + copyalpha;
 		b.grn = buf + copyalpha + 1;
-		b.grey = nil;
+		b.grey = NULL;
 		b.red = buf + copyalpha + 2;
 		b.delta = copyalpha + 3;
 	}
@@ -1718,7 +1718,7 @@ static void writebyte(Param *p, uchar *w, Buffer src) {
 	isgrey = img->flags & Fgrey;
 	adelta = src.delta;
 
-	if (isalpha && (alpha == nil || alpha == &ones)) {
+	if (isalpha && (alpha == NULL || alpha == &ones)) {
 		ff = 0xFF;
 		alpha = &ff;
 		adelta = 0;
@@ -1808,7 +1808,7 @@ static Buffer readptr(Param *p, uchar *s, int y) {
 	memset(&b, 0, sizeof b);
 	q = p->bytermin + y * p->bwidth;
 	b.red = q; /* ptr to data */
-	b.grn = b.blu = b.grey = b.alpha = nil;
+	b.grn = b.blu = b.grey = b.alpha = NULL;
 	b.rgba = (u32int *)q;
 	b.delta = p->img->depth / 8;
 	return b;
@@ -1924,7 +1924,7 @@ static Buffer genconv(Param *p, uchar *buf, int y) {
 	}
 
 	b.red = buf;
-	b.blu = b.grn = b.grey = b.alpha = nil;
+	b.blu = b.grn = b.grey = b.alpha = NULL;
 	b.rgba = (u32int *)buf;
 	b.delta = 0;
 

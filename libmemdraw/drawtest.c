@@ -190,8 +190,8 @@ void dumpimage(char *name, Memimage *img, void *vdata, Point labelpt) {
 	u32int    v, mask;
 	Rectangle r;
 
-	fmt = nil;
-	arg = nil;
+	fmt = NULL;
+	arg = NULL;
 	switch (img->depth) {
 	case 1:
 	case 2:
@@ -204,7 +204,7 @@ void dumpimage(char *name, Memimage *img, void *vdata, Point labelpt) {
 		arg = "%.2ux";
 		break;
 	case 16:
-		arg = nil;
+		arg = NULL;
 		if (img->chan == RGB16) {
 			fmt = Bprintr5g6b5;
 		} else {
@@ -221,7 +221,7 @@ void dumpimage(char *name, Memimage *img, void *vdata, Point labelpt) {
 		arg = "%.8lux";
 		break;
 	}
-	if (fmt == nil) {
+	if (fmt == NULL) {
 		fprintf(stderr, "bad format\n");
 		abort();
 	}
@@ -487,7 +487,7 @@ void verifylinemask(void) {
 
 	memimagedraw(dst, dr, src, sp, mask, mp, SoverD);
 	checkline(dr, drawrepl(src->r, sp), drawrepl(mask->r, mp), dr.min.y,
-		  nil, nil);
+		  NULL, NULL);
 }
 
 void verifyline(void) {
@@ -562,7 +562,7 @@ void verifyrectmask(void) {
 	memimagedraw(dst, dr, src, sp, mask, mp, SoverD);
 	for (y = 0; y < Yrange; y++) {
 		checkline(dr, drawrepl(src->r, sp), drawrepl(mask->r, mp), y,
-			  nil, nil);
+			  NULL, NULL);
 	}
 }
 
@@ -753,7 +753,7 @@ void verifyrectmaskrepl(int srcrepl, int maskrepl) {
 	memimagedraw(dst, dr, src, sp, mask, mp, SoverD);
 	for (y = 0; y < Yrange; y++) {
 		checkline(dr, drawrepl(src->r, sp), drawrepl(mask->r, mp), y,
-			  srcrepl ? stmp : nil, maskrepl ? mtmp : nil);
+			  srcrepl ? stmp : NULL, maskrepl ? mtmp : NULL);
 	}
 }
 

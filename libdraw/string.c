@@ -4,48 +4,48 @@
 enum { Max = 100 };
 
 Point string(Image *dst, Point pt, Image *src, Point sp, Font *f, char *s) {
-	return _string(dst, pt, src, sp, f, s, nil, 1 << 24, dst->clipr, nil,
+	return _string(dst, pt, src, sp, f, s, NULL, 1 << 24, dst->clipr, NULL,
 		       ZP, SoverD);
 }
 
 Point stringop(Image *dst, Point pt, Image *src, Point sp, Font *f, char *s,
 	       Drawop op) {
-	return _string(dst, pt, src, sp, f, s, nil, 1 << 24, dst->clipr, nil,
+	return _string(dst, pt, src, sp, f, s, NULL, 1 << 24, dst->clipr, NULL,
 		       ZP, op);
 }
 
 Point stringn(Image *dst, Point pt, Image *src, Point sp, Font *f, char *s,
 	      int len) {
-	return _string(dst, pt, src, sp, f, s, nil, len, dst->clipr, nil, ZP,
+	return _string(dst, pt, src, sp, f, s, NULL, len, dst->clipr, NULL, ZP,
 		       SoverD);
 }
 
 Point stringnop(Image *dst, Point pt, Image *src, Point sp, Font *f, char *s,
 		int len, Drawop op) {
-	return _string(dst, pt, src, sp, f, s, nil, len, dst->clipr, nil, ZP,
+	return _string(dst, pt, src, sp, f, s, NULL, len, dst->clipr, NULL, ZP,
 		       op);
 }
 
 Point runestring(Image *dst, Point pt, Image *src, Point sp, Font *f, Rune *r) {
-	return _string(dst, pt, src, sp, f, nil, r, 1 << 24, dst->clipr, nil,
+	return _string(dst, pt, src, sp, f, NULL, r, 1 << 24, dst->clipr, NULL,
 		       ZP, SoverD);
 }
 
 Point runestringop(Image *dst, Point pt, Image *src, Point sp, Font *f, Rune *r,
 		   Drawop op) {
-	return _string(dst, pt, src, sp, f, nil, r, 1 << 24, dst->clipr, nil,
+	return _string(dst, pt, src, sp, f, NULL, r, 1 << 24, dst->clipr, NULL,
 		       ZP, op);
 }
 
 Point runestringn(Image *dst, Point pt, Image *src, Point sp, Font *f, Rune *r,
 		  int len) {
-	return _string(dst, pt, src, sp, f, nil, r, len, dst->clipr, nil, ZP,
+	return _string(dst, pt, src, sp, f, NULL, r, len, dst->clipr, NULL, ZP,
 		       SoverD);
 }
 
 Point runestringnop(Image *dst, Point pt, Image *src, Point sp, Font *f,
 		    Rune *r, int len, Drawop op) {
-	return _string(dst, pt, src, sp, f, nil, r, len, dst->clipr, nil, ZP,
+	return _string(dst, pt, src, sp, f, NULL, r, len, dst->clipr, NULL, ZP,
 		       op);
 }
 
@@ -65,19 +65,19 @@ Point _string(Image *dst, Point pt, Image *src, Point sp, Font *f, char *s,
 		sysfatal("libdraw: _string len=%d", len);
 	}
 
-	if (s == nil) {
+	if (s == NULL) {
 		s = "";
-		sptr = nil;
+		sptr = NULL;
 	} else {
 		sptr = &s;
 	}
-	if (r == nil) {
+	if (r == NULL) {
 		r = (Rune *)L"";
-		rptr = nil;
+		rptr = NULL;
 	} else {
 		rptr = &r;
 	}
-	sf = nil;
+	sf = NULL;
 #if defined(__AIX__)
 	while ((*s || *rptr) && len) {
 #else
@@ -137,7 +137,7 @@ Point _string(Image *dst, Point pt, Image *src, Point sp, Font *f, char *s,
 			freesubfont(sf);
 			if ((sf = _getsubfont(f->display, subfontname)) == 0) {
 				def =
-				    f->display ? f->display->defaultfont : nil;
+				    f->display ? f->display->defaultfont : NULL;
 				if (def && f != def) {
 					f = def;
 				} else {

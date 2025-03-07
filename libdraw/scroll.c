@@ -8,7 +8,7 @@ int mousescrollsize(int maxlines) {
 	if (lines == 0 && pcnt == 0) {
 		mss = getenv("mousescrollsize");
 		if (mss) {
-			if (strchr(mss, '%') != nil) {
+			if (strchr(mss, '%') != NULL) {
 				pcnt = atof(mss);
 			} else {
 				lines = atoi(mss);

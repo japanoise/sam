@@ -19,7 +19,7 @@ Memimage *_xallocmemimage(Rectangle r, u32int chan, int pixmap) {
 	if (chan != GREY1 && chan != _x.chan) {
 		return m;
 	}
-	if (_x.display == 0 || _x.windows == nil) {
+	if (_x.display == 0 || _x.windows == NULL) {
 		return m;
 	}
 
@@ -34,9 +34,9 @@ Memimage *_xallocmemimage(Rectangle r, u32int chan, int pixmap) {
 	}
 
 	xm = mallocz(sizeof(Xmem), 1);
-	if (xm == nil) {
+	if (xm == NULL) {
 		freememimage(m);
-		return nil;
+		return NULL;
 	}
 
 	/*
@@ -71,12 +71,12 @@ Memimage *_xallocmemimage(Rectangle r, u32int chan, int pixmap) {
 	xi = XCreateImage(_x.display, _x.vis, d, ZPixmap, 0,
 			  (char *)m->data->bdata, Dx(r), Dy(r), 32,
 			  m->width * sizeof(u32int));
-	if (xi == nil) {
+	if (xi == NULL) {
 		freememimage(m);
 		if (xm->pixmap != pixmap) {
 			XFreePixmap(_x.display, xm->pixmap);
 		}
-		return nil;
+		return NULL;
 	}
 
 	xm->xi = xi;
@@ -108,19 +108,19 @@ Memimage *allocmemimage(Rectangle r, u32int chan) {
 void freememimage(Memimage *m) {
 	Xmem *xm;
 
-	if (m == nil) {
+	if (m == NULL) {
 		return;
 	}
 
 	xm = m->X;
 	if (xm && m->data->ref == 1) {
 		if (xm->xi) {
-			xm->xi->data = nil;
+			xm->xi->data = NULL;
 			XFree(xm->xi);
 		}
 		XFreePixmap(_x.display, xm->pixmap);
 		free(xm);
-		m->X = nil;
+		m->X = NULL;
 	}
 	_freememimage(m);
 }

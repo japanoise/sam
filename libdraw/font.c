@@ -135,11 +135,11 @@ void agefont(Font *f) {
 		es = s + f->nsubf;
 		while (s < es) {
 			if (s->age) {
-				if (s->age < SUBFAGE && s->cf->name != nil) {
+				if (s->age < SUBFAGE && s->cf->name != NULL) {
 					/* clean up */
 					freesubfont(s->f);
-					s->cf = nil;
-					s->f = nil;
+					s->cf = NULL;
+					s->f = NULL;
 					s->age = 0;
 				} else {
 					s->age >>= 2;
@@ -158,7 +158,7 @@ static Subfont *cf2subfont(Cachefont *cf, Font *f) {
 	Subfont *sf;
 
 	name = cf->subfontname;
-	if (name == nil) {
+	if (name == NULL) {
 		depth = 0;
 		if (f->display) {
 			if (f->display->screenimage) {
@@ -168,8 +168,8 @@ static Subfont *cf2subfont(Cachefont *cf, Font *f) {
 			depth = 8;
 		}
 		name = subfontname(cf->name, f->name, depth);
-		if (name == nil) {
-			return nil;
+		if (name == NULL) {
+			return NULL;
 		}
 		cf->subfontname = name;
 	}
@@ -224,14 +224,14 @@ Found:
 		Toss:
 			/* ancient data; toss */
 			freesubfont(subf->f);
-			subf->cf = nil;
-			subf->f = nil;
+			subf->cf = NULL;
+			subf->f = NULL;
 			subf->age = 0;
 		} else { /* too recent; grow instead */
 			of = f->subf;
 			f->subf =
 			    realloc(of, (f->nsubf + DSUBF) * sizeof *subf);
-			if (f->subf == nil) {
+			if (f->subf == NULL) {
 				f->subf = of;
 				goto Toss;
 			}
@@ -241,10 +241,10 @@ Found:
 		}
 	}
 	subf->age = 0;
-	subf->cf = nil;
+	subf->cf = NULL;
 	subf->f = cf2subfont(cf, f);
-	if (subf->f == nil) {
-		if (cf->subfontname == nil) {
+	if (subf->f == NULL) {
+		if (cf->subfontname == NULL) {
 			goto TryPJW;
 		}
 		*subfontname = cf->subfontname;
@@ -259,10 +259,10 @@ Found:
 		int    d, t;
 		d = subf->f->ascent - f->ascent;
 		b = subf->f->bits;
-		draw(b, b->r, b, nil, addpt(b->r.min, Pt(0, d)));
+		draw(b, b->r, b, NULL, addpt(b->r.min, Pt(0, d)));
 		draw(b,
 		     Rect(b->r.min.x, b->r.max.y - d, b->r.max.x, b->r.max.y),
-		     f->display->black, nil, b->r.min);
+		     f->display->black, NULL, b->r.min);
 		for (i = 0; i < subf->f->n; i++) {
 			t = subf->f->info[i].top - d;
 			if (t < 0) {
@@ -318,7 +318,7 @@ Found2:
 	c->width = fi->width;
 	c->x = h * f->width;
 	c->left = fi->left;
-	if (f->display == nil) {
+	if (f->display == NULL) {
 		return 1;
 	}
 	flushimage(f->display, 0); /* flush any pending errors */
@@ -350,7 +350,7 @@ freeup(Font *f)
 	Cachesubf *s, *es;
 	int nf;
 
-	if(f->sub[0]->name == nil)	/* font from mkfont; don't free */
+	if(f->sub[0]->name == NULL)	/* font from mkfont; don't free */
 		return 0;
 	s = f->subf;
 	es = s+f->nsubf;
@@ -358,8 +358,8 @@ freeup(Font *f)
 	while(s < es){
 		if(s->age){
 			freesubfont(s->f);
-			s->cf = nil;
-			s->f = nil;
+			s->cf = NULL;
+			s->f = NULL;
 			s->age = 0;
 			nf++;
 		}
@@ -383,13 +383,13 @@ static int fontresize(Font *f, int wid, int ncache, int depth) {
 	}
 
 	d = f->display;
-	if (d == nil) {
+	if (d == NULL) {
 		goto Nodisplay;
 	}
 
 	new = allocimage(d, Rect(0, 0, ncache * wid, f->height),
 			 CHAN1(CGrey, depth), 0, 0);
-	if (new == nil) {
+	if (new == NULL) {
 		fprint(2, "font cache resize failed: %r\n");
 		abort();
 		goto Return;
@@ -417,7 +417,7 @@ Nodisplay:
 	ret = 1;
 	if (f->ncache != ncache) {
 		i = malloc(ncache * sizeof f->cache[0]);
-		if (i != nil) {
+		if (i != NULL) {
 			ret = 0;
 			free(f->cache);
 			f->ncache = ncache;

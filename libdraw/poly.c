@@ -25,7 +25,7 @@ static void dopoly(int cmd, Image *dst, Point *pp, int np, int end0, int end1,
 		return;
 	}
 	t = malloc(np * 2 * 3);
-	if (t == nil) {
+	if (t == NULL) {
 		return;
 	}
 	u = t;

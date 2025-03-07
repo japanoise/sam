@@ -26,18 +26,18 @@ void threadmain(int argc, char **argv) {
 		sysfatal("threadspawn: %r");
 	}
 	w = recvp(c);
-	if (w == nil) {
+	if (w == NULL) {
 		print("exec/recvp failed: %r\n");
 	} else {
 		print("%d %lud %lud %lud %s\n", w->pid, w->time[0], w->time[1],
 		      w->time[2], w->msg);
 	}
 	w = recvp(c);
-	if (w == nil) {
+	if (w == NULL) {
 		print("exec/recvp failed: %r\n");
 	} else {
 		print("%d %lud %lud %lud %s\n", w->pid, w->time[0], w->time[1],
 		      w->time[2], w->msg);
 	}
-	threadexits(nil);
+	threadexits(NULL);
 }

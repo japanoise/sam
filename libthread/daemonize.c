@@ -164,7 +164,7 @@ void _threadsetupdaemonize(void) {
 		memset(&sa, 0, sizeof sa);
 		sa.sa_handler = sigpass;
 		sa.sa_flags |= SA_RESTART;
-		sigaction(sigs[i], &sa, nil);
+		sigaction(sigs[i], &sa, NULL);
 	}
 
 	for (;;) {

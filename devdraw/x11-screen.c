@@ -56,7 +56,7 @@ static Xwin *newxwin(Client *c) {
 	Xwin *w;
 
 	w = mallocz(sizeof *w, 1);
-	if (w == nil) {
+	if (w == NULL) {
 		sysfatal("out of memory");
 	}
 	w->client = c;
@@ -70,7 +70,7 @@ static Xwin *newxwin(Client *c) {
 static Xwin *findxwin(XDrawable d) {
 	Xwin *w, **l;
 
-	for (l = &_x.windows; (w = *l) != nil; l = &w->next) {
+	for (l = &_x.windows; (w = *l) != NULL; l = &w->next) {
 		if (w->drawable == d) {
 			/* move to front */
 			*l = w->next;
@@ -79,7 +79,7 @@ static Xwin *findxwin(XDrawable d) {
 			return w;
 		}
 	}
-	return nil;
+	return NULL;
 }
 
 static int xerror(XDisplay *d, XErrorEvent *e) {
@@ -141,7 +141,7 @@ void gfx_main(void) {
 	 * Connect to X server.
 	 */
 	_x.display = XOpenDisplay(NULL);
-	if (_x.display == nil) {
+	if (_x.display == NULL) {
 		disp = getenv("DISPLAY");
 		werrstr("XOpenDisplay %s: %r", disp ? disp : ":0");
 		free(disp);
@@ -267,7 +267,7 @@ static void xloop(void) {
 		FD_ZERO(&xx);
 		FD_SET(_x.fd, &rd);
 		FD_SET(_x.fd, &xx);
-		if (_x.windows != nil) {
+		if (_x.windows != NULL) {
 			XSelectInput(_x.display, _x.windows->drawable,
 				     Mask); // TODO: when is this needed?
 		}
@@ -275,7 +275,7 @@ static void xloop(void) {
 		xunlock();
 
 	again:
-		if (select(_x.fd + 1, &rd, &wr, &xx, nil) < 0) {
+		if (select(_x.fd + 1, &rd, &wr, &xx, NULL) < 0) {
 			if (errno == EINTR) {
 				goto again;
 			}
@@ -324,7 +324,7 @@ static void runxevent(XEvent *xev) {
 	ShowEvent(xev);
 #endif
 
-	w = nil;
+	w = NULL;
 	switch (xev->type) {
 	case Expose:
 		w = findxwin(((XExposeEvent *)xev)->window);
@@ -350,7 +350,7 @@ static void runxevent(XEvent *xev) {
 		w = findxwin(((XFocusChangeEvent *)xev)->window);
 		break;
 	}
-	if (w == nil) {
+	if (w == NULL) {
 		w = _x.windows;
 	}
 
@@ -362,7 +362,7 @@ static void runxevent(XEvent *xev) {
 
 	case DestroyNotify:
 		if (_xdestroy(w, xev)) {
-			threadexitsall(nil);
+			threadexitsall(NULL);
 		}
 		break;
 
@@ -547,7 +547,7 @@ static Memimage *xattach(Client *client, char *label, char *winsize) {
 
 		database = XrmGetDatabase(_x.display);
 		screen_resources = XScreenResourceString(xscreen);
-		if (screen_resources != nil) {
+		if (screen_resources != NULL) {
 			XrmCombineDatabase(
 			    XrmGetStringDatabase(screen_resources), &database,
 			    False);
@@ -555,10 +555,10 @@ static Memimage *xattach(Client *client, char *label, char *winsize) {
 		}
 
 		display_resources = XResourceManagerString(_x.display);
-		if (display_resources == nil) {
+		if (display_resources == NULL) {
 			home = getenv("HOME");
-			if (home != nil &&
-			    (file = smprint("%s/.Xdefaults", home)) != nil) {
+			if (home != NULL &&
+			    (file = smprint("%s/.Xdefaults", home)) != NULL) {
 				XrmCombineFileDatabase(file, &database, False);
 				free(file);
 			}
@@ -576,7 +576,7 @@ static Memimage *xattach(Client *client, char *label, char *winsize) {
 			}
 		}
 		geom = smprint("%s.geometry", label);
-		if (geom && XrmGetResource(database, geom, nil, &geomrestype,
+		if (geom && XrmGetResource(database, geom, NULL, &geomrestype,
 					   &geomres)) {
 			mask = XParseGeometry(geomres.addr, &x, &y,
 					      (unsigned int *)&width,
@@ -630,7 +630,7 @@ static Memimage *xattach(Client *client, char *label, char *winsize) {
 	 * Label and other properties required by ICCCCM.
 	 */
 	memset(&name, 0, sizeof name);
-	if (label == nil) {
+	if (label == NULL) {
 		label = "pjw-face-here";
 	}
 	name.value = (uchar *)label;
@@ -672,7 +672,7 @@ static Memimage *xattach(Client *client, char *label, char *winsize) {
 	classhint.res_class = label;
 
 	argv[0] = label;
-	argv[1] = nil;
+	argv[1] = NULL;
 
 	XSetWMProperties(_x.display,  /* display */
 			 w->drawable, /* window */
@@ -791,7 +791,7 @@ void rpc_setlabel(Client *client, char *label) {
 	 */
 	xlock();
 	memset(&name, 0, sizeof name);
-	if (label == nil) {
+	if (label == NULL) {
 		label = "pjw-face-here";
 	}
 	name.value = (uchar *)label;
@@ -803,11 +803,11 @@ void rpc_setlabel(Client *client, char *label) {
 			 w->drawable, /* window */
 			 &name,       /* XA_WM_NAME property */
 			 &name,       /* XA_WM_ICON_NAME property */
-			 nil,         /* XA_WM_COMMAND */
+			 NULL,        /* XA_WM_COMMAND */
 			 0,           /* argc */
-			 nil,         /* XA_WM_NORMAL_HINTS */
-			 nil,         /* XA_WM_HINTS */
-			 nil          /* XA_WM_CLASSHINTS */
+			 NULL,        /* XA_WM_NORMAL_HINTS */
+			 NULL,        /* XA_WM_HINTS */
+			 NULL         /* XA_WM_CLASSHINTS */
 	);
 	XFlush(_x.display);
 	xunlock();
@@ -1438,7 +1438,7 @@ void rpc_setcursor(Client *client, Cursor *c, Cursor2 *c2) {
 	USED(c2);
 
 	xlock();
-	if (c == nil) {
+	if (c == NULL) {
 		xcursorarrow(w);
 		xunlock();
 		return;
@@ -1513,11 +1513,11 @@ static uchar *_xgetsnarffrom(Xwin *w, XWindow xw, Atom clipboard, Atom target,
 		XFree(xdata);
 	}
 	if (len == 0) {
-		return nil;
+		return NULL;
 	}
 
 	/* get the property */
-	xdata = nil;
+	xdata = NULL;
 	XGetWindowProperty(_x.display, w->drawable, prop, 0,
 			   SnarfSize / sizeof(ulong), 0, AnyPropertyType, &type,
 			   &fmt, &len, &dummy, &xdata);
@@ -1526,14 +1526,14 @@ static uchar *_xgetsnarffrom(Xwin *w, XWindow xw, Atom clipboard, Atom target,
 		if (xdata) {
 			XFree(xdata);
 		}
-		return nil;
+		return NULL;
 	}
 	if (xdata) {
 		data = (uchar *)strdup((char *)xdata);
 		XFree(xdata);
 		return data;
 	}
-	return nil;
+	return NULL;
 }
 
 char *rpc_getsnarf(void) {
@@ -1579,14 +1579,14 @@ char *rpc_getsnarf(void) {
 	 * If not, give up.
 	 */
 	if (xw == None) {
-		data = nil;
+		data = NULL;
 		goto out;
 	}
 
 	if ((data = _xgetsnarffrom(w, xw, clipboard, _x.utf8string, 10, 100)) ==
-	    nil) {
+	    NULL) {
 		if ((data = _xgetsnarffrom(w, xw, clipboard, XA_STRING, 10,
-					   100)) == nil) {
+					   100)) == NULL) {
 			/* nothing left to do */
 		}
 	}
@@ -1698,12 +1698,12 @@ char *_applegetsnarf(void) {
 
 	/*	fprintf(stderr, "applegetsnarf\n"); */
 	qlock(&clip.lk);
-	if (clip.apple == nil) {
+	if (clip.apple == NULL) {
 		if (PasteboardCreate(kPasteboardClipboard, &clip.apple) !=
 		    noErr) {
 			fprintf(stderr, "apple pasteboard create failed\n");
 			qunlock(&clip.lk);
-			return nil;
+			return NULL;
 		}
 	}
 	flags = PasteboardSynchronize(clip.apple);
@@ -1715,7 +1715,7 @@ char *_applegetsnarf(void) {
 	if (PasteboardGetItemCount(clip.apple, &nitem) != noErr) {
 		fprintf(stderr, "apple pasteboard get item count failed\n");
 		qunlock(&clip.lk);
-		return nil;
+		return NULL;
 	}
 	for (i = 1; i <= nitem; i++) {
 		if (PasteboardGetItemIdentifier(clip.apple, i, &id) != noErr) {
@@ -1752,7 +1752,7 @@ char *_applegetsnarf(void) {
 		CFRelease(flavors);
 	}
 	qunlock(&clip.lk);
-	return nil;
+	return NULL;
 }
 
 void _appleputsnarf(char *s) {
@@ -1767,7 +1767,7 @@ void _appleputsnarf(char *s) {
 	qlock(&clip.lk);
 	strcpy(clip.buf, s);
 	runesnprint(clip.rbuf, nelem(clip.rbuf), "%s", s);
-	if (clip.apple == nil) {
+	if (clip.apple == NULL) {
 		if (PasteboardCreate(kPasteboardClipboard, &clip.apple) !=
 		    noErr) {
 			fprintf(stderr, "apple pasteboard create failed\n");
@@ -1789,7 +1789,7 @@ void _appleputsnarf(char *s) {
 	}
 	cfdata = CFDataCreate(kCFAllocatorDefault, (uchar *)clip.rbuf,
 			      runestrlen(clip.rbuf) * 2);
-	if (cfdata == nil) {
+	if (cfdata == NULL) {
 		fprintf(stderr, "apple pasteboard cfdatacreate failed\n");
 		qunlock(&clip.lk);
 		return;

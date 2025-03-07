@@ -8,7 +8,7 @@ void eresized(int new) {
 		fprint(2, "colors: can't reattach to window: %r\n");
 		exits("resized");
 	}
-	draw(screen, screen->r, display->white, nil, ZP);
+	draw(screen, screen->r, display->white, NULL, ZP);
 	flushimage(display, 1);
 }
 

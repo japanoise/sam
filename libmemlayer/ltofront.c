@@ -26,12 +26,12 @@ static void _memltofront(Memimage *i, Memimage *front, int fill) {
 		/* swap l and f in screen's list */
 		ff = f->layer->front;
 		rr = l->rear;
-		if (ff == nil) {
+		if (ff == NULL) {
 			s->frontmost = i;
 		} else {
 			ff->layer->rear = i;
 		}
-		if (rr == nil) {
+		if (rr == NULL) {
 			s->rearmost = f;
 		} else {
 			rr->layer->front = f;
@@ -47,12 +47,12 @@ static void _memltofront(Memimage *i, Memimage *front, int fill) {
 }
 
 void _memltofrontfill(Memimage *i, int fill) {
-	_memltofront(i, nil, fill);
+	_memltofront(i, NULL, fill);
 	_memlsetclear(i->layer->screen);
 }
 
 void memltofront(Memimage *i) {
-	_memltofront(i, nil, 1);
+	_memltofront(i, NULL, 1);
 	_memlsetclear(i->layer->screen);
 }
 
@@ -63,7 +63,7 @@ void memltofrontn(Memimage **ip, int n) {
 	if (n == 0) {
 		return;
 	}
-	front = nil;
+	front = NULL;
 	while (--n >= 0) {
 		i = *ip++;
 		_memltofront(i, front, 1);

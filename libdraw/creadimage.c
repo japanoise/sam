@@ -10,7 +10,7 @@ Image *creadimage(Display *d, int fd, int dolock) {
 	u32int    chan;
 
 	if (readn(fd, hdr, 5 * 12) != 5 * 12) {
-		return nil;
+		return NULL;
 	}
 
 	/*
@@ -27,19 +27,19 @@ Image *creadimage(Display *d, int fd, int dolock) {
 	}
 	if (hdr[11] != ' ') {
 		werrstr("creadimage: bad format");
-		return nil;
+		return NULL;
 	}
 	if (new) {
 		hdr[11] = '\0';
 		if ((chan = strtochan(hdr)) == 0) {
 			werrstr("creadimage: bad channel string %s", hdr);
-			return nil;
+			return NULL;
 		}
 	} else {
 		ldepth = ((int)hdr[10]) - '0';
 		if (ldepth < 0 || ldepth > 3) {
 			werrstr("creadimage: bad ldepth %d", ldepth);
-			return nil;
+			return NULL;
 		}
 		chan = drawld2chan[ldepth];
 	}
@@ -49,7 +49,7 @@ Image *creadimage(Display *d, int fd, int dolock) {
 	r.max.y = atoi(hdr + 4 * 12);
 	if (r.min.x > r.max.x || r.min.y > r.max.y) {
 		werrstr("creadimage: bad rectangle");
-		return nil;
+		return NULL;
 	}
 
 	if (d) {
@@ -60,18 +60,18 @@ Image *creadimage(Display *d, int fd, int dolock) {
 		if (dolock) {
 			unlockdisplay(d);
 		}
-		if (i == nil) {
-			return nil;
+		if (i == NULL) {
+			return NULL;
 		}
 	} else {
 		i = mallocz(sizeof(Image), 1);
-		if (i == nil) {
-			return nil;
+		if (i == NULL) {
+			return NULL;
 		}
 	}
 	ncblock = _compblocksize(r, chantodepth(chan));
 	buf = malloc(ncblock);
-	if (buf == nil) {
+	if (buf == NULL) {
 		goto Errout;
 	}
 	miny = r.min.y;
@@ -87,7 +87,7 @@ Image *creadimage(Display *d, int fd, int dolock) {
 				unlockdisplay(d);
 			}
 			free(buf);
-			return nil;
+			return NULL;
 		}
 		maxy = atoi(hdr + 0 * 12);
 		nb = atoi(hdr + 1 * 12);
@@ -107,7 +107,7 @@ Image *creadimage(Display *d, int fd, int dolock) {
 				lockdisplay(d);
 			}
 			a = bufimage(i->display, 21 + nb);
-			if (a == nil) {
+			if (a == NULL) {
 				goto Erroutlock;
 			}
 			a[0] = 'Y';

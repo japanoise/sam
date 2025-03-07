@@ -42,7 +42,7 @@ Trie *mktrie(char *seq) {
 	uchar *q;
 	Trie **tp;
 
-	if (root == nil) {
+	if (root == NULL) {
 		root = malloc(sizeof *root);
 		memset(root, 0, sizeof *root);
 	}
@@ -52,16 +52,16 @@ Trie *mktrie(char *seq) {
 	tp = &root;
 	for (q = (uchar *)seq; *(q + 1) != '\0'; q++) {
 		tp = &(*tp)->link[*q];
-		if (*tp == nil) {
+		if (*tp == NULL) {
 			*tp = malloc(sizeof(**tp));
-			assert(*tp != nil);
+			assert(*tp != NULL);
 			memset(*tp, 0, sizeof(**tp));
 			strcpy((*tp)->seq, seq);
 			(*tp)->seq[q + 1 - (uchar *)seq] = '\0';
 		}
 	}
 
-	assert(*tp != nil);
+	assert(*tp != NULL);
 	return *tp;
 }
 
@@ -189,7 +189,7 @@ void readfile(char *fname) {
 			continue;
 		}
 
-		r = strtol(line, nil, 16);
+		r = strtol(line, NULL, 16);
 		p = strchr(line, ' ');
 		if (r == 0 || (p != line + 4 && p != line + 5) || p[0] != ' ' ||
 		    (p == line + 4 && p[1] != ' ')) {

@@ -37,7 +37,7 @@ static void _memline(Memimage *dst, Point p0, Point p1, int end0, int end1,
 
 Top:
 	dl = dst->layer;
-	if (dl == nil) {
+	if (dl == NULL) {
 		_memimageline(dst, p0, p1, end0, end1, radius, src, sp, clipr,
 			      op);
 		return;
@@ -103,7 +103,7 @@ static void llineop(Memimage *dst, Rectangle screenr, Rectangle clipr,
 
 	USED(screenr.min.x);
 	ll = etc;
-	if (insave && ll->dstlayer->save == nil) {
+	if (insave && ll->dstlayer->save == NULL) {
 		return;
 	}
 	if (!rectclip(&clipr, screenr)) {

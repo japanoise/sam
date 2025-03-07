@@ -17,7 +17,7 @@ int memload(Memimage *dst, Rectangle r, uchar *data, int n, int iscompressed) {
 
 Top:
 	dl = dst->layer;
-	if (dl == nil) {
+	if (dl == NULL) {
 		return loadfn(dst, r, data, n);
 	}
 
@@ -46,11 +46,11 @@ Top:
 		return n;
 	}
 	tmp = allocmemimage(lr, dst->chan);
-	if (tmp == nil) {
+	if (tmp == NULL) {
 		return -1;
 	}
 	n = loadfn(tmp, lr, data, n);
-	memdraw(dst, lr, tmp, lr.min, nil, lr.min, S);
+	memdraw(dst, lr, tmp, lr.min, NULL, lr.min, S);
 	freememimage(tmp);
 	return n;
 }

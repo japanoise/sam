@@ -81,11 +81,11 @@ void _memfillpolysc(Memimage *dst, Point *vert, int nvert, int w, Memimage *src,
 	}
 
 	seg = malloc((nvert + 2) * sizeof(Seg *));
-	if (seg == nil) {
+	if (seg == NULL) {
 		return;
 	}
 	segtab = malloc((nvert + 1) * sizeof(Seg));
-	if (segtab == nil) {
+	if (segtab == NULL) {
 		free(seg);
 		return;
 	}

@@ -12,8 +12,8 @@ void execproc(void *v) {
 	fd[2] = dup(2, -1);
 	args[0] = "echo";
 	args[1] = buf;
-	args[2] = nil;
-	threadexec(nil, fd, args[0], args);
+	args[2] = NULL;
+	threadexec(NULL, fd, args[0], args);
 }
 
 void threadmain(int argc, char **argv) {
@@ -31,7 +31,7 @@ void threadmain(int argc, char **argv) {
 	for (i = 0;; i++) {
 		proccreate(execproc, (void *)(uintptr)i, 16384);
 		w = recvp(c);
-		if (w == nil) {
+		if (w == NULL) {
 			sysfatal("exec/recvp failed: %r");
 		}
 	}

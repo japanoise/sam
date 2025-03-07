@@ -6,7 +6,7 @@
 #include <ctype.h>
 
 static int _stringsize(char *s) {
-	if (s == nil) {
+	if (s == NULL) {
 		s = "";
 	}
 	return 4 + strlen(s);
@@ -15,7 +15,7 @@ static int _stringsize(char *s) {
 static int PUTSTRING(uchar *p, char *s) {
 	int n;
 
-	if (s == nil) {
+	if (s == NULL) {
 		s = "";
 	}
 	n = strlen(s);
@@ -422,7 +422,7 @@ int encodefmt(Fmt *f) {
 
 	b = va_arg(f->args, uchar *);
 	if (b == 0) {
-		return fmtstrcpy(f, "<nil>");
+		return fmtstrcpy(f, "<NULL>");
 	}
 
 	ilen = f->prec;
@@ -450,7 +450,7 @@ int encodefmt(Fmt *f) {
 
 	if (len > sizeof(obuf)) {
 		buf = malloc(len);
-		if (buf == nil) {
+		if (buf == NULL) {
 			goto error;
 		}
 	} else {

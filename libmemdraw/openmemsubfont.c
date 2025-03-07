@@ -12,11 +12,11 @@ Memsubfont *openmemsubfont(char *name) {
 
 	fd = open(name, OREAD);
 	if (fd < 0) {
-		return nil;
+		return NULL;
 	}
-	p = nil;
+	p = NULL;
 	i = readmemimage(fd);
-	if (i == nil) {
+	if (i == NULL) {
 		goto Err;
 	}
 	if (read(fd, hdr, 3 * 12) != 3 * 12) {
@@ -25,7 +25,7 @@ Memsubfont *openmemsubfont(char *name) {
 	}
 	n = atoi(hdr);
 	p = malloc(6 * (n + 1));
-	if (p == nil) {
+	if (p == NULL) {
 		goto Err;
 	}
 	if (read(fd, p, 6 * (n + 1)) != 6 * (n + 1)) {
@@ -33,12 +33,12 @@ Memsubfont *openmemsubfont(char *name) {
 		goto Err;
 	}
 	fc = malloc(sizeof(Fontchar) * (n + 1));
-	if (fc == nil) {
+	if (fc == NULL) {
 		goto Err;
 	}
 	_unpackinfo(fc, p, n);
 	sf = allocmemsubfont(name, n, atoi(hdr + 12), atoi(hdr + 24), fc, i);
-	if (sf == nil) {
+	if (sf == NULL) {
 		free(fc);
 		goto Err;
 	}
@@ -46,11 +46,11 @@ Memsubfont *openmemsubfont(char *name) {
 	return sf;
 Err:
 	close(fd);
-	if (i != nil) {
+	if (i != NULL) {
 		freememimage(i);
 	}
-	if (p != nil) {
+	if (p != NULL) {
 		free(p);
 	}
-	return nil;
+	return NULL;
 }

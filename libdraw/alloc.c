@@ -2,7 +2,7 @@
 #include <draw.h>
 
 Image *allocimage(Display *d, Rectangle r, u32int chan, int repl, u32int val) {
-	return _allocimage(nil, d, r, chan, repl, val, 0, 0);
+	return _allocimage(NULL, d, r, chan, repl, val, 0, 0);
 }
 
 Image *_allocimage(Image *ai, Display *d, Rectangle r, u32int chan, int repl,
@@ -19,7 +19,7 @@ Image *_allocimage(Image *ai, Display *d, Rectangle r, u32int chan, int repl,
 
 	if (chan == 0) {
 		werrstr("bad channel descriptor");
-		return nil;
+		return NULL;
 	}
 
 	depth = chantodepth(chan);
@@ -73,7 +73,7 @@ Image *_allocimage(Image *ai, Display *d, Rectangle r, u32int chan, int repl,
 		i = ai;
 	} else {
 		i = malloc(sizeof(Image));
-		if (i == nil) {
+		if (i == NULL) {
 			a = bufimage(d, 1 + 4);
 			if (a) {
 				a[0] = 'f';
@@ -141,7 +141,7 @@ Image *namedimage(Display *d, char *name) {
 	buf[12 * 12] = '\0';
 
 	i = malloc(sizeof(Image));
-	if (i == nil) {
+	if (i == NULL) {
 	Error1:
 		a = bufimage(d, 1 + 4);
 		if (a) {
@@ -235,7 +235,7 @@ int _freeimage1(Image *i) {
 int freeimage(Image *i) {
 	int ret;
 
-	if (i == nil) {
+	if (i == NULL) {
 		return 0;
 	}
 	if (i == screen) {

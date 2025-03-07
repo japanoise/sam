@@ -7,4 +7,4 @@ void proc(void *v) {
 	print("still running\n");
 }
 
-void threadmain(int argc, char **argv) { proccreate(proc, nil, 32768); }
+void threadmain(int argc, char **argv) { proccreate(proc, NULL, 32768); }

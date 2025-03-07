@@ -127,7 +127,7 @@ void wunlock(RWLock *l) {
 	if (_wunlock) {
 		(*_wunlock)(l, getcallerpc(&l));
 	} else {
-		l->writer = nil;
+		l->writer = NULL;
 	}
 }
 

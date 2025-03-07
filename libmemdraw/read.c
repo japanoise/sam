@@ -16,14 +16,14 @@ Memimage *readmemimage(int fd) {
 
 	if (readn(fd, hdr, 11) != 11) {
 		werrstr("readimage: short header");
-		return nil;
+		return NULL;
 	}
 	if (memcmp(hdr, "compressed\n", 11) == 0) {
 		return creadmemimage(fd);
 	}
 	if (readn(fd, hdr + 11, 5 * 12 - 11) != 5 * 12 - 11) {
 		werrstr("readimage: short header (2)");
-		return nil;
+		return NULL;
 	}
 
 	/*
@@ -40,19 +40,19 @@ Memimage *readmemimage(int fd) {
 	}
 	if (hdr[11] != ' ') {
 		werrstr("readimage: bad format");
-		return nil;
+		return NULL;
 	}
 	if (new) {
 		hdr[11] = '\0';
 		if ((chan = strtochan(hdr)) == 0) {
 			werrstr("readimage: bad channel string %s", hdr);
-			return nil;
+			return NULL;
 		}
 	} else {
 		ldepth = ((int)hdr[10]) - '0';
 		if (ldepth < 0 || ldepth > 3) {
 			werrstr("readimage: bad ldepth %d", ldepth);
-			return nil;
+			return NULL;
 		}
 		chan = drawld2chan[ldepth];
 	}
@@ -63,7 +63,7 @@ Memimage *readmemimage(int fd) {
 	r.max.y = atoi(hdr + 4 * 12);
 	if (r.min.x > r.max.x || r.min.y > r.max.y) {
 		werrstr("readimage: bad rectangle");
-		return nil;
+		return NULL;
 	}
 
 	miny = r.min.y;
@@ -71,15 +71,15 @@ Memimage *readmemimage(int fd) {
 
 	l = bytesperline(r, chantodepth(chan));
 	i = allocmemimage(r, chan);
-	if (i == nil) {
-		return nil;
+	if (i == NULL) {
+		return NULL;
 	}
 	chunk = 32 * 1024;
 	if (chunk < l) {
 		chunk = l;
 	}
 	tmp = malloc(chunk);
-	if (tmp == nil) {
+	if (tmp == NULL) {
 		goto Err;
 	}
 	while (maxy > miny) {
@@ -98,7 +98,7 @@ Memimage *readmemimage(int fd) {
 		Err:
 			freememimage(i);
 			free(tmp);
-			return nil;
+			return NULL;
 		}
 		if (!new) { /* an old image: must flip all the bits */
 			for (j = 0; j < chunk; j++) {

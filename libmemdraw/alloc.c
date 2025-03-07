@@ -26,18 +26,18 @@ Memimage *allocmemimaged(Rectangle r, u32int chan, Memdata *md, void *X) {
 
 	if (Dx(r) <= 0 || Dy(r) <= 0) {
 		werrstr("bad rectangle %R", r);
-		return nil;
+		return NULL;
 	}
 	if ((d = chantodepth(chan)) == 0) {
 		werrstr("bad channel descriptor %.8lux", chan);
-		return nil;
+		return NULL;
 	}
 
 	l = wordsperline(r, d);
 
 	i = mallocz(sizeof(Memimage), 1);
-	if (i == nil) {
-		return nil;
+	if (i == NULL) {
+		return NULL;
 	}
 
 	i->X = X;
@@ -54,11 +54,11 @@ Memimage *allocmemimaged(Rectangle r, u32int chan, Memdata *md, void *X) {
 	i->r = r;
 	i->clipr = r;
 	i->flags = 0;
-	i->layer = nil;
+	i->layer = NULL;
 	i->cmap = memdefcmap;
 	if (memsetchan(i, chan) < 0) {
 		free(i);
-		return nil;
+		return NULL;
 	}
 	return i;
 }
@@ -72,22 +72,22 @@ Memimage *_allocmemimage(Rectangle r, u32int chan) {
 
 	if ((d = chantodepth(chan)) == 0) {
 		werrstr("bad channel descriptor %.8lux", chan);
-		return nil;
+		return NULL;
 	}
 
 	l = wordsperline(r, d);
 	nw = l * Dy(r);
 	md = malloc(sizeof(Memdata));
-	if (md == nil) {
-		return nil;
+	if (md == NULL) {
+		return NULL;
 	}
 
 	md->ref = 1;
 	md->base =
 	    poolalloc(imagmem, sizeof(Memdata *) + (1 + nw) * sizeof(ulong));
-	if (md->base == nil) {
+	if (md->base == NULL) {
 		free(md);
-		return nil;
+		return NULL;
 	}
 
 	p = (uchar *)md->base;
@@ -101,18 +101,18 @@ Memimage *_allocmemimage(Rectangle r, u32int chan) {
 	md->bdata = p;
 	md->allocd = 1;
 
-	i = allocmemimaged(r, chan, md, nil);
-	if (i == nil) {
+	i = allocmemimaged(r, chan, md, NULL);
+	if (i == NULL) {
 		poolfree(imagmem, md->base);
 		free(md);
-		return nil;
+		return NULL;
 	}
 	md->imref = i;
 	return i;
 }
 
 void _freememimage(Memimage *i) {
-	if (i == nil) {
+	if (i == NULL) {
 		return;
 	}
 	if (i->data->ref-- == 1 && i->data->allocd) {
@@ -181,7 +181,7 @@ int memsetchan(Memimage *i, u32int chan) {
 		if (t == CAlpha) {
 			i->flags |= Falpha;
 		}
-		if (t == CMap && i->cmap == nil) {
+		if (t == CMap && i->cmap == NULL) {
 			i->cmap = memdefcmap;
 			i->flags |= Fcmap;
 		}

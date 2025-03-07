@@ -242,12 +242,12 @@ static Memimage *membrush(int radius) {
 	static Memimage *brush;
 	static int       brushradius;
 
-	if (brush == nil || brushradius != radius) {
+	if (brush == NULL || brushradius != radius) {
 		freememimage(brush);
 		brush =
 		    allocmemimage(Rect(0, 0, 2 * radius + 1, 2 * radius + 1),
 				  memopaque->chan);
-		if (brush != nil) {
+		if (brush != NULL) {
 			memfillcolor(brush, DTransparent); /* zeros */
 			memellipse(brush, Pt(radius, radius), radius, radius,
 				   -1, memopaque, Pt(radius, radius), S);
@@ -263,7 +263,7 @@ static void discend(Point p, int radius, Memimage *dst, Memimage *src,
 	Rectangle r;
 
 	disc = membrush(radius);
-	if (disc != nil) {
+	if (disc != NULL) {
 		r.min.x = p.x - radius;
 		r.min.y = p.y - radius;
 		r.max.x = p.x + radius + 1;

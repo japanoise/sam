@@ -28,7 +28,7 @@ int cloadimage(Image *i, Rectangle r, uchar *data, int ndata) {
 			return -1;
 		}
 		a = bufimage(i->display, 21 + nb);
-		if (a == nil) {
+		if (a == NULL) {
 			return -1;
 		}
 		a[0] = 'Y';

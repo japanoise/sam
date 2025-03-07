@@ -29,12 +29,5 @@ typedef unsigned long long uvlong;
 typedef long long          vlong;
 typedef uintptr_t          uintptr;
 
-/*
- * nil cannot be ((void*)0) on ANSI C,
- * because it is used for function pointers
- */
-#undef nil
-#define nil 0
-
 #undef nelem
 #define nelem(x) (sizeof(x) / sizeof(x)[0])

@@ -31,7 +31,7 @@ int loadimage(Image *i, Rectangle r, uchar *data, int ndata) {
 		}
 		n = dy * bpl;
 		a = bufimage(i->display, 21 + n);
-		if (a == nil) {
+		if (a == NULL) {
 			werrstr("bufimage failed");
 			return -1;
 		}

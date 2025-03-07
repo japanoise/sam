@@ -31,7 +31,7 @@ Font *openfont1(Display *d, char *name) {
 	char *buf, *nambuf, *nambuf0, *fname, *freename;
 
 	nambuf = 0;
-	freename = nil;
+	freename = NULL;
 	scale = parsefontscale(name, &fname);
 
 	if (strcmp(fname, "*default*") == 0) {
@@ -41,7 +41,7 @@ Font *openfont1(Display *d, char *name) {
 	fd = open(fname, OREAD);
 	if (fd < 0 && strncmp(fname, "/lib/font/bit/", 14) == 0) {
 		nambuf = smprint("#9/font/%s", fname + 14);
-		if (nambuf == nil) {
+		if (nambuf == NULL) {
 			return 0;
 		}
 		nambuf0 = unsharp(nambuf);
@@ -49,7 +49,7 @@ Font *openfont1(Display *d, char *name) {
 			free(nambuf);
 		}
 		nambuf = nambuf0;
-		if (nambuf == nil) {
+		if (nambuf == NULL) {
 			return 0;
 		}
 		if ((fd = open(nambuf, OREAD)) < 0) {
@@ -174,14 +174,14 @@ static char *hidpiname(Font *f) {
 
 	// If font name has form x,y return y.
 	p = strchr(f->namespec, ',');
-	if (p != nil) {
+	if (p != NULL) {
 		return strdup(p + 1);
 	}
 
 	// If font name is /mnt/font/Name/Size/font, scale Size.
 	if (strncmp(f->name, "/mnt/font/", 10) == 0) {
 		p = strchr(f->name + 10, '/');
-		if (p == nil || *++p < '0' || *p > '9') {
+		if (p == NULL || *++p < '0' || *p > '9') {
 			goto scale;
 		}
 		q = p;
@@ -205,14 +205,14 @@ void loadhidpi(Font *f) {
 	if (f->hidpi == f) {
 		return;
 	}
-	if (f->hidpi != nil) {
+	if (f->hidpi != NULL) {
 		swapfont(f, &f->lodpi, &f->hidpi);
 		return;
 	}
 
 	name = hidpiname(f);
 	fnew = openfont1(f->display, name);
-	if (fnew == nil) {
+	if (fnew == NULL) {
 		return;
 	}
 	f->hidpi = fnew;
@@ -229,24 +229,24 @@ Font *openfont(Display *d, char *name) {
 	// If font name has form x,y use x for lodpi, y for hidpi.
 	name = strdup(name);
 	namespec = strdup(name);
-	if ((p = strchr(name, ',')) != nil) {
+	if ((p = strchr(name, ',')) != NULL) {
 		*p = '\0';
 	}
 
 	f = openfont1(d, name);
 	if (!f) {
-		return nil;
+		return NULL;
 	}
 	f->lodpi = f;
 	free(f->namespec);
 	f->namespec = namespec;
 
 	/* add to display list for when dpi changes */
-	/* d can be nil when invoked from mc. */
-	if (d != nil) {
+	/* d can be NULL when invoked from mc. */
+	if (d != NULL) {
 		f->ondisplaylist = 1;
 		f->prev = d->lastfont;
-		f->next = nil;
+		f->next = NULL;
 		if (f->prev) {
 			f->prev->next = f;
 		} else {
@@ -290,7 +290,7 @@ int _fontpipe(char *name) {
 		argv[0] = "fontsrv";
 		argv[1] = "-pp";
 		argv[2] = name;
-		argv[3] = nil;
+		argv[3] = NULL;
 		execvp("fontsrv", argv);
 		print("exec fontsrv: %r\n");
 		_exit(0);

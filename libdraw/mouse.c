@@ -11,7 +11,7 @@ void moveto(Mousectl *mc, Point pt) {
 }
 
 void closemouse(Mousectl *mc) {
-	if (mc == nil) {
+	if (mc == NULL) {
 		return;
 	}
 
@@ -83,7 +83,9 @@ Mousectl *initmouse(char *file, Image *i) {
 	return mc;
 }
 
-void setcursor(Mousectl *mc, Cursor *c) { _displaycursor(mc->display, c, nil); }
+void setcursor(Mousectl *mc, Cursor *c) {
+	_displaycursor(mc->display, c, NULL);
+}
 
 void setcursor2(Mousectl *mc, Cursor *c, Cursor2 *c2) {
 	_displaycursor(mc->display, c, c2);

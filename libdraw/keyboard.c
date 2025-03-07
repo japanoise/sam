@@ -6,7 +6,7 @@
 void closekeyboard(Keyboardctl *kc) {
 	Rune r;
 
-	if (kc == nil) {
+	if (kc == NULL) {
 		return;
 	}
 
@@ -37,8 +37,8 @@ Keyboardctl *initkeyboard(char *file) {
 	Keyboardctl *kc;
 
 	kc = mallocz(sizeof(Keyboardctl), 1);
-	if (kc == nil) {
-		return nil;
+	if (kc == NULL) {
+		return NULL;
 	}
 	USED(file);
 	kc->c = chancreate(sizeof(Rune), 20);

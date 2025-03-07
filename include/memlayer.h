@@ -22,7 +22,7 @@ struct Memlayer {
 	int        clear;     /* layer is fully visible */
 	Memimage  *save;      /* save area for obscured parts */
 	Refreshfn  refreshfn; /* function to call to refresh obscured parts if
-				 save==nil */
+				 save==NULL */
 	void *refreshptr;     /* argument to refreshfn */
 };
 

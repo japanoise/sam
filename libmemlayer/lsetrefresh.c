@@ -15,19 +15,19 @@ int memlsetrefresh(Memimage *i, Refreshfn fn, void *ptr) {
 
 	if (l->refreshfn == 0) { /* is using backup image; just free it */
 		freememimage(l->save);
-		l->save = nil;
+		l->save = NULL;
 		l->refreshfn = fn;
 		l->refreshptr = ptr;
 		return 1;
 	}
 
 	l->save = allocmemimage(i->r, i->chan);
-	if (l->save == nil) {
+	if (l->save == NULL) {
 		return 0;
 	}
 	/* easiest way is just to update the entire save area */
 	l->refreshfn(i, i->r, l->refreshptr);
 	l->refreshfn = 0;
-	l->refreshptr = nil;
+	l->refreshptr = NULL;
 	return 1;
 }

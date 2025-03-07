@@ -61,7 +61,7 @@ Rectangle getrect(int but, Mousectl *mc) {
 	} while (mc->m.buttons == but);
 
 Return:
-	setcursor(mc, nil);
+	setcursor(mc, NULL);
 	if (mc->m.buttons & (7 ^ but)) {
 		rc.min.x = rc.max.x = 0;
 		rc.min.y = rc.max.y = 0;
@@ -78,7 +78,7 @@ static void freetmp(void) {
 	freeimage(tmp[2]);
 	freeimage(tmp[3]);
 	freeimage(red);
-	tmp[0] = tmp[1] = tmp[2] = tmp[3] = red = nil;
+	tmp[0] = tmp[1] = tmp[2] = tmp[3] = red = NULL;
 }
 
 static int max(int a, int b) {
@@ -98,7 +98,7 @@ void drawgetrect(Rectangle rc, int up) {
 	 * is unallocated and we ask to restore the screen, it would be nice
 	 * to complain, but we silently make a mess.
 	 */
-	if (up && tmp[0] != nil) {
+	if (up && tmp[0] != NULL) {
 		if (Dx(tmp[0]->r) < Dx(rc) || Dy(tmp[2]->r) < Dy(rc)) {
 			freetmp();
 		}
@@ -121,13 +121,13 @@ void drawgetrect(Rectangle rc, int up) {
 	brects(rc, rects);
 	if (!up) {
 		for (i = 0; i < 4; i++) {
-			draw(screen, rects[i], tmp[i], nil, ZP);
+			draw(screen, rects[i], tmp[i], NULL, ZP);
 		}
 		return;
 	}
 	for (i = 0; i < 4; i++) {
 		draw(tmp[i], Rect(0, 0, Dx(rects[i]), Dy(rects[i])), screen,
-		     nil, rects[i].min);
-		draw(screen, rects[i], red, nil, ZP);
+		     NULL, rects[i].min);
+		draw(screen, rects[i], red, NULL, ZP);
 	}
 }

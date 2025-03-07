@@ -15,13 +15,13 @@ static void execproc(void *v) {
 	sendul(e->c, pid);
 	if (pid > 0) {
 		w = waitfor(pid);
-		if ((c = thewaitchan) != nil) {
+		if ((c = thewaitchan) != NULL) {
 			sendp(c, w);
 		} else {
 			free(w);
 		}
 	}
-	threadexits(nil);
+	threadexits(NULL);
 }
 
 int _runthreadspawn(int *fd, char *cmd, char **argv, char *dir) {
@@ -74,7 +74,7 @@ int _threadspawn(int fd[3], char *cmd, char *argv[], char *dir) {
 		return -1;
 	case 0:
 		/* can't RFNOTEG - will lose tty */
-		if (dir != nil) {
+		if (dir != NULL) {
 			chdir(dir); /* best effort */
 		}
 		dup2(fd[0], 0);
@@ -115,7 +115,7 @@ int _threadspawn(int fd[3], char *cmd, char *argv[], char *dir) {
 }
 
 int threadspawn(int fd[3], char *cmd, char *argv[]) {
-	return _runthreadspawn(fd, cmd, argv, nil);
+	return _runthreadspawn(fd, cmd, argv, NULL);
 }
 
 int threadspawnd(int fd[3], char *cmd, char *argv[], char *dir) {
@@ -128,18 +128,18 @@ int threadspawnl(int fd[3], char *cmd, ...) {
 	va_list arg;
 
 	va_start(arg, cmd);
-	for (n = 0; va_arg(arg, char *) != nil; n++)
+	for (n = 0; va_arg(arg, char *) != NULL; n++)
 		;
 	n++;
 	va_end(arg);
 
 	argv = malloc(n * sizeof(argv[0]));
-	if (argv == nil) {
+	if (argv == NULL) {
 		return -1;
 	}
 
 	va_start(arg, cmd);
-	for (n = 0; (s = va_arg(arg, char *)) != nil; n++) {
+	for (n = 0; (s = va_arg(arg, char *)) != NULL; n++) {
 		argv[n] = s;
 	}
 	argv[n] = 0;
@@ -176,13 +176,13 @@ void threadexecl(Channel *cpid, int fd[3], char *cmd, ...) {
 	va_list arg;
 
 	va_start(arg, cmd);
-	for (n = 0; va_arg(arg, char *) != nil; n++)
+	for (n = 0; va_arg(arg, char *) != NULL; n++)
 		;
 	n++;
 	va_end(arg);
 
 	argv = malloc(n * sizeof(argv[0]));
-	if (argv == nil) {
+	if (argv == NULL) {
 		if (cpid) {
 			chansendul(cpid, ~0);
 		}
@@ -190,7 +190,7 @@ void threadexecl(Channel *cpid, int fd[3], char *cmd, ...) {
 	}
 
 	va_start(arg, cmd);
-	for (n = 0; (s = va_arg(arg, char *)) != nil; n++) {
+	for (n = 0; (s = va_arg(arg, char *)) != NULL; n++) {
 		argv[n] = s;
 	}
 	argv[n] = 0;

@@ -141,7 +141,7 @@ ulong estartfn(ulong key, int fd, int n,
 	return 1 << i;
 }
 
-ulong estart(ulong key, int fd, int n) { return estartfn(key, fd, n, nil); }
+ulong estart(ulong key, int fd, int n) { return estartfn(key, fd, n, NULL); }
 
 ulong etimer(ulong key, int n) {
 	if (Stimer != -1) {
@@ -179,7 +179,7 @@ static Ebuf *newebuf(Slave *s, int n) {
 	Ebuf *eb;
 
 	eb = malloc(sizeof(*eb) - sizeof(eb->u.buf) + n);
-	if (eb == nil) {
+	if (eb == NULL) {
 		drawerror(display, "events: out of memory");
 	}
 	eb->n = n;
@@ -198,7 +198,7 @@ static Muxrpc *startrpc(int type) {
 
 	w.type = type;
 	if (convW2M(&w, buf, sizeof buf) == 0) {
-		return nil;
+		return NULL;
 	}
 	return muxrpcstart(display->mux, buf);
 }
@@ -212,7 +212,7 @@ static int finishrpc(Muxrpc *r, Wsysmsg *w) {
 		return 0;
 	}
 	p = v;
-	if (p == nil) { /* eof on connection */
+	if (p == NULL) { /* eof on connection */
 		exit(0);
 	}
 	GET(p, n);
@@ -257,13 +257,13 @@ static int extract(int canblock) {
 	FD_ZERO(&wset);
 	FD_ZERO(&xset);
 	max = -1;
-	timeout = nil;
+	timeout = NULL;
 	for (i = 0; i < nslave; i++) {
 		if (!eslave[i].inuse) {
 			continue;
 		}
 		if (i == Smouse) {
-			if (eslave[i].rpc == nil) {
+			if (eslave[i].rpc == NULL) {
 				eslave[i].rpc = startrpc(Trdmouse);
 			}
 			if (eslave[i].rpc) {
@@ -278,7 +278,7 @@ static int extract(int canblock) {
 				}
 			}
 		} else if (i == Skeyboard) {
-			if (eslave[i].rpc == nil) {
+			if (eslave[i].rpc == NULL) {
 				eslave[i].rpc = startrpc(Trdkbd4);
 			}
 			if (eslave[i].rpc) {
@@ -333,7 +333,7 @@ static int extract(int canblock) {
 		}
 		if (i == Smouse) {
 			if (finishrpc(eslave[i].rpc, &w)) {
-				eslave[i].rpc = nil;
+				eslave[i].rpc = NULL;
 				eb = newebuf(&eslave[i], sizeof(Mouse));
 				_drawmouse = w.mouse;
 				eb->u.mouse = w.mouse;
@@ -344,7 +344,7 @@ static int extract(int canblock) {
 			}
 		} else if (i == Skeyboard) {
 			if (finishrpc(eslave[i].rpc, &w)) {
-				eslave[i].rpc = nil;
+				eslave[i].rpc = NULL;
 				eb = newebuf(&eslave[i],
 					     sizeof(Rune) +
 						 2); /* +8: alignment */
@@ -414,7 +414,7 @@ int ekbd(void) {
 
 void emoveto(Point pt) { _displaymoveto(display, pt); }
 
-void esetcursor(Cursor *c) { _displaycursor(display, c, nil); }
+void esetcursor(Cursor *c) { _displaycursor(display, c, NULL); }
 
 void esetcursor2(Cursor *c, Cursor2 *c2) { _displaycursor(display, c, c2); }
 

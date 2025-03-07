@@ -112,13 +112,13 @@ void _procstart(Proc *p, void (*fn)(Proc *)) {
 	void **a;
 
 	a = malloc(2 * sizeof a[0]);
-	if (a == nil) {
+	if (a == NULL) {
 		sysfatal("_procstart malloc: %r");
 	}
 	a[0] = (void *)fn;
 	a[1] = p;
 
-	if (pthread_create(&p->osprocid, nil, (void *(*)(void *))startprocfn,
+	if (pthread_create(&p->osprocid, NULL, (void *(*)(void *))startprocfn,
 			   (void *)a) < 0) {
 		fprint(2, "pthread_create: %r\n");
 		abort();
@@ -129,13 +129,13 @@ void _threadpthreadstart(Proc *p, _Thread *t) {
 	void **a;
 
 	a = malloc(3 * sizeof a[0]);
-	if (a == nil) {
+	if (a == NULL) {
 		sysfatal("_pthreadstart malloc: %r");
 	}
 	a[0] = p;
 	a[1] = t;
-	if (pthread_create(&t->osprocid, nil, (void *(*)(void *))startpthreadfn,
-			   (void *)a) < 0) {
+	if (pthread_create(&t->osprocid, NULL,
+			   (void *(*)(void *))startpthreadfn, (void *)a) < 0) {
 		fprint(2, "pthread_create: %r\n");
 		abort();
 	}

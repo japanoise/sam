@@ -19,8 +19,8 @@ XImage *_xgetxdata(Memimage *m, Rectangle r) {
 	Xmem  *xm;
 
 	xm = m->X;
-	if (xm == nil) {
-		return nil;
+	if (xm == NULL) {
+		return NULL;
 	}
 
 	if (xm->dirty == 0) {
@@ -64,7 +64,7 @@ void _xputxdata(Memimage *m, Rectangle r) {
 	XImage *xi;
 
 	xm = m->X;
-	if (xm == nil) {
+	if (xm == NULL) {
 		return;
 	}
 
@@ -102,7 +102,7 @@ void _xdirtyxdata(Memimage *m, Rectangle r) {
 	Xmem *xm;
 
 	xm = m->X;
-	if (xm == nil) {
+	if (xm == NULL) {
 		return;
 	}
 
