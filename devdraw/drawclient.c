@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <bio.h>
 #include <draw.h>
 #include <mouse.h>

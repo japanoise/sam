@@ -2,7 +2,6 @@
 
 #include <u.h>
 #include <sys/select.h>
-#include <libc.h>
 #include <draw.h>
 #include <mouse.h>
 #include <cursor.h>

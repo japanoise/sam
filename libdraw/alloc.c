@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 
 Image *allocimage(Display *d, Rectangle r, u32int chan, int repl, u32int val) {

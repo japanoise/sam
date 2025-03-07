@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 
 void replclipr(Image *i, int repl, Rectangle clipr) {

@@ -1,6 +1,5 @@
 #include <u.h>
 #include <sys/select.h>
-#include <libc.h>
 #include <draw.h>
 #include <cursor.h>
 #include <event.h>

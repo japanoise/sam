@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 
 void borderop(Image *im, Rectangle r, int i, Image *color, Point sp,

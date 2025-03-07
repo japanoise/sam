@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 
 static uchar *addcoord(uchar *p, int oldx, int newx) {

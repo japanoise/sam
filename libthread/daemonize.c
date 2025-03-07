@@ -1,4 +1,5 @@
 #include <u.h>
+#include <fmt.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 #include "threadimpl.h"

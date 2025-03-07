@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 
 Image *readimage(Display *d, int fd, int dolock) {

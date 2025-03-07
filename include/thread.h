@@ -9,8 +9,8 @@
 /*
  * basic procs and threads
  */
-int      proccreate(void (*f)(void *arg), void *arg, unsigned int stacksize);
-int      threadcreate(void (*f)(void *arg), void *arg, unsigned int stacksize);
+int      proccreate(void (*f)(void *arg), void *arg, uint stacksize);
+int      threadcreate(void (*f)(void *arg), void *arg, uint stacksize);
 void     threadexits(char *);
 void     threadexitsall(char *);
 void     threadsetname(char *, ...);

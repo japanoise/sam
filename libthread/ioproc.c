@@ -1,5 +1,5 @@
 #include <u.h>
-#include <libc.h>
+#include <fmt.h>
 #include <thread.h>
 #include "ioproc.h"
 

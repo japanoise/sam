@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 
 Image *creadimage(Display *d, int fd, int dolock) {

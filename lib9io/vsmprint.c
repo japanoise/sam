@@ -6,7 +6,6 @@
  */
 #ifdef PLAN9PORT
 #include <u.h>
-#include <libc.h>
 #include "fmtdef.h"
 #else
 #include <stdlib.h>

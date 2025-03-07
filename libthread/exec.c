@@ -1,3 +1,4 @@
+#include <fmt.h>
 #include "threadimpl.h"
 
 static Lock     thewaitlock;

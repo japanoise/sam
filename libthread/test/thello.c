@@ -1,5 +1,5 @@
 #include <u.h>
-#include <libc.h>
 #include <thread.h>
+#include <fmt.h>
 
 void threadmain(int argc, char **argv) { print("hello, world\n"); }

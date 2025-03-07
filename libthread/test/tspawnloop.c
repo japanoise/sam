@@ -1,5 +1,4 @@
 #include "u.h"
-#include "libc.h"
 #include "thread.h"
 
 void execproc(void *v) {

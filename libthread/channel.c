@@ -1,3 +1,5 @@
+#include <stdarg.h>
+#include <fmt.h>
 #include "threadimpl.h"
 
 /*

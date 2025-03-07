@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 
 Image *allocimagemix(Display *d, u32int color1, u32int color3) {

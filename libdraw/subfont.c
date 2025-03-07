@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 
 Subfont *allocsubfont(char *name, int n, int height, int ascent, Fontchar *info,

@@ -1,9 +1,9 @@
 #include <u.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <libc.h>
 #include <fcall.h>
 #include <thread.h>
+#include <stdarg.h>
 #include "ioproc.h"
 
 static long _ioclose(va_list *arg) {

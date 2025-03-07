@@ -2,7 +2,6 @@
 #include "x11-inc.h"
 #include "x11-keysym2ucs.h"
 #include <errno.h>
-#include <libc.h>
 #include <draw.h>
 #include <memdraw.h>
 #include <memlayer.h>

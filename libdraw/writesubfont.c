@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 
 static void packinfo(Fontchar *fc, uchar *p, int n) {

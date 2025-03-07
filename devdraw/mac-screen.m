@@ -11,7 +11,6 @@
 #undef Rect
 
 #include <u.h>
-#include <libc.h>
 #include <thread.h>
 #include <draw.h>
 #include <memdraw.h>

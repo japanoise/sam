@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 
 int unloadimage(Image *i, Rectangle r, uchar *data, int ndata) {

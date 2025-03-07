@@ -2,7 +2,6 @@
 #import <Foundation/Foundation.h>
 
 #include <u.h>
-#include <libc.h>
 
 AUTOFRAMEWORK(Foundation)
 AUTOFRAMEWORK(Cocoa)

@@ -11,7 +11,6 @@
 #endif
 #endif
 #include <sys/utsname.h>
-#include "libc.h"
 #include "thread.h"
 
 typedef struct Execjob     Execjob;

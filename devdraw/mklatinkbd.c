@@ -4,7 +4,6 @@
  */
 
 #include <u.h>
-#include <libc.h>
 #include <bio.h>
 #include <ctype.h>
 

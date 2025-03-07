@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 
 int cloadimage(Image *i, Rectangle r, uchar *data, int ndata) {

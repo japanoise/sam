@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <fmt.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <pthread.h>
@@ -80,10 +81,10 @@ void *sleeper(void *v) {
 	return 0;
 }
 
-void main(int argc, char **argv) {
+int main(int argc, char **argv) {
 	pthread_t pid;
 
 	_threadsetupdaemonize();
 	pthread_create(&pid, 0, sleeper, 0);
-	exit(1);
+	return 1;
 }

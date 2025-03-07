@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <thread.h>
 
 typedef struct Waiter Waiter;

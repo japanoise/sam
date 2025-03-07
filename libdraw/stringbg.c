@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 
 Point stringbg(Image *dst, Point pt, Image *src, Point sp, Font *f, char *s,

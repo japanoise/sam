@@ -1,5 +1,4 @@
 #include <u.h>
-#include <libc.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <fmt.h>

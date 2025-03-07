@@ -1,5 +1,3 @@
-#include "u.h"
-#include "libc.h"
 #include "thread.h"
 
 static long refadd(Ref *r, long a) {
