@@ -2,6 +2,7 @@
 #define _THREAD_H_ 1
 
 #include <u.h>
+#include "errstr.h"
 
 /* AUTOLIB(thread) */
 

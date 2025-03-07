@@ -33,4 +33,6 @@ typedef int8_t   schar;
 
 #define UNICODE_REPLACEMENT_CHAR 0xfffd
 
+#define ERRMAX 128 /* max length of error string */
+
 #endif

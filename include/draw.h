@@ -5,6 +5,7 @@
 #include "fmt.h"
 #include "utf.h"
 #include "thread.h"
+#include "errstr.h"
 
 #ifdef __APPLE__
 AUTOLIB(draw)
