@@ -2,9 +2,89 @@
 #define _THREAD_H_ 1
 
 #include <u.h>
-#include <libc.h>
 
 /* AUTOLIB(thread) */
+
+typedef struct Waitmsg {
+	int   pid;     /* of loved one */
+	ulong time[3]; /* of loved one & descendants */
+	char *msg;
+} Waitmsg;
+
+typedef struct _Thread     _Thread;
+typedef struct _Threadlist _Threadlist;
+
+struct _Threadlist {
+	_Thread *head;
+	_Thread *tail;
+};
+
+extern _Thread *(*threadnow)(void);
+
+/*
+ *  synchronization
+ */
+typedef struct Lock Lock;
+
+struct Lock {
+	int             init;
+	pthread_mutex_t mutex;
+	int             held;
+};
+
+extern void lock(Lock *);
+extern void unlock(Lock *);
+extern int  canlock(Lock *);
+extern int (*_lock)(Lock *, int, ulong);
+extern void (*_unlock)(Lock *, ulong);
+
+typedef struct QLock QLock;
+
+struct QLock {
+	Lock        l;
+	_Thread    *owner;
+	_Threadlist waiting;
+};
+
+extern void qlock(QLock *);
+extern void qunlock(QLock *);
+extern int  canqlock(QLock *);
+extern int (*_qlock)(QLock *, int, ulong); /* do not use */
+extern void (*_qunlock)(QLock *, ulong);
+
+typedef struct Rendez Rendez;
+
+struct Rendez {
+	QLock      *l;
+	_Threadlist waiting;
+};
+
+extern void rsleep(Rendez *); /* unlocks r->l, sleeps, locks r->l again */
+extern int  rwakeup(Rendez *);
+extern int  rwakeupall(Rendez *);
+extern void (*_rsleep)(Rendez *, ulong); /* do not use */
+extern int (*_rwakeup)(Rendez *, int, ulong);
+
+typedef struct RWLock RWLock;
+
+struct RWLock {
+	Lock        l;
+	int         readers;
+	_Thread    *writer;
+	_Threadlist rwaiting;
+	_Threadlist wwaiting;
+};
+
+extern void rlock(RWLock *);
+extern void runlock(RWLock *);
+extern int  canrlock(RWLock *);
+extern void wlock(RWLock *);
+extern void wunlock(RWLock *);
+extern int  canwlock(RWLock *);
+extern int (*_rlock)(RWLock *, int, ulong); /* do not use */
+extern int (*_wlock)(RWLock *, int, ulong);
+extern void (*_runlock)(RWLock *, ulong);
+extern void (*_wunlock)(RWLock *, ulong);
 
 /*
  * basic procs and threads

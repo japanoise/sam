@@ -2,9 +2,9 @@
 #define _DRAW_H_ 1
 
 #include "u.h"
-#include "libc.h"
 #include "fmt.h"
 #include "utf.h"
+#include "thread.h"
 
 #ifdef __APPLE__
 AUTOLIB(draw)

@@ -15,6 +15,12 @@
 #include <unistd.h>
 #include "utf.h"
 
+typedef long p9jmp_buf[sizeof(sigjmp_buf) / (sizeof(long))];
+
+#if defined(__GNUC__) || defined(__clang__) || defined(__IBMC__)
+#define getcallerpc(x) ((ulong)__builtin_return_address(0))
+#endif
+
 typedef int64_t  vlong;
 typedef uint64_t ulong;
 typedef uint64_t uvlong;
