@@ -1,6 +1,6 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
+#include <fmt.h>
 
 void line(Image *dst, Point p0, Point p1, int end0, int end1, int radius,
 	  Image *src, Point sp) {
@@ -16,7 +16,7 @@ void lineop(Image *dst, Point p0, Point p1, int end0, int end1, int radius,
 	a = bufimage(dst->display,
 		     1 + 4 + 2 * 4 + 2 * 4 + 4 + 4 + 4 + 4 + 2 * 4);
 	if (a == 0) {
-		fprintf(stderr, "image line\n");
+		fprint(2, "image line: %r\n");
 		return;
 	}
 	a[0] = 'L';

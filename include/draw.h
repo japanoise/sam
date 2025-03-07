@@ -3,6 +3,7 @@
 
 #include "u.h"
 #include "libc.h"
+#include "fmt.h"
 #include "utf.h"
 
 #ifdef __APPLE__
@@ -26,8 +27,8 @@ typedef struct Subfont   Subfont;
 
 struct Mux;
 
-/* extern int Rfmt(Fmt *); */
-/* extern int Pfmt(Fmt *); */
+extern int Rfmt(Fmt *);
+extern int Pfmt(Fmt *);
 
 #define DOpaque 0xFFFFFFFF
 #define DTransparent 0x00000000 /* only useful for allocimage memfillcolor */

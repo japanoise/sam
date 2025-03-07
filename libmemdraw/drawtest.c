@@ -1,6 +1,6 @@
 #include <u.h>
-#include <libc.h>
 #include <bio.h>
+#include <fmt.h>
 #include <draw.h>
 #include <memdraw.h>
 #include <stdarg.h>
@@ -120,7 +120,7 @@ void main(int argc, char *argv[]) {
 	 * src->chan, mask->chan, stmp->chan, mtmp->chan, ones->chan); */
 	if (dst == 0 || src == 0 || mask == 0 || mtmp == 0 || ones == 0) {
 	Alloc:
-		fprintf(stderr, "dtest: allocation failed\n");
+		fprint(2, "dtest: allocation failed: %r\n");
 		exits("alloc");
 	}
 	nbytes = (4 * Xrange + 4) * Yrange;
@@ -288,15 +288,15 @@ void checkone(Point p, Point sp, Point mp) {
 	sdp = (uchar *)savedstbits + delta;
 
 	if (memcmp(dp, sdp, (dst->depth + 7) / 8) != 0) {
-		fprintf(stderr,
-			"dtest: one bad pixel drawing at dst %P from source %P "
-			"mask %P\n",
-			p, sp, mp);
-		fprintf(stderr,
-			" %.2ux %.2ux %.2ux %.2ux should be %.2ux %.2ux %.2ux "
-			"%.2ux\n",
-			dp[0], dp[1], dp[2], dp[3], sdp[0], sdp[1], sdp[2],
-			sdp[3]);
+		fprint(2,
+		       "dtest: one bad pixel drawing at dst %P from source %P "
+		       "mask %P\n",
+		       p, sp, mp);
+		fprint(2,
+		       " %.2ux %.2ux %.2ux %.2ux should be %.2ux %.2ux %.2ux "
+		       "%.2ux\n",
+		       dp[0], dp[1], dp[2], dp[3], sdp[0], sdp[1], sdp[2],
+		       sdp[3]);
 		fprintf(stderr, "addresses dst %p src %p mask %p\n", dp,
 			byteaddr(src, sp), byteaddr(mask, mp));
 		dumpimage("src", src, src->data->bdata, sp);
@@ -329,7 +329,7 @@ void checkline(Rectangle r, Point sp, Point mp, int y, Memimage *stmp,
 	if (memcmp(dp, saved, nb) != 0) {
 		fprintf(stderr, "dtest: bad line at y=%d; saved %p dp %p\n", y,
 			saved, dp);
-		fprintf(stderr, "draw dst %R src %P mask %P\n", r, sp, mp);
+		fprint(2, "draw dst %R src %P mask %P\n", r, sp, mp);
 		dumpimage("src", src, src->data->bdata, sp);
 		if (stmp) {
 			dumpimage("stmp", stmp, stmp->data->bdata, sp);
@@ -882,7 +882,7 @@ u32int getpixel(Memimage *img, Point pt) {
 			case CIgnore:
 				break;
 			default:
-				fprintf(stderr, "unknown channel type %lud\n",
+				fprintf(stderr, "unknown channel type %ud\n",
 					TYPE(c));
 				abort();
 			}
@@ -990,7 +990,7 @@ void putpixel(Memimage *img, Point pt, u32int nv) {
 				break;
 			default:
 				SET(bits);
-				fprintf(stderr, "unknown channel type %lud\n",
+				fprintf(stderr, "unknown channel type %ud\n",
 					TYPE(c));
 				abort();
 			}

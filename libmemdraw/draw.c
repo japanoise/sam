@@ -1,6 +1,6 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
+#include <fmt.h>
 #include <memdraw.h>
 
 int        drawdebug;
@@ -103,9 +103,9 @@ Memdrawparam *_memimagedrawsetup(Memimage *dst, Rectangle r, Memimage *src,
 		mask = memopaque;
 	}
 
-	DBG printf("memimagedraw %p/%X %p @ %p %p/%X %p %p/%X %p... ", dst,
-		   dst->chan, &r, dst->data->bdata, src, src->chan, &p0, mask,
-		   mask->chan, &p1);
+	DBG print("memimagedraw %p/%X %R @ %p %p/%X %P %p/%X %P... ", dst,
+		  dst->chan, r, dst->data->bdata, src, src->chan, p0, mask,
+		  mask->chan, p1);
 
 	if (drawclip(dst, &r, src, &p0, mask, &p1, &par.sr, &par.mr) == 0) {
 		/*		if(drawdebug) */
@@ -165,8 +165,7 @@ Memdrawparam *_memimagedrawsetup(Memimage *dst, Rectangle r, Memimage *src,
 
 	/*	if(drawdebug) */
 	/*		iprint("dr %R sr %R mr %R...", r, par.sr, par.mr); */
-	DBG printf("draw dr %p sr %p mr %p %x\n", &r, &par.sr, &par.mr,
-		   par.state);
+	DBG print("draw dr %R sr %R mr %R %x\n", r, par.sr, par.mr, par.state);
 
 	return &par;
 }
@@ -647,7 +646,7 @@ static int alphadraw(Memdrawparam *par) {
 	Rectangle r, sr, mr;
 
 	if (drawdebug) {
-		printf("alphadraw %p\n", &par->r);
+		print("alphadraw %R\n", par->r);
 	}
 	r = par->r;
 	dx = Dx(r);

@@ -3,7 +3,7 @@
  */
 
 #include <u.h>
-#include <libc.h>
+#include <fmt.h>
 #include <thread.h>
 #include <draw.h>
 #include <memdraw.h>
@@ -168,8 +168,8 @@ static void serveproc(void *v) {
 			break;
 		}
 		if (trace) {
-			fprintf(stderr, "%lu [%d] <- %p\n", nsec() / 1000000,
-				threadid(), &m);
+			fprint(2, "%lu [%d] <- %W\n", nsec() / 1000000,
+			       threadid(), &m);
 		}
 		runmsg(c, &m);
 	}
@@ -361,7 +361,7 @@ static void replymsg(Client *c, Wsysmsg *m) {
 	}
 	convW2M(m, c->mbuf, n);
 	if (write(c->wfd, c->mbuf, n) != n) {
-		fprintf(stderr, "client write\n");
+		fprint(2, "client write: %r\n");
 	}
 	qunlock(&c->wfdlk);
 }

@@ -1,6 +1,6 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
+#include <fmt.h>
 #include "defont.h"
 
 /*
@@ -28,7 +28,7 @@ Subfont *_getsubfont(Display *d, char *name) {
 		fd = _fontpipe(fname + 10);
 	}
 	if (fd < 0) {
-		fprintf(stderr, "getsubfont: can't open %s\n", fname);
+		fprint(2, "getsubfont: can't open %s: %r\n", fname);
 		return 0;
 	}
 	/*
@@ -45,7 +45,7 @@ Subfont *_getsubfont(Display *d, char *name) {
 		lockdisplay(d);
 	}
 	if (f == 0) {
-		fprintf(stderr, "getsubfont: can't read %s\n", name);
+		fprint(2, "getsubfont: can't read %s: %r\n", name);
 	}
 	close(fd);
 	if (scale > 1) {

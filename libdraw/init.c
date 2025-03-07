@@ -1,7 +1,7 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 #include <mouse.h>
+#include <fmt.h>
 
 Display *display;
 Font    *font;
@@ -50,7 +50,7 @@ int geninitdraw(char *devdir, void (*error)(Display *, char *), char *fontname,
 	 * Set up default font
 	 */
 	if (openfont(display, "*default*") == 0) {
-		fprintf(stderr, "imageinit: can't open default subfont\n");
+		fprint(2, "imageinit: can't open default subfont: %r\n");
 	Error:
 		closedisplay(display);
 		display = nil;
@@ -70,7 +70,7 @@ int geninitdraw(char *devdir, void (*error)(Display *, char *), char *fontname,
 
 	font = openfont(display, fontname);
 	if (font == nil) {
-		fprintf(stderr, "imageinit: can't open font %s\n", fontname);
+		fprint(2, "imageinit: can't open font %s: %r\n", fontname);
 		goto Error;
 	}
 	display->defaultfont = font;
@@ -80,7 +80,7 @@ int geninitdraw(char *devdir, void (*error)(Display *, char *), char *fontname,
 	    display->image; /* _allocwindow wants screenimage->chan */
 	screen = _allocwindow(nil, _screen, display->image->r, Refnone, DWhite);
 	if (screen == nil) {
-		fprintf(stderr, "_allocwindow\n");
+		fprint(stderr, "_allocwindow: %r\n");
 		goto Error;
 	}
 	display->screenimage = screen;
@@ -150,20 +150,20 @@ static Image *getimage0(Display *d, Image *image) {
 	a[0] = 'J';
 	a[1] = 'I';
 	if (flushimage(d, 0) < 0) {
-		fprintf(stderr, "cannot read screen info\n");
+		fprint(2, "cannot read screen info: %r\n");
 		return nil;
 	}
 
 	n = _displayrddraw(d, info, sizeof info);
 	if (n != 12 * 12) {
-		fprintf(stderr, "short screen info\n");
+		fprint(2, "short screen info: %r\n");
 		return nil;
 	}
 
 	if (image == nil) {
 		image = mallocz(sizeof(Image), 1);
 		if (image == nil) {
-			fprintf(stderr, "cannot allocate image\n");
+			fprint(2, "cannot allocate image: %r\n");
 			return nil;
 		}
 	}
@@ -377,7 +377,7 @@ static int doflush(Display *d) {
 
 	if (_displaywrdraw(d, d->buf, n) != n) {
 		if (_drawdebug) {
-			fprintf(stderr, "flushimage fail: d=%p\n", d); /**/
+			fprint(2, "flushimage fail: d=%p: %r\n", d); /**/
 		}
 		d->bufp = d->buf; /* might as well; chance of continuing */
 		return -1;

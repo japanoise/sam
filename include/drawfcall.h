@@ -5,6 +5,7 @@
 #include <u.h>
 #include <cursor.h>
 #include <mouse.h>
+#include <fmt.h>
 
 /*
 
@@ -136,6 +137,7 @@ uint convM2W(uchar *, uint, Wsysmsg *);
 uint sizeW2M(Wsysmsg *);
 int  readwsysmsg(int, uchar *, uint);
 
-/* int drawfcallfmt(Fmt *); */
+int drawfcallfmt(Fmt *);
+int encodefmt(Fmt *);
 
 #endif /* _DRAW_F_CALL_H */

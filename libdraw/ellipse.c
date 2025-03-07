@@ -1,6 +1,6 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
+#include <fmt.h>
 
 static void doellipse(int cmd, Image *dst, Point *c, int xr, int yr, int thick,
 		      Image *src, Point *sp, int alpha, int phi, Drawop op) {
@@ -11,7 +11,7 @@ static void doellipse(int cmd, Image *dst, Point *c, int xr, int yr, int thick,
 	a = bufimage(dst->display,
 		     1 + 4 + 4 + 2 * 4 + 4 + 4 + 4 + 2 * 4 + 2 * 4);
 	if (a == 0) {
-		fprintf(stderr, "image ellipse\n");
+		fprint(2, "image ellipse: %r\n");
 		return;
 	}
 	a[0] = cmd;

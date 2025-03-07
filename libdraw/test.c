@@ -1,12 +1,11 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
 #include <9event.h>
 #include <mouse.h>
 
 void eresized(int new) {
 	if (new && getwindow(display, Refnone) < 0) {
-		fprintf(stderr, "colors: can't reattach to window\n");
+		fprint(2, "colors: can't reattach to window: %r\n");
 		exits("resized");
 	}
 	draw(screen, screen->r, display->white, nil, ZP);

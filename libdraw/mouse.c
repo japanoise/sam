@@ -1,6 +1,6 @@
 #include <u.h>
-#include <libc.h>
 #include <draw.h>
+#include <fmt.h>
 #include <thread.h>
 #include <cursor.h>
 #include <mouse.h>
@@ -30,7 +30,7 @@ int readmouse(Mousectl *mc) {
 		flushimage(mc->display, 1);
 	}
 	if (recv(mc->c, &mc->m) < 0) {
-		fprintf(stderr, "readmouse: %r\n");
+		fprint(2, "readmouse: %r\n");
 		return -1;
 	}
 	return 0;
