@@ -821,8 +821,6 @@ static int alphadraw(Memdrawparam *par) {
 
 static Buffer alphacalc0(Buffer bdst, Buffer b1, Buffer b2, int dx, int grey,
 			 int op) {
-	USED(grey);
-	USED(op);
 	memset(bdst.rgba, 0, dx * bdst.delta);
 	return bdst;
 }
@@ -1045,9 +1043,6 @@ static Buffer alphacalc3679(Buffer bdst, Buffer bsrc, Buffer bmask, int dx,
 
 static Buffer alphacalc5(Buffer bdst, Buffer b1, Buffer b2, int dx, int grey,
 			 int op) {
-	USED(dx);
-	USED(grey);
-	USED(op);
 	return bdst;
 }
 
@@ -1058,7 +1053,6 @@ static Buffer alphacalc11(Buffer bdst, Buffer bsrc, Buffer bmask, int dx,
 	int    i, sa, ma, q;
 	u32int t, t1;
 
-	USED(op);
 	obdst = bdst;
 	sadelta = bsrc.alpha == &ones ? 0 : bsrc.delta;
 	q = bsrc.delta == 4 && bdst.delta == 4 && chanmatch(&bdst, &bsrc);
@@ -1150,7 +1144,6 @@ static Buffer alphacalcS(Buffer bdst, Buffer bsrc, Buffer bmask, int dx,
 	int    i, ma;
 	u32int t;
 
-	USED(op);
 	obdst = bdst;
 
 	for (i = 0; i < dx; i++) {
@@ -1332,7 +1325,6 @@ static Buffer boolcalc1011(Buffer bdst, Buffer bsrc, Buffer bmask, int dx,
 static Buffer replread(Param *p, uchar *s, int y) {
 	Buffer *b;
 
-	USED(s);
 	b = &p->bcache[y];
 	if ((p->bfilled & (1 << y)) == 0) {
 		p->bfilled |= 1 << y;
@@ -1780,10 +1772,7 @@ static Readfn *readfn(Memimage *img) {
 	return readbyte;
 }
 
-static Readfn *readalphafn(Memimage *m) {
-	USED(m);
-	return readbyte;
-}
+static Readfn *readalphafn(Memimage *m) { return readbyte; }
 
 static Writefn *writefn(Memimage *img) {
 	if (img->depth < 8) {
@@ -1795,16 +1784,12 @@ static Writefn *writefn(Memimage *img) {
 	return writebyte;
 }
 
-static void nullwrite(Param *p, uchar *s, Buffer b) {
-	USED(p);
-	USED(s);
-}
+static void nullwrite(Param *p, uchar *s, Buffer b) {}
 
 static Buffer readptr(Param *p, uchar *s, int y) {
 	Buffer b;
 	uchar *q;
 
-	USED(s);
 	memset(&b, 0, sizeof b);
 	q = p->bytermin + y * p->bwidth;
 	b.red = q; /* ptr to data */
@@ -1816,8 +1801,6 @@ static Buffer readptr(Param *p, uchar *s, int y) {
 
 static Buffer boolmemmove(Buffer bdst, Buffer bsrc, Buffer b1, int dx, int i,
 			  int o) {
-	USED(i);
-	USED(o);
 	memmove(bdst.red, bsrc.red, dx * bdst.delta);
 	return bdst;
 }
@@ -1826,8 +1809,6 @@ static Buffer boolcopy8(Buffer bdst, Buffer bsrc, Buffer bmask, int dx, int i,
 			int o) {
 	uchar *m, *r, *w, *ew;
 
-	USED(i);
-	USED(o);
 	m = bmask.grey;
 	w = bdst.red;
 	r = bsrc.red;
@@ -1845,8 +1826,6 @@ static Buffer boolcopy16(Buffer bdst, Buffer bsrc, Buffer bmask, int dx, int i,
 	uchar  *m;
 	ushort *r, *w, *ew;
 
-	USED(i);
-	USED(o);
 	m = bmask.grey;
 	w = (ushort *)bdst.red;
 	r = (ushort *)bsrc.red;
@@ -1864,8 +1843,6 @@ static Buffer boolcopy24(Buffer bdst, Buffer bsrc, Buffer bmask, int dx, int i,
 	uchar *m;
 	uchar *r, *w, *ew;
 
-	USED(i);
-	USED(o);
 	m = bmask.grey;
 	w = bdst.red;
 	r = bsrc.red;
@@ -1888,8 +1865,6 @@ static Buffer boolcopy32(Buffer bdst, Buffer bsrc, Buffer bmask, int dx, int i,
 	uchar  *m;
 	u32int *r, *w, *ew;
 
-	USED(i);
-	USED(o);
 	m = bmask.grey;
 	w = (u32int *)bdst.red;
 	r = (u32int *)bsrc.red;
@@ -2514,7 +2489,7 @@ static int chardraw(Memdrawparam *par) {
 
 	bx = -bsh - 1;
 	ex = -bsh - 1 - dx;
-	SET(bits);
+	bits = 0;
 	v = par->sdval;
 
 	/* make little endian */

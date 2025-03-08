@@ -1,6 +1,7 @@
 #include <u.h>
 #include <draw.h>
 #include <memdraw.h>
+#include <bio.h>
 
 Memsubfont *openmemsubfont(char *name) {
 	Memsubfont *sf;

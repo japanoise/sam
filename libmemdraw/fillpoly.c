@@ -182,7 +182,6 @@ static void xscan(Memimage *dst, Seg **seg, Seg *segtab, int nseg, int wind,
 		}
 	 *
 	 */
-	USED(clipped);
 
 	for (i = 0, s = segtab, p = seg; i < nseg; i++, s++) {
 		*p = s;

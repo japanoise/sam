@@ -1,6 +1,7 @@
 #include <u.h>
 #include <draw.h>
 #include <memdraw.h>
+#include <bio.h>
 
 Memimage *creadmemimage(int fd) {
 	char      hdr[5 * 12 + 1];

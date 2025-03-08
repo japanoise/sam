@@ -35,7 +35,7 @@ Memimage *allocmemimaged(Rectangle r, u32int chan, Memdata *md, void *X) {
 
 	l = wordsperline(r, d);
 
-	i = mallocz(sizeof(Memimage), 1);
+	i = calloc(sizeof(Memimage), 1);
 	if (i == NULL) {
 		return NULL;
 	}
