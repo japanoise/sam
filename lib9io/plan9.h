@@ -28,6 +28,3 @@ typedef unsigned long      ulong;
 typedef unsigned long long uvlong;
 typedef long long          vlong;
 typedef uintptr_t          uintptr;
-
-#undef nelem
-#define nelem(x) (sizeof(x) / sizeof(x)[0])
