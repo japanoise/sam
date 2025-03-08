@@ -19,8 +19,6 @@ static void lhideop(Memimage *src, Rectangle screenr, Rectangle clipr,
 	Rectangle r;
 	Memlayer *l;
 
-	USED(clipr.min.x);
-	USED(insave);
 	l = etc;
 	if (src != l->save) { /* do nothing if src is already in save area */
 		r = rectsubpt(screenr, l->delta);
@@ -43,7 +41,6 @@ static void lexposeop(Memimage *dst, Rectangle screenr, Rectangle clipr,
 	Memlayer *l;
 	Rectangle r;
 
-	USED(clipr.min.x);
 	if (insave) { /* if dst is save area, don't bother */
 		return;
 	}

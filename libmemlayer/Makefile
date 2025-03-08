@@ -13,16 +13,12 @@ AR=ar
 
 CFLAGS+=-c $(INCS) $(STANDARDS) $(INCLUDES)
 
-LIB=lib9io.a
+LIB=libmemlayer.a
 CC?=c99
 
-OBJ=bflush.o binit.o bprint.o brdline.o brdstr.o bread.o bvprint.o\
-	bwrite.o dofmt.o dorfmt.o errfmt.o errstr.o fltfmt.o fmt.o \
-	fmtfd.o fmtfdflush.o fmtlocale.o fmtlock.o fmtprint.o\
-	fmtquote.o fmtrune.o fmtstr.o fmtvprint.o fprint.o nan64.o\
-	pow10.o print.o readn.o runesnprint.o runevsnprint.o\
-	seprint.o smprint.o snprint.o sprint.o strtod.o\
-	vfprint.o vseprint.o vsmprint.o vsnprint.o
+OBJ=draw.o lalloc.o layerop.o ldelete.o lhide.o line.o load.o\
+	lorigin.o lsetrefresh.o ltofront.o ltorear.o unload.o
+
 
 all:	$(LIB)
 
@@ -40,4 +36,4 @@ install:	$(LIB)
 
 uninstall:
 
-$(OBJ):	../include/u.h ../include/bio.h ../include/fmt.h
+$(OBJ):	../include/u.h ../include/memlayer.h ../include/memdraw.h

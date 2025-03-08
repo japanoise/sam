@@ -53,6 +53,9 @@ int     Bterm(Biobuf *);
 long    Bwrite(Biobuf *, void *, long);
 int     Bvprint(Biobuf *, char *, va_list);
 
+/* Fits here because it is io into a buffer */
+long readn(int f, void *av, long n);
+
 #define OREAD O_RDONLY
 #define OWRITE O_WRONLY
 #define OTRUNC O_TRUNC

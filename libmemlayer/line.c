@@ -101,7 +101,6 @@ static void llineop(Memimage *dst, Rectangle screenr, Rectangle clipr,
 	struct Lline *ll;
 	Point         p0, p1;
 
-	USED(screenr.min.x);
 	ll = etc;
 	if (insave && ll->dstlayer->save == NULL) {
 		return;
