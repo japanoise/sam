@@ -1,0 +1,51 @@
+<$PLAN9/src/mkhdr
+<|osxvers
+
+TARG=devdraw
+
+SHORTLIB=draw memdraw
+
+WSYSOFILES=\
+	devdraw.$O\
+	latin1.$O\
+	mouseswap.$O\
+	srv.$O\
+	winsize.$O\
+
+<|sh ./mkwsysrules.sh
+
+OFILES=$WSYSOFILES
+
+HFILES=\
+	bigarrow.h\
+	devdraw.h\
+	glendapng.h\
+	latin1.h\
+	$WSYSHFILES\
+
+<$PLAN9/src/mkone
+
+$O.drawclient: drawclient.$O
+	$LD -o $target $prereq
+
+$O.mklatinkbd: mklatinkbd.$O
+	$LD -o $target $prereq
+
+latin1.$O: latin1.h
+
+latin1.h: $PLAN9/lib/keyboard $O.mklatinkbd
+	./$O.mklatinkbd -r $PLAN9/lib/keyboard | sed 's/, }/ }/' >$target
+
+$O.macargv: $MACARGV
+	$LD -o $target $prereq
+
+%.$O: %.m
+	$CC $CFLAGS $OBJCFLAGS -fobjc-arc -o $target $stem.m
+
+CLEANFILES=$O.devdraw $O.macargv $O.drawclient $O.mklatinkbd latin1.h
+
+install: mklatinkbd.install
+install:Q:
+	if [ $MACARGV ]; then
+		mk $MKFLAGS macargv.install
+	fi
