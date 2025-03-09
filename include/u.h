@@ -33,6 +33,8 @@ typedef int8_t   schar;
 
 #define UNICODE_REPLACEMENT_CHAR 0xfffd
 
+#define nelem(x) (sizeof(x) / sizeof(x[0]))
+
 #define ERRMAX 128 /* max length of error string */
 
 #endif

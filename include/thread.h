@@ -140,6 +140,14 @@ void **threaddata(void);
 void       threadmain(int argc, char *argv[]);
 extern int mainstacksize;
 
+/*
+ * See needstack(3):
+ * "Calling needstack indicates to the thread library that an external
+ * routine is about to be called that will require n bytes of stack
+ * space"
+ */
+void needstack(int n);
+
 int threadmaybackground(void);
 
 /*
@@ -255,5 +263,36 @@ Channel *threadwaitchan(void);
  * alternate interface to threadwaitchan - don't use both!
  */
 Waitmsg *procwait(int pid);
+
+#ifdef RFMEM /* FreeBSD, OpenBSD */
+#undef RFFDG
+#undef RFNOTEG
+#undef RFPROC
+#undef RFMEM
+#undef RFNOWAIT
+#undef RFCFDG
+#undef RFNAMEG
+#undef RFENVG
+#undef RFCENVG
+#undef RFCFDG
+#undef RFCNAMEG
+#endif
+
+enum {
+	RFNAMEG = (1 << 0),
+	RFENVG = (1 << 1),
+	RFFDG = (1 << 2),
+	RFNOTEG = (1 << 3),
+	RFPROC = (1 << 4),
+	RFMEM = (1 << 5),
+	RFNOWAIT = (1 << 6),
+	RFCNAMEG = (1 << 10),
+	RFCENVG = (1 << 11),
+	RFCFDG = (1 << 12)
+	/*      RFREND          = (1<<13), */
+	/*      RFNOMNT         = (1<<14) */
+};
+
+int p9rfork(int flags);
 
 #endif /* _THREADH_ */

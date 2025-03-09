@@ -52,9 +52,10 @@ static void xioproc(void *a) {
 Ioproc *ioproc(void) {
 	Ioproc *io;
 
-	io = mallocz(sizeof(*io), 1);
+	io = calloc(sizeof(*io), 1);
 	if (io == NULL) {
-		sysfatal("ioproc malloc: %r");
+		fprint(2, "ioproc malloc: %r");
+		exit(1);
 	}
 	io->c = chancreate(sizeof(void *), 0);
 	chansetname(io->c, "ioc%p", io->c);
@@ -110,7 +111,6 @@ long iocall(Ioproc *io, long (*op)(va_list *), ...) {
 		inted = 1;
 		iointerrupt(io);
 	}
-	USED(inted);
 	va_end(io->arg);
 	ret = io->ret;
 	if (ret < 0) {

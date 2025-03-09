@@ -19,7 +19,7 @@ static void child(void) {
 	notedisable("sys: child");
 	pid = waitpid(sigpid, &status, 0);
 	if (pid < 0) {
-		fprint(2, "%s: wait: %r\n", argv0);
+		fprint(2, "wait: %r\n");
 		_exit(97);
 	}
 	if (WIFEXITED(status)) {
@@ -39,16 +39,18 @@ static void child(void) {
 		_exit(98); /* not reached */
 	}
 	if (WIFSTOPPED(status)) {
-		fprint(2, "%s: wait pid %d stopped\n", argv0, pid);
+		fprint(2, "wait pid %d stopped\n", pid);
+		abort();
 		return;
 	}
 #ifdef WIFCONTINUED
 	if (WIFCONTINUED(status)) {
-		fprint(2, "%s: wait pid %d continued\n", argv0, pid);
+		fprint(2, "wait pid %d continued\n", pid);
+		abort();
 		return;
 	}
 #endif
-	fprint(2, "%s: wait pid %d status 0x%ux\n", argv0, pid, status);
+	fprint(2, "wait pid %d status 0x%ux\n", pid, status);
 	_exit(99);
 }
 
@@ -118,13 +120,15 @@ void _threadsetupdaemonize(void) {
 	setpgid(0, 0);
 
 	if (pipe(p) < 0) {
-		sysfatal("passer pipe: %r");
+		fprint(2, "passer pipe: %r\n");
+		abort();
 	}
 
 	/* hide these somewhere they won't cause harm */
 	/* can't go too high: NetBSD max is 64, for example */
-	if (dup(p[0], 28) < 0 || dup(p[1], 29) < 0) {
-		sysfatal("passer pipe dup: %r");
+	if (p9dup(p[0], 28) < 0 || p9dup(p[1], 29) < 0) {
+		fprint(2, "passer pipe dup: %r\n");
+		abort();
 	}
 	close(p[0]);
 	close(p[1]);
@@ -133,14 +137,16 @@ void _threadsetupdaemonize(void) {
 
 	/* close on exec */
 	if (fcntl(p[0], F_SETFD, 1) < 0 || fcntl(p[1], F_SETFD, 1) < 0) {
-		sysfatal("passer pipe pipe fcntl: %r");
+		fprint(2, "passer pipe pipe fcntl: %r");
+		abort();
 	}
 
 	noteenable("sys: child");
 	signal(SIGCHLD, sigpass);
 	switch (pid = fork()) {
 	case -1:
-		sysfatal("passer fork: %r");
+		fprint(2, "passer fork: %r");
+		abort();
 	default:
 		close(p[1]);
 		break;
@@ -183,7 +189,9 @@ void _threadsetupdaemonize(void) {
 
 void _threaddaemonize(void) {
 	if (threadpassfd < 0) {
-		sysfatal("threads in main proc exited w/o threadmaybackground");
+		fprint(2,
+		       "threads in main proc exited w/o threadmaybackground");
+		abort();
 	}
 	write(threadpassfd, "0", 1);
 	close(threadpassfd);

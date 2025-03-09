@@ -118,3 +118,9 @@ extern void     _threadpthreadstart(Proc *, _Thread *);
 	(void *)((((uintptr)(ucp)->uc_stack.ss_sp + (ucp)->uc_stack.ss_size) - \
 		  (align)) &                                                   \
 		 ~((align) - 1))
+
+int atnotify(int (*f)(void *, char *), int in);
+int noteenable(char *msg);
+int notedisable(char *msg);
+int notifyoff(char *msg);
+int p9dup(int old, int new);

@@ -1,3 +1,4 @@
+#include <bio.h>
 #include <fmt.h>
 #include "threadimpl.h"
 
@@ -23,6 +24,17 @@ static void     pthreadsleepschedlocked(Proc *p, _Thread *t);
 static void     pthreadwakeupschedlocked(Proc *p, _Thread *self, _Thread *t);
 static _Thread *procnext(Proc *, _Thread *);
 
+/* If you're debugging, please set this properly :) */
+char *argv0 = "<prog>";
+
+int p9dup(int old, int new) {
+	if (new == -1) {
+		return dup(old);
+	}
+
+	return dup2(old, new);
+}
+
 static void _threaddebug(_Thread *t, char *fmt, ...) {
 	va_list    arg;
 	char       buf[128];
@@ -41,11 +53,11 @@ static void _threaddebug(_Thread *t, char *fmt, ...) {
 			p = argv0;
 		}
 		snprint(buf, sizeof buf, "/tmp/%s.tlog", p);
-		if ((fd = create(buf, OWRITE, 0666)) < 0) {
+		if ((fd = creat(buf, 0666)) < 0) {
 			fd = open("/dev/null", OWRITE);
 		}
 		if (fd >= 0 && fd != 2) {
-			dup(fd, 2);
+			p9dup(fd, 2);
 			close(fd);
 			fd = 2;
 		}
@@ -73,7 +85,7 @@ static Proc *procalloc(void) {
 
 	p = malloc(sizeof *p);
 	if (p == NULL) {
-		sysfatal("procalloc malloc: %r");
+		fprint(2, "procalloc malloc: %r");
 	}
 	memset(p, 0, sizeof *p);
 	addproc(p);
@@ -86,10 +98,9 @@ static Proc *procalloc(void) {
 _Thread *_threadcreate(Proc *p, void (*fn)(void *), void *arg, uint stack) {
 	_Thread *t;
 
-	USED(stack);
 	t = malloc(sizeof *t);
 	if (t == NULL) {
-		sysfatal("threadcreate malloc: %r");
+		fprint(2, "threadcreate malloc: %r");
 	}
 	memset(t, 0, sizeof *t);
 	t->id = incref(&threadidref);
@@ -216,7 +227,7 @@ void threadsysfatal(char *fmt, va_list arg) {
 	char buf[256];
 
 	vseprint(buf, buf + sizeof(buf), fmt, arg);
-	__fixargv0();
+	/* __fixargv0(); */
 	fprint(2, "%s: %s\n", argv0 ? argv0 : "<prog>", buf);
 	threadexitsall(buf);
 }
@@ -513,8 +524,6 @@ static void threadqunlock(QLock *l, ulong pc) {
 }
 
 static int threadrlock(RWLock *l, int block, ulong pc) {
-	USED(pc);
-
 	lock(&l->l);
 	if (l->writer == NULL && l->wwaiting.head == NULL) {
 		l->readers++;
@@ -536,8 +545,6 @@ static int threadrlock(RWLock *l, int block, ulong pc) {
 }
 
 static int threadwlock(RWLock *l, int block, ulong pc) {
-	USED(pc);
-
 	lock(&l->l);
 	if (l->writer == NULL && l->readers == 0) {
 		l->writer = (*threadnow)();
@@ -561,7 +568,6 @@ static int threadwlock(RWLock *l, int block, ulong pc) {
 static void threadrunlock(RWLock *l, ulong pc) {
 	_Thread *t;
 
-	USED(pc);
 	t = NULL;
 	lock(&l->l);
 	--l->readers;
@@ -578,7 +584,6 @@ static void threadrunlock(RWLock *l, ulong pc) {
 static void threadwunlock(RWLock *l, ulong pc) {
 	_Thread *t;
 
-	USED(pc);
 	lock(&l->l);
 	l->writer = NULL;
 	assert(l->readers == 0);
@@ -644,8 +649,6 @@ extern int _p9usepwlibrary; /* getgrgid etc. smash the stack - tell _p9dir just
 			       say no */
 
 static void threadmainstart(void *v) {
-	USED(v);
-
 	/*
 	 * N.B. This call to proc() is a program's first call (indirectly) to a
 	 * pthreads function while executing on a non-pthreads-allocated
@@ -695,8 +698,10 @@ int main(int argc, char **argv) {
 	_rsleep = threadrsleep;
 	_rwakeup = threadrwakeup;
 	_notejmpbuf = threadnotejmp;
-	_pin = threadpin;
-	_unpin = threadunpin;
+	/* Sam is always threaded, so the pointer versions are not
+	   called. */
+	/* _pin = threadpin; */
+	/* _unpin = threadunpin; */
 	_sysfatal = threadsysfatal;
 
 	_pthreadinit();
@@ -710,7 +715,8 @@ int main(int argc, char **argv) {
 	t = _threadcreate(p, threadmainstart, NULL, mainstacksize);
 	t->mainthread = 1;
 	procmain(p);
-	sysfatal("procmain returned in libthread");
+	fprint(2, "procmain returned in libthread");
+	abort();
 	/* does not return */
 	return 0;
 }

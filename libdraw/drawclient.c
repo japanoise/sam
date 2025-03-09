@@ -6,6 +6,7 @@
 #include <mouse.h>
 #include <cursor.h>
 #include <drawfcall.h>
+#include <thread.h>
 #include <mux.h>
 
 extern Mouse _drawmouse;
@@ -263,10 +264,13 @@ static int displayrpc(Display *d, Wsysmsg *tx, Wsysmsg *rx, void **freep) {
 	 *
 	 * _pin and _unpin are aliases for threadpin and threadunpin
 	 * in a threaded program and are no-ops in unthreaded programs.
+	 *
+	 * 25/03/08: sam is always threaded, AFAICT, so replaced these
+	 * with threadpin/threadunpin. - japanoise
 	 */
-	_pin();
+	threadpin();
 	rpkt = muxrpc(d->mux, tpkt);
-	_unpin();
+	threadunpin();
 	free(tpkt);
 	if (rpkt == NULL) {
 		werrstr("muxrpc: %r");

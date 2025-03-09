@@ -1,5 +1,6 @@
 #include <u.h>
 #include <thread.h>
+#include <fmt.h>
 
 typedef struct Waiter Waiter;
 
@@ -82,7 +83,8 @@ Waitmsg *procwait(int pid) {
 				    waiting.msg,
 				    (waiting.nmsg + 1) * sizeof waiting.msg[0]);
 				if (waiting.msg == NULL) {
-					sysfatal("out of memory");
+					fprint(2, "out of memory");
+					abort();
 				}
 				waiting.msg[waiting.nmsg++] = msg;
 			}
