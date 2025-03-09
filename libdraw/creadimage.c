@@ -1,5 +1,6 @@
 #include <u.h>
 #include <draw.h>
+#include <bio.h>
 
 Image *creadimage(Display *d, int fd, int dolock) {
 	char      hdr[5 * 12 + 1];
@@ -64,7 +65,7 @@ Image *creadimage(Display *d, int fd, int dolock) {
 			return NULL;
 		}
 	} else {
-		i = mallocz(sizeof(Image), 1);
+		i = calloc(sizeof(Image), 1);
 		if (i == NULL) {
 			return NULL;
 		}

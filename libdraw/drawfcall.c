@@ -4,6 +4,8 @@
 #include <cursor.h>
 #include <drawfcall.h>
 #include <ctype.h>
+#include <bio.h>
+#include <encode.h>
 
 static int _stringsize(char *s) {
 	if (s == NULL) {

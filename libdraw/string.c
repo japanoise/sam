@@ -62,7 +62,8 @@ Point _string(Image *dst, Point pt, Image *src, Point sp, Font *f, char *s,
 	Subfont *sf;
 
 	if (len < 0) {
-		sysfatal("libdraw: _string len=%d", len);
+		fprint(2, "libdraw: _string len=%d", len);
+		abort();
 	}
 
 	if (s == NULL) {

@@ -43,7 +43,7 @@ char *subfontname(char *cfname, char *fname, int maxdepth) {
 		}
 		/* try i-bit grey */
 		tmp2 = smprint("%s.%d", t, i);
-		if (access(tmp2, AREAD) == 0) {
+		if (access(tmp2, R_OK) == 0) {
 			free(t);
 			if (scale > 1) {
 				t = smprint("%d*%s", scale, tmp2);
@@ -56,7 +56,7 @@ char *subfontname(char *cfname, char *fname, int maxdepth) {
 	}
 
 	/* try default */
-	if (strncmp(t, "/mnt/font/", 10) == 0 || access(t, AREAD) == 0) {
+	if (strncmp(t, "/mnt/font/", 10) == 0 || access(t, R_OK) == 0) {
 		if (scale > 1) {
 			tmp2 = smprint("%d*%s", scale, t);
 			free(t);

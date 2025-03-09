@@ -107,8 +107,8 @@ void     _threadsleep(Rendez *);
 _Thread *_threadwakeup(Rendez *);
 #define yield threadyield
 int  threadid(void);
-void _threadpin(void);
-void _threadunpin(void);
+void threadpin(void);
+void threadunpin(void);
 
 /*
  * I am tired of making this mistake.
@@ -120,6 +120,15 @@ void _threadunpin(void);
  * signals
  */
 void threadnotify(int (*f)(void *, char *), int);
+int  postnote(int who, int pid, char *msg);
+
+char *_p9sigstr(int sig, char *tmp);
+int   _p9strsig(char *s);
+
+/*
+ * one-of-a-kind
+ */
+enum { PNPROC = 1, PNGROUP = 2 };
 
 /*
  * daemonize
@@ -294,5 +303,6 @@ enum {
 };
 
 int p9rfork(int flags);
+int p9dup(int old, int new);
 
 #endif /* _THREADH_ */

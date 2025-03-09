@@ -36,11 +36,10 @@ static void _ioproc(void *arg) {
 Keyboardctl *initkeyboard(char *file) {
 	Keyboardctl *kc;
 
-	kc = mallocz(sizeof(Keyboardctl), 1);
+	kc = calloc(sizeof(Keyboardctl), 1);
 	if (kc == NULL) {
 		return NULL;
 	}
-	USED(file);
 	kc->c = chancreate(sizeof(Rune), 20);
 	chansetname(kc->c, "kbdc");
 	proccreate(_ioproc, kc, 32 * 1024);

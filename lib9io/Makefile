@@ -17,8 +17,8 @@ LIB=lib9io.a
 CC?=c99
 
 OBJ=bflush.o binit.o bprint.o brdline.o brdstr.o bread.o bvprint.o\
-	bwrite.o dofmt.o dorfmt.o errfmt.o errstr.o fltfmt.o fmt.o \
-	fmtfd.o fmtfdflush.o fmtlocale.o fmtlock.o fmtprint.o\
+	bwrite.o dofmt.o dorfmt.o encode.o errfmt.o errstr.o fltfmt.o\
+	fmt.o fmtfd.o fmtfdflush.o fmtlocale.o fmtlock.o fmtprint.o\
 	fmtquote.o fmtrune.o fmtstr.o fmtvprint.o fprint.o nan64.o\
 	pow10.o print.o readn.o runesnprint.o runevsnprint.o\
 	seprint.o smprint.o snprint.o sprint.o strtod.o\

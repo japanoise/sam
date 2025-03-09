@@ -71,7 +71,7 @@ static void _ioproc(void *arg) {
 Mousectl *initmouse(char *file, Image *i) {
 	Mousectl *mc;
 
-	mc = mallocz(sizeof(Mousectl), 1);
+	mc = calloc(sizeof(Mousectl), 1);
 	if (i) {
 		mc->display = i->display;
 	}

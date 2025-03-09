@@ -2,9 +2,9 @@
 #include <sys/select.h>
 #include <draw.h>
 #include <cursor.h>
-#include <event.h>
-#include <mux.h>
+#include <9event.h>
 #include <drawfcall.h>
+#include "mux.h"
 
 typedef struct Slave Slave;
 typedef struct Ebuf  Ebuf;

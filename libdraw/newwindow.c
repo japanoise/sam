@@ -1,5 +1,7 @@
 #include <u.h>
 #include <draw.h>
+#include <bio.h>
+#include <sys/mount.h>
 
 /* Connect us to new window, if possible */
 int newwindow(char *str) {
@@ -16,7 +18,7 @@ int newwindow(char *str) {
 	if (fd < 0) {
 		return -1;
 	}
-	rfork(RFNAMEG);
+	p9rfork(RFNAMEG);
 	if (str) {
 		snprintf(buf, sizeof buf, "new %s", str);
 	} else {

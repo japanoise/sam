@@ -60,5 +60,6 @@ long readn(int f, void *av, long n);
 #define OWRITE O_WRONLY
 #define OTRUNC O_TRUNC
 #define OCEXEC O_CLOEXEC
+#define ORDWR O_RDWR
 
 #endif

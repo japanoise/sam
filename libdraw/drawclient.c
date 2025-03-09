@@ -1,5 +1,6 @@
 /* Copyright (c) 2006 Russ Cox */
 
+#include <string.h>
 #include <u.h>
 #include <sys/select.h>
 #include <draw.h>
@@ -7,7 +8,15 @@
 #include <cursor.h>
 #include <drawfcall.h>
 #include <thread.h>
-#include <mux.h>
+#include <bio.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include "mux.h"
+
+char *argv0;
 
 extern Mouse _drawmouse;
 int          chattydrawclient = 0;
@@ -18,6 +27,88 @@ static int   drawnbrecv(Mux *mux, void **);
 static int   drawsend(Mux *mux, void *vmsg);
 static int   drawsettag(Mux *mux, void *vmsg, uint tag);
 static int   canreadfd(int);
+
+/*
+ * Absent other hints, it works reasonably well to use
+ * the X11 display name as the name space identifier.
+ * This is how sam's B has worked since the early days.
+ * Since most programs using name spaces are also using X,
+ * this still seems reasonable.  Terminal-only sessions
+ * can set $NAMESPACE.
+ */
+static char *nsfromdisplay(void) {
+	int         fd;
+	struct stat d;
+	char       *disp, *p;
+
+	if ((disp = getenv("DISPLAY")) == NULL) {
+#ifdef __APPLE__
+		// Might be running native GUI on OS X.
+		disp = strdup(":0.0");
+		if (disp == NULL) {
+			return NULL;
+		}
+#else
+		werrstr("$DISPLAY not set");
+		return NULL;
+#endif
+	}
+
+	/* canonicalize: xxx:0.0 => xxx:0 */
+	p = strrchr(disp, ':');
+	if (p) {
+		p++;
+		while (isdigit((uchar)*p)) {
+			p++;
+		}
+		if (strcmp(p, ".0") == 0) {
+			*p = 0;
+		}
+	}
+
+	/* turn /tmp/launch/:0 into _tmp_launch_:0 (OS X 10.5) */
+	for (p = disp; *p; p++) {
+		if (*p == '/') {
+			*p = '_';
+		}
+	}
+
+	p = smprint("/tmp/ns.%d.%s", getuid(), disp);
+	free(disp);
+	if (p == NULL) {
+		werrstr("out of memory");
+		return p;
+	}
+	if (!mkdir(p, 0700) || errno == EEXIST) {
+		return p;
+	}
+	if (stat(p, &d)) {
+		int errsrv = errno;
+		werrstr("stat %s: %s", p, strerror(errsrv));
+		free(p);
+		return NULL;
+	}
+	if ((d.st_mode & 0777) != 0700 || d.st_uid != getuid()) {
+		werrstr("bad name space dir %s", p);
+		free(p);
+		return NULL;
+	}
+	return p;
+}
+
+char *getns(void) {
+	char *ns;
+
+	ns = getenv("NAMESPACE");
+	if (ns == NULL) {
+		ns = nsfromdisplay();
+	}
+	if (ns == NULL) {
+		werrstr("$NAMESPACE not set, %r");
+		return NULL;
+	}
+	return ns;
+}
 
 int _displayconnect(Display *d) {
 	int     pid, p[2], fd, nbuf, n;
@@ -46,7 +137,7 @@ int _displayconnect(Display *d) {
 		if (addr == NULL) {
 			return -1;
 		}
-		fd = dial(addr, 0, 0, 0);
+		fd = p9dial(addr, 0, 0, 0);
 		free(addr);
 		if (fd < 0) {
 			return -1;
@@ -106,8 +197,8 @@ int _displayconnect(Display *d) {
 			devdraw = "devdraw";
 		}
 		close(p[0]);
-		dup(p[1], 0);
-		dup(p[1], 1);
+		p9dup(p[1], 0);
+		p9dup(p[1], 1);
 		/* execl("strace", "strace", "-o", "drawsrv.out", "drawsrv",
 		 * NULL); */
 		/*
@@ -125,7 +216,7 @@ int _displayconnect(Display *d) {
 		 * so "(argv0)" is not okay.  Use "devdraw"
 		 * instead.
 		 */
-		putenv("NOLIBTHREADDAEMONIZE", "1");
+		putenv("NOLIBTHREADDAEMONIZE=1");
 		devdraw = getenv("DEVDRAW");
 		if (devdraw == NULL) {
 			devdraw = "devdraw";
@@ -134,7 +225,8 @@ int _displayconnect(Display *d) {
 			argv0 = devdraw;
 		}
 		execl(devdraw, argv0, argv0, "(devdraw)", NULL);
-		sysfatal("exec devdraw: %r");
+		fprint(2, "exec devdraw: %r\n");
+		abort();
 	}
 	close(p[1]);
 	d->srvfd = p[0];
@@ -142,7 +234,7 @@ int _displayconnect(Display *d) {
 }
 
 int _displaymux(Display *d) {
-	if ((d->mux = mallocz(sizeof(*d->mux), 1)) == NULL) {
+	if ((d->mux = calloc(sizeof(*d->mux), 1)) == NULL) {
 		return -1;
 	}
 
@@ -208,7 +300,6 @@ static int drawnbrecv(Mux *mux, void **vp) { return _drawrecv(mux, 0, vp); }
 
 static int drawgettag(Mux *mux, void *vmsg) {
 	uchar *msg;
-	USED(mux);
 
 	msg = vmsg;
 	return msg[4];
@@ -216,7 +307,6 @@ static int drawgettag(Mux *mux, void *vmsg) {
 
 static int drawsettag(Mux *mux, void *vmsg, uint tag) {
 	uchar *msg;
-	USED(mux);
 
 	msg = vmsg;
 	msg[4] = tag;

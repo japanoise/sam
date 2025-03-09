@@ -586,4 +586,8 @@ int   _displaywrsnarf(Display *d, char *snarf);
 int   _displaytop(Display *d);
 int   _displayresize(Display *d, Rectangle rect);
 
+char    *getns(void);
+int      p9dial(char *addr, char *local, char *dummy2, int *dummy3);
+uint64_t nsec();
+
 #endif

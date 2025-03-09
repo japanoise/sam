@@ -20,7 +20,7 @@ Screen *allocscreen(Image *image, Image *fill, int public) {
 	if (s == 0) {
 		return 0;
 	}
-	SET(id);
+	id = 0;
 	for (try = 0; try < 25; try++) {
 		/* loop until find a free id */
 		a = bufimage(d, 1 + 4 + 4 + 4 + 1);

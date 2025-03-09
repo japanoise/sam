@@ -123,4 +123,3 @@ int atnotify(int (*f)(void *, char *), int in);
 int noteenable(char *msg);
 int notedisable(char *msg);
 int notifyoff(char *msg);
-int p9dup(int old, int new);

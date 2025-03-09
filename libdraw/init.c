@@ -2,6 +2,7 @@
 #include <draw.h>
 #include <mouse.h>
 #include <fmt.h>
+#include <bio.h>
 
 Display *display;
 Font    *font;
@@ -39,7 +40,7 @@ int geninitdraw(char *devdir, void (*error)(Display *, char *), char *fontname,
 	char *p;
 
 	if (label == NULL) {
-		label = argv0;
+		label = "<prog>";
 	}
 	display = _initdisplay(error, label);
 	if (display == NULL) {
@@ -81,7 +82,7 @@ int geninitdraw(char *devdir, void (*error)(Display *, char *), char *fontname,
 	screen =
 	    _allocwindow(NULL, _screen, display->image->r, Refnone, DWhite);
 	if (screen == NULL) {
-		fprint(stderr, "_allocwindow: %r\n");
+		fprint(2, "_allocwindow: %r\n");
 		goto Error;
 	}
 	display->screenimage = screen;
@@ -162,7 +163,7 @@ static Image *getimage0(Display *d, Image *image) {
 	}
 
 	if (image == NULL) {
-		image = mallocz(sizeof(Image), 1);
+		image = calloc(sizeof(Image), 1);
 		if (image == NULL) {
 			fprint(2, "cannot allocate image: %r\n");
 			return NULL;
@@ -213,7 +214,8 @@ int getwindow(Display *d, int ref) {
 	oi = d->image;
 	i = getimage0(d, oi);
 	if (i == NULL) {
-		sysfatal("getwindow failed");
+		fprint(2, "getwindow failed");
+		abort();
 	}
 	d->image = i;
 	/* fprintf(stderr, "getwindow %p -> %p\n", oi, i); */
@@ -246,7 +248,7 @@ Display *_initdisplay(void (*error)(Display *, char *), char *label) {
 	fmtinstall('P', Pfmt);
 	fmtinstall('R', Rfmt);
 
-	disp = mallocz(sizeof(Display), 1);
+	disp = calloc(sizeof(Display), 1);
 	if (disp == NULL) {
 	Error1:
 		return NULL;
@@ -364,7 +366,7 @@ void drawerror(Display *d, char *s) {
 	} else {
 		errstr(err, sizeof err);
 		fprintf(stderr, "draw: %s: %s\n", s, err);
-		exits(s);
+		fprintf(stderr, "%s\n", s);
 	}
 }
 

@@ -1,5 +1,69 @@
 #include <u.h>
 #include <draw.h>
+#include <bio.h>
+
+/*
+ * I don't want too many of these,
+ * but the ones we have are just too useful.
+ */
+static struct {
+	char *old;
+	char *new;
+} replace[] = {
+    "#9",
+    NULL, /* must be first */
+    "#d",
+    "/dev/fd",
+};
+
+char *get9root(void) {
+	static char *s;
+
+	if (s) {
+		return s;
+	}
+
+	if ((s = getenv("PLAN9")) != 0) {
+		return s;
+	}
+	/* bweh */
+	s = "/tmp";
+	return s;
+}
+
+char *unsharp(char *old) {
+	char *new;
+	int i, olen, nlen, len;
+
+	if (replace[0].new == NULL) {
+		replace[0].new = get9root();
+	}
+
+	for (i = 0; i < nelem(replace); i++) {
+		if (!replace[i].new) {
+			continue;
+		}
+		olen = strlen(replace[i].old);
+		if (strncmp(old, replace[i].old, olen) != 0 ||
+		    (old[olen] != '\0' && old[olen] != '/')) {
+			continue;
+		}
+		nlen = strlen(replace[i].new);
+		len = strlen(old) + nlen - olen;
+		new = malloc(len + 1);
+		if (new == NULL) {
+			/* Most callers won't check the return value... */
+			fprint(2, "out of memory translating %s to %s%s", old,
+			       replace[i].new, old + olen);
+			abort();
+		}
+		strcpy(new, replace[i].new);
+		strcpy(new + nlen, old + olen);
+		assert(strlen(new) == len);
+		return new;
+	}
+	return old;
+}
 
 extern vlong _drawflength(int);
 int          _fontpipe(char *);
@@ -110,7 +174,8 @@ void swapfont(Font *targ, Font **oldp, Font **newp) {
 	Font f, *old, *new;
 
 	if (targ != *oldp) {
-		sysfatal("bad swapfont %p %p %p", targ, *oldp, *newp);
+		fprint(2, "bad swapfont %p %p %p", targ, *oldp, *newp);
+		abort();
 	}
 
 	old = *oldp;
@@ -274,7 +339,7 @@ int _fontpipe(char *name) {
 	if (pipe(p) < 0) {
 		return -1;
 	}
-	pid = rfork(RFNOWAIT | RFFDG | RFPROC);
+	pid = p9rfork(RFNOWAIT | RFFDG | RFPROC);
 	if (pid < 0) {
 		close(p[0]);
 		close(p[1]);
@@ -282,8 +347,8 @@ int _fontpipe(char *name) {
 	}
 	if (pid == 0) {
 		close(p[0]);
-		dup(p[1], 1);
-		dup(p[1], 2);
+		p9dup(p[1], 1);
+		p9dup(p[1], 2);
 		if (p[1] > 2) {
 			close(p[1]);
 		}

@@ -24,6 +24,34 @@
 #include <thread.h>
 #include <fmt.h>
 
+int postnote(int who, int pid, char *msg) {
+	int sig;
+
+	sig = _p9strsig(msg);
+	if (sig == 0) {
+		werrstr("unknown note");
+		return -1;
+	}
+
+	if (pid <= 0) {
+		werrstr("bad pid in postnote");
+		return -1;
+	}
+
+	switch (who) {
+	default:
+		werrstr("bad who in postnote");
+		return -1;
+	case PNPROC:
+		return kill(pid, sig);
+	case PNGROUP:
+		if ((pid = getpgid(pid)) < 0) {
+			return -1;
+		}
+		return killpg(pid, sig);
+	}
+}
+
 #define NCONT 0 /* continue after note */
 #define NDFLT 1 /* terminate after note */
 #define NSAVE 2 /* clear note but hold state */
@@ -32,9 +60,6 @@
 #define NFN 33
 static int (*onnot[NFN])(void *, char *);
 static Lock onnotlock;
-
-extern char *_p9sigstr(int, char *);
-extern int   _p9strsig(char *);
 
 typedef struct Sig Sig;
 
