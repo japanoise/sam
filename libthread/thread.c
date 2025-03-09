@@ -85,7 +85,7 @@ static Proc *procalloc(void) {
 
 	p = malloc(sizeof *p);
 	if (p == NULL) {
-		fprint(2, "procalloc malloc: %r");
+		sysfatal("procalloc malloc: %r");
 	}
 	memset(p, 0, sizeof *p);
 	addproc(p);
@@ -100,7 +100,7 @@ _Thread *_threadcreate(Proc *p, void (*fn)(void *), void *arg, uint stack) {
 
 	t = malloc(sizeof *t);
 	if (t == NULL) {
-		fprint(2, "threadcreate malloc: %r");
+		sysfatal("threadcreate malloc: %r");
 	}
 	memset(t, 0, sizeof *t);
 	t->id = incref(&threadidref);
@@ -715,8 +715,7 @@ int main(int argc, char **argv) {
 	t = _threadcreate(p, threadmainstart, NULL, mainstacksize);
 	t->mainthread = 1;
 	procmain(p);
-	fprint(2, "procmain returned in libthread");
-	abort();
+	sysfatal("procmain returned in libthread");
 	/* does not return */
 	return 0;
 }

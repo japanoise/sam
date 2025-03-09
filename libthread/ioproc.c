@@ -54,8 +54,7 @@ Ioproc *ioproc(void) {
 
 	io = calloc(sizeof(*io), 1);
 	if (io == NULL) {
-		fprint(2, "ioproc malloc: %r");
-		exit(1);
+		sysfatal("ioproc malloc: %r");
 	}
 	io->c = chancreate(sizeof(void *), 0);
 	chansetname(io->c, "ioc%p", io->c);

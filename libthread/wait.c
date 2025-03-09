@@ -83,8 +83,7 @@ Waitmsg *procwait(int pid) {
 				    waiting.msg,
 				    (waiting.nmsg + 1) * sizeof waiting.msg[0]);
 				if (waiting.msg == NULL) {
-					fprint(2, "out of memory");
-					abort();
+					sysfatal("out of memory");
 				}
 				waiting.msg[waiting.nmsg++] = msg;
 			}

@@ -174,8 +174,7 @@ void swapfont(Font *targ, Font **oldp, Font **newp) {
 	Font f, *old, *new;
 
 	if (targ != *oldp) {
-		fprint(2, "bad swapfont %p %p %p", targ, *oldp, *newp);
-		abort();
+		sysfatal("bad swapfont %p %p %p", targ, *oldp, *newp);
 	}
 
 	old = *oldp;

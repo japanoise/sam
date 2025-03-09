@@ -214,8 +214,7 @@ int getwindow(Display *d, int ref) {
 	oi = d->image;
 	i = getimage0(d, oi);
 	if (i == NULL) {
-		fprint(2, "getwindow failed");
-		abort();
+		sysfatal("getwindow failed");
 	}
 	d->image = i;
 	/* fprintf(stderr, "getwindow %p -> %p\n", oi, i); */

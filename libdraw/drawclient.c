@@ -225,8 +225,7 @@ int _displayconnect(Display *d) {
 			argv0 = devdraw;
 		}
 		execl(devdraw, argv0, argv0, "(devdraw)", NULL);
-		fprint(2, "exec devdraw: %r\n");
-		abort();
+		sysfatal("exec devdraw: %r");
 	}
 	close(p[1]);
 	d->srvfd = p[0];

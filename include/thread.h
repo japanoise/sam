@@ -302,6 +302,8 @@ enum {
 	/*      RFNOMNT         = (1<<14) */
 };
 
+extern void sysfatal(char *, ...);
+
 int p9rfork(int flags);
 int p9dup(int old, int new);
 

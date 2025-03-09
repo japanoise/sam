@@ -16,8 +16,8 @@ CFLAGS+=-c $(INCS) $(STANDARDS) $(INCLUDES)
 LIB=libthread.a
 CC?=c99
 
-OBJ= bg.o channel.o daemonize.o exec.o ioproc.o lock.o\
-	notify.o pthread.o qlock.o ref.o rfork.o thread.o wait.o
+OBJ= bg.o channel.o daemonize.o exec.o ioproc.o lock.o notify.o\
+	pthread.o qlock.o ref.o rfork.o sysfatal.o thread.o wait.o
 
 all:	$(LIB)
 

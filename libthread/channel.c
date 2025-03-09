@@ -20,8 +20,7 @@ Channel *chancreate(int elemsize, int bufsize) {
 
 	c = malloc(sizeof *c + bufsize * elemsize);
 	if (c == NULL) {
-		fprint(2, "chancreate malloc: %r");
-		abort();
+		sysfatal("chancreate malloc: %r");
 	}
 	memset(c, 0, sizeof *c);
 	c->elemsize = elemsize;
@@ -318,8 +317,7 @@ int chanalt(Alt *a) {
 	 * and then set t->alt to the one that was executed.
 	 */
 	if (t->alt < a || t->alt >= a + n) {
-		fprint(2, "channel bad alt");
-		abort();
+		sysfatal("channel bad alt");
 	}
 	return t->alt - a;
 }

@@ -102,10 +102,9 @@ static void scalesubfont(Subfont *f, int scale) {
 		n = unloadimage(f->bits, Rect(r.min.x, y, r.max.x, y + 1), src,
 				srcn);
 		if (n != srcn) {
-			fprint(2, "scalesubfont: bad unload %R %R: %d < %d: %r",
-			       f->bits->r, Rect(r.min.x, y, r.max.x, y + 1), n,
-			       srcn);
-			abort();
+			sysfatal("scalesubfont: bad unload %R %R: %d < %d: %r",
+				 f->bits->r, Rect(r.min.x, y, r.max.x, y + 1),
+				 n, srcn);
 		}
 		memset(dst, 0, dstn + 1);
 		pack = 8 / f->bits->depth;
@@ -122,8 +121,7 @@ static void scalesubfont(Subfont *f, int scale) {
 			}
 		}
 		if (dst[dstn] != 0) {
-			fprint(2, "overflow dst");
-			abort();
+			sysfatal("overflow dst");
 		}
 		for (j = 0; j < scale; j++) {
 			loadimage(i,

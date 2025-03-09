@@ -58,8 +58,7 @@ void _procsleep(_Procrendez *r) {
 	pthread_cond_init(&r->cond, 0);
 	r->asleep = 1;
 	if (pthread_cond_wait(&r->cond, &r->l->mutex) != 0) {
-		fprint(2, "pthread_cond_wait: %r");
-		abort();
+		sysfatal("pthread_cond_wait: %r");
 	}
 	pthread_cond_destroy(&r->cond);
 	r->asleep = 0;
@@ -117,8 +116,7 @@ void _procstart(Proc *p, void (*fn)(Proc *)) {
 
 	a = malloc(2 * sizeof a[0]);
 	if (a == NULL) {
-		fprint(2, "_procstart malloc: %r");
-		abort();
+		sysfatal("_procstart malloc: %r");
 	}
 	a[0] = (void *)fn;
 	a[1] = p;
@@ -135,8 +133,7 @@ void _threadpthreadstart(Proc *p, _Thread *t) {
 
 	a = malloc(3 * sizeof a[0]);
 	if (a == NULL) {
-		fprint(2, "_pthreadstart malloc: %r");
-		abort();
+		sysfatal("_pthreadstart malloc: %r");
 	}
 	a[0] = p;
 	a[1] = t;
@@ -173,9 +170,8 @@ void _pthreadinit(void) {
 		 */
 		id = pthread_self();
 		if (*(ulong *)(void *)&id < 1024 * 1024) {
-			fprint(2, "cannot use LinuxThreads as pthread library; "
-				  "see $PLAN9/src/libthread/README.Linux");
-			abort();
+			sysfatal("cannot use LinuxThreads as pthread library; "
+				 "see $PLAN9/src/libthread/README.Linux");
 		}
 	}
 	pthread_key_create(&prockey, 0);

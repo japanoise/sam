@@ -120,15 +120,13 @@ void _threadsetupdaemonize(void) {
 	setpgid(0, 0);
 
 	if (pipe(p) < 0) {
-		fprint(2, "passer pipe: %r\n");
-		abort();
+		sysfatal("passer pipe: %r");
 	}
 
 	/* hide these somewhere they won't cause harm */
 	/* can't go too high: NetBSD max is 64, for example */
 	if (p9dup(p[0], 28) < 0 || p9dup(p[1], 29) < 0) {
-		fprint(2, "passer pipe dup: %r\n");
-		abort();
+		sysfatal("passer pipe dup: %r");
 	}
 	close(p[0]);
 	close(p[1]);
@@ -137,16 +135,14 @@ void _threadsetupdaemonize(void) {
 
 	/* close on exec */
 	if (fcntl(p[0], F_SETFD, 1) < 0 || fcntl(p[1], F_SETFD, 1) < 0) {
-		fprint(2, "passer pipe pipe fcntl: %r");
-		abort();
+		sysfatal("passer pipe pipe fcntl: %r");
 	}
 
 	noteenable("sys: child");
 	signal(SIGCHLD, sigpass);
 	switch (pid = fork()) {
 	case -1:
-		fprint(2, "passer fork: %r");
-		abort();
+		sysfatal("passer fork: %r");
 	default:
 		close(p[1]);
 		break;
