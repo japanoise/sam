@@ -316,11 +316,7 @@ static void xdtoa(double f, char *s, int *exp, int *neg, int *ns) {
 	errno = oerrno;
 }
 
-#ifdef PLAN9PORT
 static char *special[] = {"NaN", "NaN", "+Inf", "+Inf", "-Inf", "-Inf"};
-#else
-static char *special[] = {"nan", "NAN", "inf", "INF", "-inf", "-INF"};
-#endif
 
 int __efgfmt(Fmt *fmt) {
 	char   buf[NSIGNIF + 10], *dot, *digits, *p, *s, suf[10], *t;

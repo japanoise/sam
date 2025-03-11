@@ -259,21 +259,11 @@ int fmtstrcpy(Fmt *f, char *s) {
 	}
 	/* if precision is specified, make sure we don't wander off the end */
 	if (f->flags & FmtPrec) {
-#ifdef PLAN9PORT
 		Rune r;
 		i = 0;
 		for (j = 0; j < f->prec && s[i]; j++) {
 			i += chartorune(&r, s + i);
 		}
-#else
-		/* ANSI requires precision in bytes, not Runes */
-		for (i = 0; i < f->prec; i++) {
-			if (s[i] == 0) {
-				break;
-			}
-		}
-		j = utfnlen(s, i); /* won't print partial at end */
-#endif
 		return __fmtcpy(f, s, j, i);
 	}
 	return __fmtcpy(f, s, utflen(s), strlen(s));
@@ -345,21 +335,7 @@ int __ifmt(Fmt *f) {
 	isv = 0;
 	vu = 0;
 	u = 0;
-#ifndef PLAN9PORT
-	/*
-	 * Unsigned verbs for ANSI C
-	 */
-	switch (f->r) {
-	case 'o':
-	case 'p':
-	case 'u':
-	case 'x':
-	case 'X':
-		fl |= FmtUnsigned;
-		fl &= ~(FmtSign | FmtSpace);
-		break;
-	}
-#endif
+
 	if (f->r == 'p') {
 		u = (ulong)va_arg(f->args, void *);
 		f->r = 'x';
@@ -367,13 +343,13 @@ int __ifmt(Fmt *f) {
 	} else if (fl & FmtVLong) {
 		isv = 1;
 		if (fl & FmtUnsigned) {
-			vu = va_arg(f->args, uvlong);
+			vu = va_arg(f->args, unsigned long long);
 		} else {
-			vu = va_arg(f->args, vlong);
+			vu = va_arg(f->args, long long);
 		}
 	} else if (fl & FmtLong) {
 		if (fl & FmtUnsigned) {
-			u = va_arg(f->args, ulong);
+			u = va_arg(f->args, unsigned long);
 		} else {
 			u = va_arg(f->args, long);
 		}
@@ -385,13 +361,13 @@ int __ifmt(Fmt *f) {
 		}
 	} else if (fl & FmtShort) {
 		if (fl & FmtUnsigned) {
-			u = (ushort)va_arg(f->args, int);
+			u = (unsigned short)va_arg(f->args, int);
 		} else {
 			u = (short)va_arg(f->args, int);
 		}
 	} else {
 		if (fl & FmtUnsigned) {
-			u = va_arg(f->args, uint);
+			u = va_arg(f->args, unsigned int);
 		} else {
 			u = va_arg(f->args, int);
 		}

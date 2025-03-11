@@ -34,9 +34,9 @@ exhausted:
 }
 
 int enc16(char *out, int lim, uchar *in, int n) {
-	uint  c;
-	char *eout = out + lim;
-	char *start = out;
+	unsigned int c;
+	char        *eout = out + lim;
+	char        *start = out;
 
 	while (n-- > 0) {
 		c = *in++;

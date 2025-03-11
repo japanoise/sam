@@ -1,18 +1,9 @@
 /* Copyright (c) 2002-2006 Lucent Technologies; see LICENSE */
-/*
- * Plan 9 port version must include libc.h in order to
- * get Plan 9 debugging malloc, which sometimes returns
- * different pointers than the standard malloc.
- */
-#ifdef PLAN9PORT
 #include <u.h>
-#include "fmtdef.h"
-#else
 #include <stdlib.h>
 #include <string.h>
 #include "fmt.h"
 #include "fmtdef.h"
-#endif
 
 static int fmtStrFlush(Fmt *f) {
 	char *s;
@@ -67,9 +58,9 @@ char *vsmprint(char *fmt, va_list args) {
 	if (fmtstrinit(&f) < 0) {
 		return NULL;
 	}
-	VA_COPY(f.args, args);
+	va_copy(f.args, args);
 	n = dofmt(&f, fmt);
-	VA_END(f.args);
+	va_end(f.args);
 	if (n < 0) {
 		free(f.start);
 		return NULL;

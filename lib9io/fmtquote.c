@@ -103,11 +103,6 @@ void __quotesetup(char *s, Rune *r, int nin, int nout, Quoteinfo *q, int sharp,
 		/* advance output */
 		q->nbytesout += w;
 		q->nrunesout++;
-
-#ifndef PLAN9PORT
-		/* ANSI requires precision in bytes, not Runes. */
-		nin -= w - 1; /* and then n-- in the loop */
-#endif
 	}
 }
 

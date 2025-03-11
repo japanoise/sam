@@ -16,10 +16,10 @@ char *vseprint(char *buf, char *e, char *fmt, va_list args) {
 	f.flush = 0;
 	f.farg = NULL;
 	f.nfmt = 0;
-	VA_COPY(f.args, args);
+	va_copy(f.args, args);
 	fmtlocaleinit(&f, NULL, NULL, NULL);
 	dofmt(&f, fmt);
-	VA_END(f.args);
+	va_end(f.args);
 	*(char *)f.to = '\0';
 	return (char *)f.to;
 }
