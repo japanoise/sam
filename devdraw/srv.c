@@ -12,6 +12,7 @@
 #include <mouse.h>
 #include <cursor.h>
 #include <drawfcall.h>
+#include <bio.h>
 #include "devdraw.h"
 
 static void runmsg(Client *, Wsysmsg *);
@@ -34,22 +35,26 @@ static void usage(void) {
 
 void threadmain(int argc, char **argv) {
 	char *p;
+	int   opt;
 
-	ARGBEGIN {
-	case 'D': /* for good ps -a listings */
-		break;
-	case 'f': /* fall through for backward compatibility */
-	case 'g':
-	case 'b':
-		break;
-	case 's':
-		// TODO: Update usage, man page.
-		srvname = EARGF(usage());
-		break;
-	default:
-		usage();
+	while ((opt = getopt(argc, argv, "Dfgbs")) != -1) {
+		switch (opt) {
+		case 'D': /* for good ps -a listings */
+			break;
+		case 'f': /* fall through for backward compatibility */
+		case 'g':
+		case 'b':
+			break;
+		case 's':
+			// TODO: Update usage, man page.
+			srvname = optarg;
+			usage();
+			abort();
+			break;
+		default:
+			usage();
+		}
 	}
-	ARGEND
 
 	memimageinit();
 	fmtinstall('H', encodefmt);
@@ -58,7 +63,7 @@ void threadmain(int argc, char **argv) {
 	}
 
 	if (srvname == NULL) {
-		client0 = mallocz(sizeof(Client), 1);
+		client0 = calloc(sizeof(Client), 1);
 		if (client0 == NULL) {
 			fprintf(stderr,
 				"initdraw: allocating client0: out of memory");
@@ -72,8 +77,8 @@ void threadmain(int argc, char **argv) {
 		 * Move the protocol off stdin/stdout so that
 		 * any inadvertent prints don't screw things up.
 		 */
-		dup(0, 3);
-		dup(1, 4);
+		p9dup(0, 3);
+		p9dup(1, 4);
 		close(0);
 		close(1);
 		open("/dev/null", OREAD);
@@ -116,14 +121,12 @@ static void listenproc(void *v) {
 	int     fd;
 	char    dir[40];
 
-	USED(v);
-
 	for (;;) {
 		fd = listen(adir, dir);
 		if (fd < 0) {
 			sysfatal("listen: %r");
 		}
-		c = mallocz(sizeof(Client), 1);
+		c = calloc(sizeof(Client), 1);
 		if (c == NULL) {
 			fprintf(stderr,
 				"initdraw: allocating client0: out of memory");

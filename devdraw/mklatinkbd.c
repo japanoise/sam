@@ -5,6 +5,7 @@
 
 #include <u.h>
 #include <bio.h>
+#include <fmt.h>
 #include <ctype.h>
 
 int rflag;
@@ -179,7 +180,7 @@ void readfile(char *fname) {
 
 	if ((b = Bopen(fname, OREAD)) == 0) {
 		fprint(2, "cannot open \"%s\": %r\n", fname);
-		exits("open");
+		exit(1);
 	}
 
 	lineno = 0;
@@ -223,33 +224,35 @@ void readfile(char *fname) {
 
 void usage(void) {
 	fprintf(stderr, "usage: mklatinkbd [-r] [/lib/keyboard]\n");
-	exits("usage");
+	exit(1);
 }
 
 int kfmt(Fmt *);
 
-void main(int argc, char **argv) {
-	int    i;
+int main(int argc, char **argv) {
+	int    i, opt;
 	Biobuf bout;
 
-	ARGBEGIN {
-	case 'r': /* print rune values */
-		rflag = 1;
-		break;
-	case 'x':
-		xflag = 1;
-		break;
-	default:
-		usage();
+	while ((opt = getopt(argc, argv, "rx")) != -1) {
+		switch (opt) {
+		case 'r': /* print rune values */
+			rflag = 1;
+			break;
+		case 'x':
+			xflag = 1;
+			break;
+		}
+		argc--;
+		argv++;
 	}
-	ARGEND
 
-	if (argc > 1) {
+	if (argc > 2) {
+		printf("%d %s\n", argc, argv[0]);
 		usage();
 	}
 
 	fmtinstall('k', kfmt);
-	readfile(argc == 1 ? argv[0] : "/dev/stdin");
+	readfile(argc == 2 ? argv[1] : "/dev/stdin");
 
 	Binit(&bout, 1, OWRITE);
 	if (xflag) {
@@ -265,7 +268,7 @@ void main(int argc, char **argv) {
 	if (root) {
 		printtrie(&bout, root);
 	}
-	exits(0);
+	return 0;
 }
 
 // X11 key names

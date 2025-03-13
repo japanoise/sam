@@ -1,5 +1,6 @@
 *.a
 *.o
+o.*
 config.mk
 sam/sam
 samterm/samterm
@@ -13,3 +14,5 @@ libutf/runetype/islowerrune.c
 libutf/runetype/isspacerune.c
 libutf/runetype/istitlerune.c
 libutf/runetype/isupperrune.c
+devdraw/devdraw
+devdraw/latin.h

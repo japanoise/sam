@@ -11,7 +11,7 @@ RANLIB=:
 #	add name of library
 AR=ar
 
-CFLAGS+=-c $(INCS) $(STANDARDS) $(INCLUDES)
+CFLAGS+=-g -O0 -c $(INCS) $(STANDARDS) $(INCLUDES)
 
 LIB=lib9io.a
 CC?=c99

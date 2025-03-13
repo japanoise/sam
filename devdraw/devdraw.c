@@ -70,8 +70,6 @@ static void drawrefresh(Memimage *m, Rectangle r, void *v) {
 	Client  *c;
 	Refresh *ref;
 
-	USED(m);
-
 	if (v == 0) {
 		return;
 	}
@@ -84,7 +82,7 @@ static void drawrefresh(Memimage *m, Rectangle r, void *v) {
 			return;
 		}
 	}
-	ref = mallocz(sizeof(Refresh), 1);
+	ref = calloc(sizeof(Refresh), 1);
 	if (ref) {
 		ref->dimage = d;
 		ref->r = r;
@@ -281,7 +279,7 @@ static Memimage *drawinstall(Client *client, int id, Memimage *i,
 			     DScreen *dscreen) {
 	DImage *d;
 
-	d = mallocz(sizeof(DImage), 1);
+	d = calloc(sizeof(DImage), 1);
 	if (d == 0) {
 		return 0;
 	}
@@ -307,7 +305,7 @@ static Memscreen *drawinstallscreen(Client *client, DScreen *d, int id,
 	Memscreen *s;
 	CScreen   *c;
 
-	c = mallocz(sizeof(CScreen), 1);
+	c = calloc(sizeof(CScreen), 1);
 	if (dimage && dimage->image && dimage->image->chan == 0) {
 		fprintf(stderr, "bad image %p in drawinstallscreen",
 			dimage->image);
@@ -318,12 +316,12 @@ static Memscreen *drawinstallscreen(Client *client, DScreen *d, int id,
 		return 0;
 	}
 	if (d == 0) {
-		d = mallocz(sizeof(DScreen), 1);
+		d = calloc(sizeof(DScreen), 1);
 		if (d == 0) {
 			free(c);
 			return 0;
 		}
-		s = mallocz(sizeof(Memscreen), 1);
+		s = calloc(sizeof(Memscreen), 1);
 		if (s == 0) {
 			free(c);
 			free(d);
@@ -506,7 +504,7 @@ static int drawaddname(Client *client, DImage *di, int n, char *str,
 			return -1;
 		}
 	}
-	t = mallocz((client->nname + 1) * sizeof(DName), 1);
+	t = calloc((client->nname + 1) * sizeof(DName), 1);
 	ns = malloc(n + 1);
 	if (t == NULL || ns == NULL) {
 		free(t);
@@ -718,7 +716,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 				if (reffn) {
 					refx = NULL;
 					if (reffn == drawrefresh) {
-						refx = mallocz(sizeof(Refx), 1);
+						refx = calloc(sizeof(Refx), 1);
 						if (refx == 0) {
 							if (drawuninstall(
 								client, dstid) <
@@ -929,7 +927,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 				goto error;
 			}
 			free(font->fchar); /* should we complain if non-zero? */
-			font->fchar = mallocz(ni * sizeof(FChar), 1);
+			font->fchar = calloc(ni * sizeof(FChar), 1);
 			if (font->fchar == 0) {
 				err = "no memory for font";
 				goto error;
@@ -1260,7 +1258,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 			drawpoint(&sp, a + 23);
 			drawpoint(&p, a + 31);
 			ni++;
-			pp = mallocz(ni * sizeof(Point), 1);
+			pp = calloc(ni * sizeof(Point), 1);
 			if (pp == NULL) {
 				goto Enomem;
 			}
@@ -1358,7 +1356,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 			c = bytesperline(r, i->depth);
 			c *= Dy(r);
 			free(client->readdata);
-			client->readdata = mallocz(c, 0);
+			client->readdata = calloc(c, 0);
 			if (client->readdata == NULL) {
 				err = "readimage malloc failed";
 				goto error;
@@ -1493,7 +1491,7 @@ int draw_datawrite(Client *client, void *v, int n) {
 			if (n < m) {
 				goto Eshortdraw;
 			}
-			lp = mallocz(nw * sizeof(Memimage *), 1);
+			lp = calloc(nw * sizeof(Memimage *), 1);
 			if (lp == 0) {
 				goto Enomem;
 			}
