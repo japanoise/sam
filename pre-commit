@@ -1,4 +1,4 @@
-#!/usr/env/bin bash
+#!/usr/bin/env bash
 
 for file in $(git diff-index --cached --name-only HEAD | grep -iE '\.(c|cpp|cc|h|hpp)$')
 do
