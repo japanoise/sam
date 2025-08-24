@@ -515,7 +515,7 @@ void update(void) {
 			continue;
 		}
 		if (f->deleted) {
-			delete (f);
+			delete(f);
 			continue;
 		}
 		if (f->seq == seq && fileupdate(f, false, downloaded)) {
@@ -957,12 +957,7 @@ void printposn(File *f, int chars) {
 		dprint("%s:", s);
 		free(s);
 	}
-	if (chars) {
-		dprint("#%lud", addr.r.p1);
-		if (addr.r.p2 != addr.r.p1) {
-			dprint(",#%lud", addr.r.p2);
-		}
-	} else {
+	if (!chars) {
 		l1 = 1 + nlcount(f, (Posn)0, addr.r.p1);
 		l2 = l1 + nlcount(f, addr.r.p1, addr.r.p2);
 		/* check if addr ends with '\n' */
@@ -970,10 +965,15 @@ void printposn(File *f, int chars) {
 		    filereadc(f, addr.r.p2 - 1) == '\n') {
 			--l2;
 		}
-		dprint("%lud", l1);
+		dprint("%lu", l1);
 		if (l2 != l1) {
-			dprint(",%lud", l2);
+			dprint(",%lu", l2);
 		}
+		dprint("; ", l1);
+	}
+	dprint("#%lu", addr.r.p1);
+	if (addr.r.p2 != addr.r.p1) {
+		dprint(",#%lu", addr.r.p2);
 	}
 	dprint("\n");
 }
