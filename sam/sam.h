@@ -18,7 +18,7 @@
 
 #define INFINITY 0x7FFFFFFFL
 #define INCR 25
-#define STRSIZE (512 << 20)
+#define STRSIZE (2 * BLOCKSIZE)
 
 typedef int64_t  Posn; /* file position or address */
 typedef uint16_t Mod;  /* modification number */
