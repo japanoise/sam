@@ -2,7 +2,7 @@
 
 PREFIX = /usr/local
 
-UNICODE = 16.0.0
+UNICODE = 17.0.0
 
 CFLAGS  = -ansi -pedantic -I../include -Os -Wall -Wextra
 LDFLAGS = -s
