@@ -21,7 +21,7 @@ static int tempdisk(void) {
 			continue;
 		}
 		/* maybe? fd = open(buf, O_RDWR|O_TMPFILE); */
-		fd = open(buf, O_RDWR | O_EXCL | O_CREAT);
+		fd = open(buf, O_RDWR | O_EXCL | O_CREAT, 0600);
 		if (fd >= 0) {
 			return fd;
 		}
