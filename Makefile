@@ -8,16 +8,17 @@ MODE?=user
 
 all:    config.mk lXg lframe lutf samdir samtermdir docdir
 
+# Note: config.mk is not included in this makefile. That is by design.
 config.mk:
 	cp config.mk.def config.mk
 
 lutf:
 	cd libutf; $(MAKE)
 
-lXg:
+lXg:    lutf
 	cd libXg; $(MAKE)
 
-lframe:
+lframe: lutf
 	cd libframe; $(MAKE)
 
 docdir:
@@ -30,7 +31,6 @@ samtermdir: lutf lXg lframe samdir
 	cd samterm; $(MAKE)
 
 install:
-	@xdg-desktop-menu install --mode $(MODE) deadpixi-sam.desktop || echo "unable to install desktop entry"
 	cd libXg; $(MAKE) install
 	cd libframe; $(MAKE) install
 	cd sam; $(MAKE) install
@@ -39,7 +39,6 @@ install:
 	cd ssam; $(MAKE) install
 
 uninstall:
-	@xdg-desktop-menu uninstall --mode $(MODE) deadpixi-sam.desktop || echo "unable to uninstall desktop entry"
 	cd libXg; $(MAKE) uninstall
 	cd libframe; $(MAKE) uninstall
 	cd sam; $(MAKE) uninstall
